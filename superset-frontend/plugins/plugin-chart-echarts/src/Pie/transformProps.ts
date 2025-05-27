@@ -365,10 +365,13 @@ export default function transformProps(
     }
   };
 
+  const labelColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--echarts-value-label-color')
+  .trim() || theme.colors.grayscale.dark1;
   const defaultLabel = {
     formatter,
     show: showLabels,
-    color: theme.colors.grayscale.dark2,
+    color: labelColor,
   };
 
   const chartPadding = getChartPadding(

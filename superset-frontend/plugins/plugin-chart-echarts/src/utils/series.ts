@@ -314,6 +314,10 @@ export function extractSeries(
         }));
 
   let minPositiveValue: number | undefined;
+  const labelColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--echarts-value-label-color')
+  .trim() || '#ffffff';
+
   const finalSeries = sortedSeries.map(name => ({
     id: name,
     name,
@@ -433,6 +437,12 @@ export function getLegendProps(
   legendState?: LegendState,
   padding?: LegendPaddingType,
 ): LegendComponentOption | LegendComponentOption[] {
+  const getCSSVar = (name: string, fallback: string): string =>
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim() || fallback;
+  const legendTextColor = getCSSVar('--echarts-value-label-color', theme.colors.grayscale.base);
+
   const legend: LegendComponentOption | LegendComponentOption[] = {
     orient: [LegendOrientation.Top, LegendOrientation.Bottom].includes(
       orientation,
@@ -443,10 +453,15 @@ export function getLegendProps(
     type,
     selected: legendState,
     selector: ['all', 'inverse'],
+    textStyle: {
+      color: legendTextColor,
+      fontFamily: theme.typography.families.sansSerif,
+      fontSize: theme.typography.sizes.s,
+    },
     selectorLabel: {
       fontFamily: theme.typography.families.sansSerif,
       fontSize: theme.typography.sizes.s,
-      color: theme.colors.grayscale.base,
+      color: theme.colors.grayscale.light1,
       borderColor: theme.colors.grayscale.base,
     },
   };
@@ -454,6 +469,7 @@ export function getLegendProps(
   const MARGIN_GUTTER = 45;
   const getLegendWidth = (paddingWidth: number) =>
     Math.max(paddingWidth - MARGIN_GUTTER, MIN_LEGEND_WIDTH);
+
 
   switch (orientation) {
     case LegendOrientation.Left:

@@ -260,7 +260,6 @@ export default function transformProps(
 
   const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
-
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
   const percentFormatter = forcePercentFormatter
     ? getPercentFormatter(yAxisFormat)
@@ -344,7 +343,6 @@ export default function transformProps(
       }
     }
   });
-
   if (stack === StackControlsValue.Stream) {
     const baselineSeries = getBaselineSeriesForStream(
       series.map(entry => entry.data) as [string | number, number][][],
@@ -474,6 +472,11 @@ export default function transformProps(
     .map(entry => entry.name || '')
     .concat(extractAnnotationLabels(annotationLayers, annotationData));
 
+  const labelColor =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--echarts-value-label-color')
+      .trim() || '#ffffff';
+
   let xAxis: any = {
     type: xAxisType,
     name: xAxisTitle,
@@ -483,6 +486,7 @@ export default function transformProps(
       hideOverlap: true,
       formatter: xAxisFormatter,
       rotate: xAxisLabelRotation,
+      color: labelColor,
     },
     minorTick: { show: minorTicks },
     minInterval:
@@ -515,6 +519,7 @@ export default function transformProps(
         defaultFormatter,
         yAxisFormat,
       ),
+      color: labelColor,
     },
     scale: truncateYAxis,
     name: yAxisTitle,
@@ -526,6 +531,7 @@ export default function transformProps(
     [xAxis, yAxis] = [yAxis, xAxis];
     [padding.bottom, padding.left] = [padding.left, padding.bottom];
   }
+
 
   const echartOptions: EChartsCoreOption = {
     useUTC: true,
@@ -624,7 +630,9 @@ export default function transformProps(
       ),
       data: legendData as string[],
     },
-    series: dedupSeries(reorderForecastSeries(series) as SeriesOption[]),
+    series: dedupSeries(
+      reorderForecastSeries(series) as SeriesOption[],
+    ),
     toolbox: {
       show: zoomable,
       top: TIMESERIES_CONSTANTS.toolboxTop,

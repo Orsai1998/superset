@@ -284,6 +284,10 @@ export function transformSeries(
       showSymbol = true;
     }
   }
+  const labelColor = getComputedStyle(document.documentElement)
+    .getPropertyValue('--echarts-value-label-color')
+    .trim();
+
   const lineStyle =
     isConfidenceBand || (stack === StackControlsValue.Stream && area)
       ? { ...opts.lineStyle, opacity: OpacityEnum.Transparent }
@@ -321,6 +325,7 @@ export function transformSeries(
     label: {
       show: !!showValue,
       position: isHorizontal ? 'right' : 'top',
+      color: labelColor || 'auto',
       formatter: (params: any) => {
         // don't show confidence band value labels, as they're already visible on the tooltip
         if (
