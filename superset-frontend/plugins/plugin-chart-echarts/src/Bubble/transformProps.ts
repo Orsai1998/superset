@@ -171,6 +171,10 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
   const yAxisFormatter = getNumberFormatter(yAxisFormat);
   const tooltipSizeFormatter = getNumberFormatter(tooltipSizeFormat);
 
+  const labelColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--echarts-value-label-color')
+  .trim() || theme.colors.grayscale.light5;
+
   const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
   const [yAxisMin, yAxisMax] = (yAxisBounds || []).map(parseAxisBound);
 
@@ -190,7 +194,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
   const echartOptions: EChartsCoreOption = {
     series,
     xAxis: {
-      axisLabel: { formatter: xAxisFormatter },
+      axisLabel: { formatter: xAxisFormatter, color: labelColor },
       splitLine: {
         lineStyle: {
           type: 'dashed',
@@ -208,7 +212,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
       ...getMinAndMaxFromBounds(xAxisType, truncateXAxis, xAxisMin, xAxisMax),
     },
     yAxis: {
-      axisLabel: { formatter: yAxisFormatter },
+      axisLabel: { formatter: yAxisFormatter, color: labelColor  },
       splitLine: {
         lineStyle: {
           type: 'dashed',
@@ -228,6 +232,9 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     },
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
+      textStyle: {
+        color: labelColor,
+      },
       data: Array.from(legends),
     },
     tooltip: {

@@ -34,6 +34,7 @@ import RoseChartPlugin from '@superset-ui/legacy-plugin-chart-rose';
 import TableChartPlugin from '@superset-ui/plugin-chart-table';
 import { WordCloudChartPlugin } from '@superset-ui/plugin-chart-word-cloud';
 import WorldMapChartPlugin from '@superset-ui/legacy-plugin-chart-world-map';
+
 import {
   BubbleChartPlugin,
   BulletChartPlugin,
@@ -98,6 +99,8 @@ export default class MainPreset extends Preset {
       presets: [new DeckGLChartPreset()],
       plugins: [
         new BigNumberChartPlugin().configure({ key: VizType.BigNumber }),
+
+
         new BigNumberTotalChartPlugin().configure({
           key: VizType.BigNumberTotal,
         }),

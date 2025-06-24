@@ -107,6 +107,9 @@ export default function transformProps(
     datasource,
   } = chartProps;
 
+   const labelColor = getComputedStyle(document.documentElement).getPropertyValue('--echarts-value-label-color')
+    .trim() || theme.colors.grayscale.light5;
+
   const gaugeSeriesOptions = defaultGaugeSeriesOption(theme);
   const {
     verboseMap = {},
@@ -183,6 +186,7 @@ export default function transformProps(
             `${index * titleOffsetFromTitle + OFFSETS.titleFromCenter}%`,
           ],
           fontSize,
+          color: labelColor,
         },
         detail: {
           offsetCenter: [
@@ -273,7 +277,7 @@ export default function transformProps(
     distance: -axisLabelDistance,
     fontSize,
     formatter: numberFormatter,
-    color: gaugeSeriesOptions.axisLabel?.color,
+    color: labelColor,
   };
   const axisTick = {
     show: showAxisTick,
@@ -284,7 +288,7 @@ export default function transformProps(
   const detail = {
     valueAnimation: animation,
     formatter: (value: number) => formatValue(value),
-    color: gaugeSeriesOptions.detail?.color,
+    color: labelColor,
   };
   const tooltip = {
     ...getDefaultTooltip(refs),
@@ -300,7 +304,7 @@ export default function transformProps(
       INTERVAL_GAUGE_SERIES_OPTION.splitLine?.lineStyle?.color;
     axisTick.lineStyle.color = INTERVAL_GAUGE_SERIES_OPTION?.axisTick?.lineStyle
       ?.color as string;
-    axisLabel.color = INTERVAL_GAUGE_SERIES_OPTION.axisLabel?.color;
+    axisLabel.color = <string>INTERVAL_GAUGE_SERIES_OPTION.axisLabel?.color;
     axisLine.lineStyle.color = intervalBoundsAndColors;
     pointer = {
       show: showPointer,

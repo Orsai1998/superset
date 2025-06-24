@@ -56,6 +56,12 @@ export default function transformProps(
     inContextMenu,
     emitCrossFilters,
   } = chartProps;
+
+  const labelColor =
+  getComputedStyle(document.documentElement)
+    .getPropertyValue('--echarts-value-label-color')
+    .trim() || "#FFF";
+
   const { data = [] } = queriesData[0];
   const { setDataMask = () => {}, onContextMenu } = hooks;
   const coltypeMapping = getColtypesMapping(queriesData[0]);
@@ -187,11 +193,11 @@ export default function transformProps(
   );
 
   let axisLabel;
-  if (xTicksLayout === '45°') axisLabel = { rotate: -45 };
-  else if (xTicksLayout === '90°') axisLabel = { rotate: -90 };
-  else if (xTicksLayout === 'flat') axisLabel = { rotate: 0 };
-  else if (xTicksLayout === 'staggered') axisLabel = { rotate: -45 };
-  else axisLabel = { show: true };
+  if (xTicksLayout === '45°') axisLabel = { rotate: -45, color: labelColor };
+  else if (xTicksLayout === '90°') axisLabel = { rotate: -90, color: labelColor };
+  else if (xTicksLayout === 'flat') axisLabel = { rotate: 0, color: labelColor };
+  else if (xTicksLayout === 'staggered') axisLabel = { rotate: -45, color: labelColor };
+  else axisLabel = { show: true, color: labelColor };
 
   const series: BoxplotSeriesOption[] = [
     {
@@ -270,7 +276,10 @@ export default function transformProps(
     yAxis: {
       ...defaultYAxis,
       type: 'value',
-      axisLabel: { formatter: numberFormatter },
+      axisLabel: {
+        formatter: numberFormatter,
+        color: labelColor,
+      },
       name: yAxisTitle,
       nameGap: convertInteger(yAxisTitleMargin),
       nameLocation: yAxisTitlePosition === 'Left' ? 'middle' : 'end',

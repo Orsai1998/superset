@@ -314,9 +314,6 @@ export function extractSeries(
         }));
 
   let minPositiveValue: number | undefined;
-  const labelColor = getComputedStyle(document.documentElement)
-  .getPropertyValue('--echarts-value-label-color')
-  .trim() || '#ffffff';
 
   const finalSeries = sortedSeries.map(name => ({
     id: name,

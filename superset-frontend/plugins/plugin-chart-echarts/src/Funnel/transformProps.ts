@@ -227,7 +227,7 @@ export default function transformProps(
   const defaultLabel = {
     formatter,
     show: showLabels,
-    color: theme.colors.grayscale.dark2,
+    color: theme.colors.grayscale.light5,
   };
 
   const series: FunnelSeriesOption[] = [
@@ -290,6 +290,9 @@ export default function transformProps(
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
       data: keys,
+        textStyle: {
+    color: theme.colors.grayscale.light5,
+  },
     },
     series,
   };
