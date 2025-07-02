@@ -146,6 +146,9 @@ function transformer({
   return transformedData;
 }
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: EchartsWaterfallChartProps,
 ): WaterfallChartTransformedProps {
@@ -180,6 +183,10 @@ export default function transformProps(
     yAxisFormat,
     showValue,
   } = formData;
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const defaultFormatter = currencyFormat?.symbol
     ? new CurrencyFormatter({ d3Format: yAxisFormat, currency: currencyFormat })
     : getNumberFormatter(yAxisFormat);
@@ -333,6 +340,7 @@ export default function transformProps(
     hideOverlap?: boolean;
     show?: boolean;
     formatter?: typeof xAxisFormatter;
+    color?: string;
   };
   if (xTicksLayout === '45°') {
     axisLabel = { rotate: -45 };
@@ -347,7 +355,7 @@ export default function transformProps(
   }
   axisLabel.formatter = xAxisFormatter;
   axisLabel.hideOverlap = false;
-
+  axisLabel.color = labelColor;
   const seriesProps: Pick<BarSeriesOption, 'type' | 'stack' | 'emphasis'> = {
     type: 'bar',
     stack: 'stack',
@@ -369,6 +377,7 @@ export default function transformProps(
         show: showValue,
         position: 'top',
         formatter: seriesformatter,
+        color: labelColor,
       },
       itemStyle: {
         color: rgbToHex(increaseColor.r, increaseColor.g, increaseColor.b),
@@ -382,6 +391,7 @@ export default function transformProps(
         show: showValue,
         position: 'bottom',
         formatter: seriesformatter,
+        color: labelColor,
       },
       itemStyle: {
         color: rgbToHex(decreaseColor.r, decreaseColor.g, decreaseColor.b),
@@ -395,6 +405,7 @@ export default function transformProps(
         show: showValue,
         position: 'top',
         formatter: seriesformatter,
+        color: labelColor,
       },
       itemStyle: {
         color: rgbToHex(totalColor.r, totalColor.g, totalColor.b),
@@ -415,6 +426,9 @@ export default function transformProps(
       show: showLegend,
       selected: legendState,
       data: [LEGEND.INCREASE, LEGEND.DECREASE, LEGEND.TOTAL],
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     xAxis: {
       data: xAxisData,
@@ -424,7 +438,10 @@ export default function transformProps(
         padding: [theme.gridUnit * 4, 0, 0, 0],
       },
       nameLocation: 'middle',
-      axisLabel,
+      axisLabel: {
+        ...axisLabel,
+        color: labelColor,
+      },
     },
     yAxis: {
       ...defaultYAxis,
@@ -434,7 +451,7 @@ export default function transformProps(
       },
       nameLocation: 'middle',
       name: yAxisLabel,
-      axisLabel: { formatter: defaultFormatter },
+      axisLabel: { formatter: defaultFormatter, color: labelColor },
     },
     tooltip: {
       ...getDefaultTooltip(refs),

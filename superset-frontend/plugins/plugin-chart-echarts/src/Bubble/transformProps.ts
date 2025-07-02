@@ -44,6 +44,7 @@ function normalizeSymbolSize(
 ) {
   const [bubbleMinValue, bubbleMaxValue] = extent(nodes, x => x.data![0][2]);
   const nodeSpread = bubbleMaxValue - bubbleMinValue;
+
   nodes.forEach(node => {
     // eslint-disable-next-line no-param-reassign
     node.symbolSize =
@@ -80,6 +81,10 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     chartProps;
 
   const { data = [] } = queriesData[0];
+  const getCSSVariable = (name: string): string =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const labelColor = getCSSVariable('--label-color') || "#333";
+  const legendTextColor = getCSSVariable('--legend-text-color') || "#333";
   const {
     x,
     y,
@@ -141,6 +146,10 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
       itemStyle: {
         color: colorFn(name, sliceId),
         opacity,
+      },
+      label: {
+        show: true,
+        color: labelColor,
       },
     });
     legends.add(name);
@@ -210,6 +219,9 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
       data: Array.from(legends),
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     tooltip: {
       show: !inContextMenu,

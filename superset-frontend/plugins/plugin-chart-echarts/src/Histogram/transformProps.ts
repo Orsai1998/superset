@@ -35,6 +35,9 @@ import { getLegendProps } from '../utils/series';
 import { getDefaultTooltip } from '../utils/tooltip';
 import { getPercentFormatter } from '../utils/formatters';
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: HistogramChartProps,
 ): HistogramTransformedProps {
@@ -61,6 +64,10 @@ export default function transformProps(
     xAxisTitle,
     yAxisTitle,
   } = formData;
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const { data } = queriesData[0];
   const colorFn = CategoricalColorNamespace.getScale(colorScheme);
   const formatter = getNumberFormatter(
@@ -151,6 +158,9 @@ export default function transformProps(
       nameGap: 35,
       type: 'category',
       nameLocation: 'middle',
+      axisLabel: {
+        color: labelColor,
+      },
     },
     yAxis: {
       ...defaultYAxis,
@@ -160,6 +170,7 @@ export default function transformProps(
       nameLocation: 'middle',
       axisLabel: {
         formatter: (value: number) => formatter.format(value),
+        color: labelColor,
       },
     },
     series: barSeries,
@@ -173,6 +184,9 @@ export default function transformProps(
         legendState,
       ),
       data: legendOptions,
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     tooltip: {
       ...getDefaultTooltip(refs),
