@@ -106,6 +106,9 @@ import {
   getYAxisFormatter,
 } from '../utils/formatters';
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: EchartsTimeseriesChartProps,
 ): TimeseriesChartTransformedProps {
@@ -190,6 +193,10 @@ export default function transformProps(
     yAxisTitlePosition,
     zoomable,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const refs: Refs = {};
   const groupBy = ensureIsArray(groupby);
   const labelMap: { [key: string]: string[] } = Object.entries(
@@ -487,6 +494,7 @@ export default function transformProps(
       hideOverlap: true,
       formatter: xAxisFormatter,
       rotate: xAxisLabelRotation,
+      color: labelColor,
     },
     minorTick: { show: minorTicks },
     minInterval:
@@ -519,6 +527,7 @@ export default function transformProps(
         defaultFormatter,
         yAxisFormat,
       ),
+      color: labelColor,
     },
     scale: truncateYAxis,
     name: yAxisTitle,
@@ -626,6 +635,9 @@ export default function transformProps(
         legendState,
       ),
       data: legendData as string[],
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     series: dedupSeries(series),
     toolbox: {

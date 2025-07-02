@@ -92,6 +92,9 @@ const calculateMin = (data: GaugeDataItemOption[]) =>
 const calculateMax = (data: GaugeDataItemOption[]) =>
   2 * Math.max(...data.map(d => d.value as number).concat([0]));
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: EchartsGaugeChartProps,
 ): GaugeChartTransformedProps {
@@ -137,6 +140,10 @@ export default function transformProps(
     valueFormatter,
     sliceId,
   }: EchartsGaugeFormData = { ...DEFAULT_GAUGE_FORM_DATA, ...formData };
+  const labelColor =
+    getCSSVariable('--label-color') || gaugeSeriesOptions.axisLabel?.color;
+  const detailColor =
+    getCSSVariable('--legend-text-color') || gaugeSeriesOptions.detail?.color;
   const refs: Refs = {};
   const data = (queriesData[0]?.data || []) as DataRecord[];
   const coltypeMapping = getColtypesMapping(queriesData[0]);
@@ -273,7 +280,7 @@ export default function transformProps(
     distance: -axisLabelDistance,
     fontSize,
     formatter: numberFormatter,
-    color: gaugeSeriesOptions.axisLabel?.color,
+    color: labelColor,
   };
   const axisTick = {
     show: showAxisTick,
@@ -284,7 +291,7 @@ export default function transformProps(
   const detail = {
     valueAnimation: animation,
     formatter: (value: number) => formatValue(value),
-    color: gaugeSeriesOptions.detail?.color,
+    color: detailColor,
   };
   const tooltip = {
     ...getDefaultTooltip(refs),

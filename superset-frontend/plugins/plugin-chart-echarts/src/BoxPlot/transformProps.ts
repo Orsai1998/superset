@@ -79,6 +79,10 @@ export default function transformProps(
   const numberFormatter = getNumberFormatter(numberFormat);
   const metricLabels = metrics.map(getMetricLabel);
   const groupbyLabels = groupby.map(getColumnLabel);
+  const getCSSVariable = (name: string): string =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const labelColor = getCSSVariable('--label-color') || '#333';
+  const legendTextColor = getCSSVariable('--legend-text-color') || '#333';
 
   const transformedData = data
     .map((datum: any) => {
@@ -262,7 +266,10 @@ export default function transformProps(
     xAxis: {
       type: 'category',
       data: transformedData.map(row => row.name),
-      axisLabel,
+      axisLabel: {
+        ...axisLabel,
+        color: labelColor,
+      },
       name: xAxisTitle,
       nameGap: convertInteger(xAxisTitleMargin),
       nameLocation: 'middle',
@@ -270,7 +277,7 @@ export default function transformProps(
     yAxis: {
       ...defaultYAxis,
       type: 'value',
-      axisLabel: { formatter: numberFormatter },
+      axisLabel: { formatter: numberFormatter, color: labelColor },
       name: yAxisTitle,
       nameGap: convertInteger(yAxisTitleMargin),
       nameLocation: yAxisTitlePosition === 'Left' ? 'middle' : 'end',
@@ -282,6 +289,16 @@ export default function transformProps(
       axisPointer: {
         type: 'shadow',
       },
+    },
+    legend: {
+      show: true,
+      textStyle: {
+        color: legendTextColor,
+      },
+      top: legendOrientation === 'top' ? 0 : 'auto',
+      bottom: legendOrientation === 'bottom' ? 0 : 'auto',
+      left: legendOrientation === 'left' ? 0 : 'auto',
+      right: legendOrientation === 'right' ? 0 : 'auto',
     },
     series,
   };

@@ -97,6 +97,10 @@ import {
   getYAxisFormatter,
 } from '../utils/formatters';
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const labelColor = getCSSVariable('--label-color');
+const legendTextColor = getCSSVariable('--legend-text-color');
 const getFormatter = (
   customFormatters: Record<string, ValueFormatter>,
   defaultFormatter: ValueFormatter,
@@ -510,6 +514,7 @@ export default function transformProps(
       axisLabel: {
         formatter: xAxisFormatter,
         rotate: xAxisLabelRotation,
+        color: labelColor,
       },
       minorTick: { show: minorTicks },
       minInterval:
@@ -543,6 +548,7 @@ export default function transformProps(
             formatter,
             yAxisFormat,
           ),
+          color: labelColor,
         },
         scale: truncateYAxis,
         name: yAxisTitle,
@@ -566,6 +572,7 @@ export default function transformProps(
             formatterSecondary,
             yAxisFormatSecondary,
           ),
+          color: labelColor,
         },
         scale: truncateYAxis,
         name: yAxisTitleSecondary,
@@ -647,6 +654,9 @@ export default function transformProps(
         theme,
         zoomable,
       ),
+      textStyle: {
+        color: legendTextColor,
+      },
       // @ts-ignore
       data: rawSeriesA
         .concat(rawSeriesB)
