@@ -16,11 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React  from 'react';
 import { styled } from '@superset-ui/core';
-
-
-
 
 export interface ProductCounterProps {
   width: number;
@@ -40,8 +36,7 @@ interface CounterGroupProps {
   hasSingleCategory: boolean;
 }
 
-
-
+// eslint-disable-next-line theme-colors/no-literal-colors
 const Wrapper = styled.div`
   background-color: #002b60;
   padding: 20px;
@@ -78,15 +73,18 @@ const CounterRowWithCategory = styled.div`
   gap: 12px;
 `;
 
+// eslint-disable-next-line theme-colors/no-literal-colors
 const CounterGroup = styled.div<CounterGroupProps>`
   display: flex;
   flex-direction: column;
   color: white;
   font-family: 'Share Tech Mono', monospace;
   text-align: left;
-  align-items: ${({ hasSingleCategory }) => (hasSingleCategory ? 'center' : 'flex-start')};
+  align-items: ${({ hasSingleCategory }) =>
+    hasSingleCategory ? 'center' : 'flex-start'};
 `;
 
+// eslint-disable-next-line theme-colors/no-literal-colors
 const Category = styled.div`
   background-color: orange;
   color: white;
@@ -113,6 +111,7 @@ const Title = styled.div`
   margin-bottom: 4px;
 `;
 
+// eslint-disable-next-line theme-colors/no-literal-colors
 const Digits = styled.div`
   display: flex;
   gap: 2px;
@@ -121,6 +120,7 @@ const Digits = styled.div`
   border-radius: 4px;
 `;
 
+// eslint-disable-next-line theme-colors/no-literal-colors
 const DigitBox = styled.div`
   background: #002c6d;
   padding: 2px 5px;
@@ -138,61 +138,61 @@ const DigitBox = styled.div`
  */
 
 export default function SupersetPluginChartProductCounter({
-                                                            width,
-                                                            height,
-                                                            data,
-                                                            headerText,
-                                                            boldText,
-                                                            headerFontSize,
-                                                          }: ProductCounterProps) {
-
+  width,
+  height,
+  data,
+  headerText,
+  boldText,
+  headerFontSize,
+}: ProductCounterProps) {
   const metricGroups = [];
   for (let i = 0; i < data.length; i += 2) {
     metricGroups.push(data.slice(i, i + 2));
   }
 
   return (
-      <Wrapper>
-        {metricGroups.map((group, groupIdx) => {
-          const sameCategory = group.length === 2 && group[0].category === group[1].category;
-          return (
-              <Column key={groupIdx}>
-                {sameCategory && (
-                    <CenteredCategoryWrapper>
-                      <Category>{group[0].category}</Category>
-                    </CenteredCategoryWrapper>
-                )}
-                <VerticalGroup>
-                  {group.map((item, i) => (
-                      sameCategory ? (
-                          <CounterRow key={i}>
-                            <CounterGroup hasSingleCategory={true}>
-                              <Title>{item.title}</Title>
-                              <Digits>
-                                {[...item.value].map((digit, index) => (
-                                    <DigitBox key={index}>{digit}</DigitBox>
-                                ))}
-                              </Digits>
-                            </CounterGroup>
-                          </CounterRow>
-                      ) : (
-                          <CounterRowWithCategory key={i}>
-                            <Category>{item.category}</Category>
-                            <CounterGroup hasSingleCategory={false}>
-                              <Title>{item.title}</Title>
-                              <Digits>
-                                {[...item.value].map((digit, index) => (
-                                    <DigitBox key={index}>{digit}</DigitBox>
-                                ))}
-                              </Digits>
-                            </CounterGroup>
-                          </CounterRowWithCategory>
-                      )
-                  ))}
-                </VerticalGroup>
-              </Column>
-          );
-        })}
-      </Wrapper>
+    <Wrapper>
+      {metricGroups.map((group, groupIdx) => {
+        const sameCategory =
+          group.length === 2 && group[0].category === group[1].category;
+        return (
+          <Column key={groupIdx}>
+            {sameCategory && (
+              <CenteredCategoryWrapper>
+                <Category>{group[0].category}</Category>
+              </CenteredCategoryWrapper>
+            )}
+            <VerticalGroup>
+              {group.map((item, i) =>
+                sameCategory ? (
+                  <CounterRow key={i}>
+                    <CounterGroup hasSingleCategory>
+                      <Title>{item.title}</Title>
+                      <Digits>
+                        {[...item.value].map((digit, index) => (
+                          <DigitBox key={index}>{digit}</DigitBox>
+                        ))}
+                      </Digits>
+                    </CounterGroup>
+                  </CounterRow>
+                ) : (
+                  <CounterRowWithCategory key={i}>
+                    <Category>{item.category}</Category>
+                    <CounterGroup hasSingleCategory={false}>
+                      <Title>{item.title}</Title>
+                      <Digits>
+                        {[...item.value].map((digit, index) => (
+                          <DigitBox key={index}>{digit}</DigitBox>
+                        ))}
+                      </Digits>
+                    </CounterGroup>
+                  </CounterRowWithCategory>
+                ),
+              )}
+            </VerticalGroup>
+          </Column>
+        );
+      })}
+    </Wrapper>
   );
 }
