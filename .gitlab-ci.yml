@@ -17,4 +17,4 @@ build_docker_superset:
     - docker push docker.erg.kz/erg/cv/superset-data-platform:$CI_COMMIT_SHORT_SHA
     - echo "Current image docker.erg.kz/erg/superset-data-platform:$CI_COMMIT_SHORT_SHA"
   only:
-    - master
+    - main
