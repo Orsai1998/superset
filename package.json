@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "superset-plugin-chart-product-counter": "file:../../plugins/superset-plugin-chart-product-counter/src"
+    "superset-plugin-chart-product-counter": "file:../../plugins/superset-plugin-chart-product-counter/"
   }
 }
