@@ -1,0 +1,20 @@
+image: docker:dind
+
+variables:
+  GIT_SSL_NO_VERIFY: "1"
+
+stages:
+  - build_docker
+
+build_docker_superset:
+  image: docker.mirror.erg.kz/docker:20-dind
+  stage: build_docker
+  tags:
+    - upr-runner-docker
+  script:
+    - docker login -u $NEXUS_LOGIN -p $NEXUS_PASS docker.erg.kz
+    - docker build --no-cache --ulimit nofile=65536:65536 . -t docker.erg.kz/erg/cv/superset-data-platform:$CI_COMMIT_SHORT_SHA
+    - docker push docker.erg.kz/erg/cv/superset-data-platform:$CI_COMMIT_SHORT_SHA
+    - echo "Current image docker.erg.kz/erg/superset-data-platform:$CI_COMMIT_SHORT_SHA"
+  only:
+    - master
