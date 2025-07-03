@@ -7,6 +7,7 @@
     "noUnusedLocals": true,
     "strictNullChecks": true,
 
+
     /* Modules */
     "baseUrl": ".",
     "module": "esnext",
@@ -24,7 +25,9 @@
       ],
       "@superset-ui/plugin-chart-*": ["./plugins/plugin-chart-*/src"],
       "@superset-ui/preset-chart-*": ["./plugins/preset-chart-*/src"],
-      "@superset-ui/switchboard": ["./packages/superset-ui-switchboard/src"]
+      "@superset-ui/switchboard": ["./packages/superset-ui-switchboard/src"],
+      "superset-plugin-chart-product-counter": ["./plugins/superset-plugin-chart-product-counter"]
+
     },
     "types": [
       "@emotion/react/types/css-prop",
