@@ -83,8 +83,10 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
   const { data = [] } = queriesData[0];
   const getCSSVariable = (name: string): string =>
     getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-  const labelColor = getCSSVariable('--label-color') || "#333";
-  const legendTextColor = getCSSVariable('--legend-text-color') || "#333";
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const {
     x,
     y,
