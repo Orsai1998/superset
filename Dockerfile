@@ -10,6 +10,11 @@ ARG NPM_BUILD_CMD="build"
 ENV BUILD_CMD=${NPM_BUILD_CMD} \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
+
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     build-essential \
     python3
@@ -31,6 +36,10 @@ RUN npm run build-translation
 RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
 RUN rm /app/superset/translations/messages.pot
 
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
 ######################################################################
 # Stage 2: Lean Python Superset base
 ######################################################################
@@ -44,6 +53,10 @@ ENV LANG=C.UTF-8 \
     PYTHONPATH="/app/pythonpath" \
     SUPERSET_HOME="/app/superset_home" \
     SUPERSET_PORT=8088
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
 
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info \
     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
@@ -83,6 +96,10 @@ RUN ./scripts/translations/generate_mo_files.sh \
     && rm superset/translations/messages.pot \
     && rm superset/translations/*/LC_MESSAGES/*.po
 
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
 COPY --chmod=755 ./docker/run-server.sh /usr/bin/
 HEALTHCHECK CMD curl -f "http://localhost:${SUPERSET_PORT}/health"
 EXPOSE ${SUPERSET_PORT}
@@ -93,6 +110,10 @@ EXPOSE ${SUPERSET_PORT}
 FROM lean AS custom
 
 USER root
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
 
 # Add Microsoft repo and install MSSQL drivers
 RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \
@@ -131,6 +152,10 @@ RUN pip install \
 
 RUN playwright install-deps && playwright install chromium
 
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
 USER superset
 CMD ["/usr/bin/run-server.sh"]
 
@@ -140,6 +165,11 @@ CMD ["/usr/bin/run-server.sh"]
 FROM custom AS dev
 
 USER root
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     libnss3 \
     libdbus-glib-1-2 \
@@ -163,6 +193,10 @@ RUN wget -q https://github.com/mozilla/geckodriver/releases/download/${GECKODRIV
 
 COPY --chown=superset:superset requirements/development.txt requirements/
 RUN pip install -r requirements/development.txt
+
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
 
 USER superset
 
