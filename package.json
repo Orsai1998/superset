@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "superset-plugin-chart-product-counter": "file:../../Desktop/superset-plugin-chart-product-counter"
+  }
+}
