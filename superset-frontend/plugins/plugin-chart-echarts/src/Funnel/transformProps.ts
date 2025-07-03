@@ -233,7 +233,7 @@ export default function transformProps(
   const defaultLabel = {
     formatter,
     show: showLabels,
-    color: labelColor
+    color: labelColor,
   };
 
   const series: FunnelSeriesOption[] = [
