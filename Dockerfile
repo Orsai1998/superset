@@ -11,8 +11,8 @@ ENV BUILD_CMD=${NPM_BUILD_CMD} \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+#ENV http_proxy=http://10.5.8.5:8080
+#ENV https_proxy=http://10.5.8.5:8080
 
 
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
@@ -55,8 +55,8 @@ ENV LANG=C.UTF-8 \
     SUPERSET_PORT=8088
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+#ENV http_proxy=http://10.5.8.5:8080
+#ENV https_proxy=http://10.5.8.5:8080
 
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info \
     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
@@ -112,8 +112,8 @@ FROM lean AS custom
 USER root
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+#ENV http_proxy=http://10.5.8.5:8080
+#ENV https_proxy=http://10.5.8.5:8080
 
 # Add Microsoft repo and install MSSQL drivers
 RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \
@@ -167,8 +167,8 @@ FROM custom AS dev
 USER root
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+#ENV http_proxy=http://10.5.8.5:8080
+#ENV https_proxy=http://10.5.8.5:8080
 
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     libnss3 \
