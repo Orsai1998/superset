@@ -33,7 +33,7 @@ import SankeyChartPlugin from '@superset-ui/legacy-plugin-chart-sankey';
 import TableChartPlugin from '@superset-ui/plugin-chart-table';
 import { WordCloudChartPlugin } from '@superset-ui/plugin-chart-word-cloud';
 import WorldMapChartPlugin from '@superset-ui/legacy-plugin-chart-world-map';
-import { SupersetPluginChartProductCounter } from 'superset-plugin-chart-product-counter';
+import { SupersetPluginChartProductCounter } from '../../plugins/superset-plugin-chart-product-counter';
 import {
   AreaChartPlugin,
   BarChartPlugin,
