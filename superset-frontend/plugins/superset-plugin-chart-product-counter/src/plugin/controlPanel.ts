@@ -22,12 +22,8 @@ import {
   sharedControls,
 } from '@superset-ui/chart-controls';
 
-
 const config: ControlPanelConfig = {
-
-
   controlPanelSections: [
-
     {
       label: t('Query'),
       expanded: true,
@@ -41,9 +37,11 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
               default: null,
               mapStateToProps: (state, controlState) => {
-                const datasource = state.datasource;
+                const { datasource } = state;
                 return {
-                  choices: (datasource?.columns || []).map((col: { column_name: any; }) => [col.column_name]),
+                  choices: (datasource?.columns || []).map(
+                    (col: { column_name: any }) => [col.column_name],
+                  ),
                 };
               },
               label: t('Categories'),
@@ -61,9 +59,11 @@ const config: ControlPanelConfig = {
               default: null,
               multi: false,
               mapStateToProps: (state, controlState) => {
-                const datasource = state.datasource;
+                const { datasource } = state;
                 return {
-                  choices: (datasource?.columns || []).map((col: { column_name: any; }) => [col.column_name]),
+                  choices: (datasource?.columns || []).map(
+                    (col: { column_name: any }) => [col.column_name],
+                  ),
                 };
               },
             },

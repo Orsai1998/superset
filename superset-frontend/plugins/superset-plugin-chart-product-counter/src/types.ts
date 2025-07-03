@@ -16,10 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  QueryFormData,
-  TimeseriesDataRecord,
-} from '@superset-ui/core';
+import { QueryFormData, TimeseriesDataRecord } from '@superset-ui/core';
 
 export interface SupersetPluginChartProductCounterStylesProps {
   width: number;
@@ -43,9 +40,9 @@ export type SupersetPluginChartProductCounterQueryFormData = QueryFormData &
   SupersetPluginChartProductCounterStylesProps &
   SupersetPluginChartProductCounterCustomizeProps;
 
-export type SupersetPluginChartProductCounterProps = SupersetPluginChartProductCounterStylesProps &
-  SupersetPluginChartProductCounterCustomizeProps & {
-    data: TimeseriesDataRecord[];
-    // add typing here for the props you pass in from transformProps.ts!
-  };
-
+export type SupersetPluginChartProductCounterProps =
+  SupersetPluginChartProductCounterStylesProps &
+    SupersetPluginChartProductCounterCustomizeProps & {
+      data: TimeseriesDataRecord[];
+      // add typing here for the props you pass in from transformProps.ts!
+    };
