@@ -67,16 +67,23 @@
     "skipLibCheck": true
   },
   "exclude": [
-    "./packages/generator-superset/test/**/*"
+    "./packages/generator-superset/test/**/*",
+    "lib",
+    "esm",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ],
   "include": [
     "./src/**/*",
     "./spec/**/*",
+      "src/**/*",
+    "plugins/**/*",
     "./packages/*/src/**/*",
     "./packages/*/types/**/*",
     "./plugins/*/src/**/*",
     "./plugins/*/types/**/*",
     "./packages/*/test/**/*",
     "./plugins/*/test/**/*"
-  ]
+  ],
+
 }
