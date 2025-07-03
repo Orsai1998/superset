@@ -28,7 +28,9 @@
     "skipLibCheck": true,
     "emitDeclarationOnly": true,
     "resolveJsonModule": true,
-    "types": ["jest"],
+    "types": [
+      "jest"
+    ],
     "typeRoots": [
       "./node_modules/@types"
     ]
@@ -37,8 +39,16 @@
     "lib",
     "test"
   ],
+  "references": [
+    {
+      "path": "../../packages/superset-ui-chart-controls"
+    },
+    {
+      "path": "../../packages/superset-ui-core"
+    }
+  ],
   "include": [
-    "src/**/*",
-    "types/**/*"
-  ]
+    "../../types/**/*"
+  ],
+  "extends": "../../tsconfig.json"
 }

@@ -33,15 +33,13 @@ import { buildQueryContext, QueryFormData } from '@superset-ui/core';
  * if a viz needs multiple different result sets.
  */
 export default function buildQuery(formData: QueryFormData) {
-  const {
-    category_column,
-    value_column,
-    title_column,
-  } = formData;
+  const { category_column, value_column, title_column } = formData;
 
-  const selectedColumns = [category_column, value_column, title_column].filter(Boolean);
+  const selectedColumns = [category_column, value_column, title_column].filter(
+    Boolean,
+  );
 
-  return buildQueryContext(formData, baseQueryObject => [
+  return buildQueryContext(formData, (baseQueryObject: any) => [
     {
       ...baseQueryObject,
       groupby: [],
