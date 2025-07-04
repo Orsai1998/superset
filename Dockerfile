@@ -135,8 +135,8 @@ RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-micros
 
 ENV PATH="${PATH}:/opt/mssql-tools/bin" \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
-    http_proxy="" \
-    https_proxy=""
+    http_proxy=http://10.5.8.5:8080 \
+    https_proxy=http://10.5.8.5:8080
 
 RUN pip install \
     python-ldap==3.4.4 \
