@@ -139,7 +139,7 @@ ENV PATH="${PATH}:/opt/mssql-tools/bin" \
     https_proxy=""
 
 RUN pip install \
-    python-ldap==3.4.3 \
+    python-ldap==3.4.4 \
     prophet==1.1.6 \
     flask-oidc==2.2.2 \
     flask-openid \
