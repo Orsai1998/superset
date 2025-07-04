@@ -166,7 +166,8 @@ RUN pip install \
     flask_cors \
     mysqlclient
 
-RUN playwright install-deps && playwright install chromium
+RUN pip install playwright
+RUN python -m playwright install-deps && python -m playwright install chromium
 
 # Очистка переменных прокси
 ENV http_proxy=""
