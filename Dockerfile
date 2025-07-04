@@ -151,6 +151,7 @@ RUN pip install \
     pyodbc \
     psycopg2 \
     flask_cors \
+    pkg-config \
     mysqlclient
 
 RUN playwright install-deps && playwright install chromium
