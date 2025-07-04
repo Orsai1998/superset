@@ -10,7 +10,7 @@ build_docker_superset:
   image: docker.mirror.erg.kz/docker:20-dind
   stage: build_docker
   tags:
-    - upr-runner-docker
+    - platform_data
   script:
     - docker login -u $NEXUS_LOGIN -p $NEXUS_PASS docker.erg.kz
     - docker build --no-cache --ulimit nofile=65536:65536 . -t docker.erg.kz/erg/cv/superset-data-platform:$CI_COMMIT_SHORT_SHA
