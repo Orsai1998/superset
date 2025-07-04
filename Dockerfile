@@ -141,6 +141,19 @@ ENV PATH="${PATH}:/opt/mssql-tools/bin" \
 ENV  http_proxy=http://10.5.8.5:8080
 ENV  https_proxy=http://10.5.8.5:8080
 
+RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
+    libnss3 \
+    libdbus-glib-1-2 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libasound2 \
+    libxtst6 \
+    git \
+    pkg-config \
+    wget \
+    bzip2 \
+    && rm -rf /var/lib/apt/lists/* \
+
 RUN pip install \
     python-ldap==3.4.4 \
     prophet==1.1.6 \
@@ -151,7 +164,6 @@ RUN pip install \
     pyodbc \
     psycopg2 \
     flask_cors \
-    pkg-config \
     mysqlclient
 
 RUN playwright install-deps && playwright install chromium
@@ -174,18 +186,7 @@ USER root
 ENV http_proxy=http://10.5.8.5:8080
 ENV https_proxy=http://10.5.8.5:8080
 
-RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
-    libnss3 \
-    libdbus-glib-1-2 \
-    libgtk-3-0 \
-    libx11-xcb1 \
-    libasound2 \
-    libxtst6 \
-    git \
-    pkg-config \
-    wget \
-    bzip2 \
-    && rm -rf /var/lib/apt/lists/*
+
 
 ARG GECKODRIVER_VERSION=v0.34.0 \
     FIREFOX_VERSION=125.0.3
