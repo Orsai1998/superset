@@ -99,8 +99,6 @@ import {
 
 const getCSSVariable = (name: string): string =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const labelColor = getCSSVariable('--label-color');
-const legendTextColor = getCSSVariable('--legend-text-color');
 const getFormatter = (
   customFormatters: Record<string, ValueFormatter>,
   defaultFormatter: ValueFormatter,
@@ -134,7 +132,10 @@ export default function transformProps(
   } = chartProps;
 
   let focusedSeries: string | null = null;
-
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const {
     verboseMap = {},
     currencyFormats = {},
@@ -668,7 +669,7 @@ export default function transformProps(
         .map(entry => entry.name || '')
         .concat(extractAnnotationLabels(annotationLayers, annotationData)),
     },
-    series: dedupSeries(series),
+    series: dedupSeries(series as SeriesOption[]),
     toolbox: {
       show: zoomable,
       top: TIMESERIES_CONSTANTS.toolboxTop,
