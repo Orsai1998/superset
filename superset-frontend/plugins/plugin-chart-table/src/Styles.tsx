@@ -31,12 +31,13 @@ export default styled.div`
     th,
     td {
       min-width: 4.3em;
+      background: transparent !important;
     }
 
     thead > tr > th {
       padding-right: 0;
       position: relative;
-      background: ${theme.colors.grayscale.light5};
+      background: transparent !important;
       text-align: left;
     }
     th svg {
@@ -71,7 +72,7 @@ export default styled.div`
       cursor: pointer;
     }
     td.dt-is-filter:hover {
-      background-color: ${theme.colors.secondary.light4};
+      background-color: ${theme.colors.secondary.light5};
     }
     td.dt-is-active-filter,
     td.dt-is-active-filter:hover {
