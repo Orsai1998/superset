@@ -23,7 +23,7 @@ import example2 from '../images/example2.jpg';
 import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
-import { registerCustomHelpers } from './handlebarsHelpers';
+import { registerCustomHelpers } from './handleBarsHelpers';
 
 registerCustomHelpers();
 
