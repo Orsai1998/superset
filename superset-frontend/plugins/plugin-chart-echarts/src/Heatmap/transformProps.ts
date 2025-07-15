@@ -43,6 +43,9 @@ type EChartsOption = ComposeOption<HeatmapSeriesOption>;
 
 const DEFAULT_ECHARTS_BOUNDS = [0, 200];
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 // Calculated totals per x and y categories plus total
 const calculateTotals = memoizeOne(
   (
@@ -95,8 +98,13 @@ export default function transformProps(
     yAxisFormat,
     xAxisTimeFormat,
     currencyFormat,
+    theme,
   } = formData;
   const metricLabel = getMetricLabel(metric);
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const xAxisLabel = getColumnLabel(xAxis);
   // groupby is overridden to be a single value
   const yAxisLabel = getColumnLabel(groupby as unknown as QueryFormColumn);
@@ -156,6 +164,7 @@ export default function transformProps(
       ),
       label: {
         show: showValues,
+        color: labelColor,
         formatter: (params: CallbackDataParams) =>
           valueFormatter(params.value[2]),
       },
@@ -221,6 +230,9 @@ export default function transformProps(
         color: colors,
       },
       show: showLegend,
+      textStyle: {
+        color: legendTextColor,
+      },
       // By default, ECharts uses the last dimension which is rank
       dimension: normalized ? 3 : 2,
     },
@@ -229,6 +241,7 @@ export default function transformProps(
       axisLabel: {
         formatter: xAxisFormatter,
         interval: xscaleInterval === -1 ? 'auto' : xscaleInterval - 1,
+        color: labelColor,
       },
     },
     yAxis: {
@@ -236,6 +249,7 @@ export default function transformProps(
       axisLabel: {
         formatter: yAxisFormatter,
         interval: yscaleInterval === -1 ? 'auto' : yscaleInterval - 1,
+        color: labelColor,
       },
     },
   };
