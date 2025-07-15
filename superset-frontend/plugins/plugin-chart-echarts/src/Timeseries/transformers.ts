@@ -270,6 +270,11 @@ export function transformSeries(
       showSymbol = true;
     }
   }
+
+  const labelColor =
+    getComputedStyle(document.documentElement)
+      .getPropertyValue('--label-color')
+      .trim() || '#333';
   const lineStyle =
     isConfidenceBand || (stack === StackControlsValue.Stream && area)
       ? { ...opts.lineStyle, opacity: OpacityEnum.Transparent }
@@ -315,6 +320,7 @@ export function transformSeries(
     label: {
       show: !!showValue,
       position: isHorizontal ? 'right' : 'top',
+      color: labelColor,
       formatter: (params: any) => {
         const { value, dataIndex, seriesIndex, seriesName } = params;
         const numericValue = isHorizontal ? value[0] : value[1];
@@ -484,11 +490,15 @@ export function transformEventAnnotation(
         opacity: 1,
       },
     };
+    const labelColor =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--label-color')
+        .trim() || '#333';
 
     const eventLabel: SeriesLineLabelOption = showLabel
       ? {
           show: true,
-          color: theme.colors.grayscale.dark2,
+          color: labelColor,
           position: 'insideEndTop',
           fontWeight: 'bold',
           formatter: (params: CallbackDataParams) => params.name,
