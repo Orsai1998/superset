@@ -95,6 +95,7 @@ export default function transformProps(
       },
       label: {
         show: showValue,
+        color: labelColor,
         position: 'top',
         formatter: params => {
           const { value } = params;
