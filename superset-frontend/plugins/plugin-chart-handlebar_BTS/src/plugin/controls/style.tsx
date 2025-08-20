@@ -20,29 +20,44 @@ import {
   ControlSetItem,
   CustomControlConfig,
   sharedControls,
+  InfoTooltipWithTrigger,
 } from '@superset-ui/chart-controls';
-import { t, validateNonEmpty } from '@superset-ui/core';
+import { t, useTheme } from '@superset-ui/core';
 import { CodeEditor } from '../../components/CodeEditor/CodeEditor';
 import { ControlHeader } from '../../components/ControlHeader/controlHeader';
 import { debounceFunc } from '../../consts';
 
-interface HandlebarsCustomControlProps {
+interface StyleCustomControlProps {
   value: string;
 }
 
-const HandlebarsTemplateControl = (
-  props: CustomControlConfig<HandlebarsCustomControlProps>,
-) => {
-  const val = String(
-    props?.value ? props?.value : props?.default ? props?.default : '',
-  );
+const StyleControl = (props: CustomControlConfig<StyleCustomControlProps>) => {
+  const theme = useTheme();
+
+  const defaultValue = props?.value
+    ? undefined
+    : `/*
+  .data-list {
+    background-color: yellow;
+  }
+*/`;
 
   return (
     <div>
-      <ControlHeader>{props.label}</ControlHeader>
+      <ControlHeader>
+        <div>
+          {props.label}
+          <InfoTooltipWithTrigger
+            iconsStyle={{ marginLeft: theme.gridUnit }}
+            tooltip={t('You need to configure HTML sanitization to use CSS')}
+          />
+        </div>
+      </ControlHeader>
       <CodeEditor
         theme="dark"
-        value={val}
+        mode="css"
+        value={props.value}
+        defaultValue={defaultValue}
         onChange={source => {
           debounceFunc(props.onChange, source || '');
         }}
@@ -51,23 +66,17 @@ const HandlebarsTemplateControl = (
   );
 };
 
-export const handlebarsTemplateControlSetItem: ControlSetItem = {
-  name: 'handlebarsTemplate',
-  //name: 'template',
+export const styleControlSetItem: ControlSetItem = {
+  name: 'styleTemplate',
   config: {
     ...sharedControls.entity,
-    type: HandlebarsTemplateControl,
-    label: t('Handlebars Template'),
-    description: t('A handlebars template that is applied to the data'),
-    default: `<ul class="data-list">
-  {{#each data}}
-    <li>{{stringify this}}</li>
-  {{/each}}
-</ul>`,
+    type: StyleControl,
+    label: t('CSS Styles'),
+    description: t('CSS applied to the chart'),
     isInt: false,
     renderTrigger: true,
 
-    validators: [validateNonEmpty],
+    validators: [],
     mapStateToProps: ({ controls }) => ({
       value: controls?.handlebars_template?.value,
     }),
