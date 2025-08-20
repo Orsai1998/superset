@@ -18,9 +18,16 @@ WORKDIR /home/superset-websocket
 
 COPY . ./
 
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
 RUN npm ci && \
   npm run build
 
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
 
 FROM node:16-alpine
 
@@ -30,8 +37,16 @@ WORKDIR /home/superset-websocket
 COPY --from=build /home/superset-websocket/dist ./dist
 COPY package*.json ./
 
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
 # Only install production dependencies
 RUN npm ci --omit=dev
+
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
 
 # Don't run as root!
 USER node
