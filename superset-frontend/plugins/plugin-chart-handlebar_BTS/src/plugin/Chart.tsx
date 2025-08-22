@@ -1,6 +1,6 @@
 // plugin-chart-handlebars/src/plugin/Chart.tsx
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Handlebars from 'handlebars';
 import { ChartProps } from '@superset-ui/core';
 import './handleBarsHelpers';
@@ -50,10 +50,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
   const records: any[] = Array.isArray(raw)
     ? raw
     : Array.isArray((raw as any).records)
-    ? (raw as any).records
-    : [];
+      ? (raw as any).records
+      : [];
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [modalUrl, setModalUrl] = useState<string | null>(null); // <-- состояние модалки
   const html = Handlebars.compile(template ?? '')({ data: records });
 
   useEffect(() => {
@@ -66,10 +67,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       return;
     }
 
+
     // Render handlebars HTML
     root.innerHTML = html;
 
-        // Optional: inline user CSS (remove if CSP blocks it)
+    // Optional: inline user CSS (remove if CSP blocks it)
     const userStyles = (props.formData as any).styles as string | undefined;
     if (userStyles && userStyles.trim()) {
       const exists = root.querySelector('style[data-origin="userStyles"]');
@@ -83,7 +85,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     // ---- State kept across clicks (not React state) ------------------------
     // We keep the current period in both DOM (data-period) and a ref variable,
     // so it remains correct on every click.
-    let periodRef: Period='day'; //| null = null; // null => "no specific period" (show all columns)
+    let periodRef: Period = 'day'; //| null = null; // null => "no specific period" (show all columns)
 
     // Read from DOM if it existed (e.g., re-mount within same container)
     const attr = root.getAttribute('data-period');
@@ -100,16 +102,18 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     // Multiple category selection (checkbox-like)
     const selectedCats = new Set<string>(); // 'bp' | 'op' | 'ps'
     // === INIT: Default selected categories ===
-  ['bp', 'op', 'ps'].forEach(cat => selectedCats.add(cat));
+    ['bp', 'op', 'ps'].forEach(cat => selectedCats.add(cat));
 
-  // Activate any existing category buttons
-  const allCatBtns = root.querySelectorAll<HTMLButtonElement>('.smypki-refresh-btn');
-  allCatBtns.forEach(btn => {
-    const cat = btn.dataset.cat;
-    if (cat && selectedCats.has(cat)) {
-      btn.classList.add('active');
-    }
-  });
+    // Activate any existing category buttons
+    const allCatBtns = root.querySelectorAll<HTMLButtonElement>(
+      '.smypki-refresh-btn',
+    );
+    allCatBtns.forEach(btn => {
+      const cat = btn.dataset.cat;
+      if (cat && selectedCats.has(cat)) {
+        btn.classList.add('active');
+      }
+    });
     // Toggle period columns visibility (table cells)
     const applyPeriodColumns = () => {
       const p = getPeriod(); // can be null
@@ -125,34 +129,38 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         setCellsDisplay(mnthCells, true);
         setCellsDisplay(yearCells, true);
       } else {
-        setCellsDisplay(dayCells,  p === 'day');
+        setCellsDisplay(dayCells, p === 'day');
         setCellsDisplay(weekCells, p === 'week');
         setCellsDisplay(mnthCells, p === 'mnth');
         setCellsDisplay(yearCells, p === 'year');
       }
     };
 
-
-const allPeriodBtns = root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
-allPeriodBtns.forEach(btn => {
-  const typeAttr = btn.getAttribute('data-type');
-  if (normalizePeriod(typeAttr) === 'day') {
-    btn.classList.add('active');
-  } else {
-    btn.classList.remove('active');
-  }
-});
+    const allPeriodBtns = root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
+    allPeriodBtns.forEach(btn => {
+      const typeAttr = btn.getAttribute('data-type');
+      if (normalizePeriod(typeAttr) === 'day') {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
     // Show/hide rows by selected categories & current period
     // If no period selected -> apply to ALL periods.
     const DISPLAY_ROW = 'table-row'; // change to 'block' if rows are <div>
     const applyCategoryFilter = () => {
       const current = getPeriod(); // Period | null
-      const periods: Period[] = current ? [current] : ['day', 'week', 'mnth', 'year'];
-      const catsToShow = selectedCats.size === 0 ? ['bp', 'op', 'ps'] : Array.from(selectedCats);
+      const periods: Period[] = current
+        ? [current]
+        : ['day', 'week', 'mnth', 'year'];
+      const catsToShow =
+        selectedCats.size === 0 ? ['bp', 'op', 'ps'] : Array.from(selectedCats);
 
       // For each period, hide all rows first (except .f), then show selected categories
       periods.forEach(p => {
-        const allRows = document.querySelectorAll<HTMLElement>(`.${p}-value-row`);
+        const allRows = document.querySelectorAll<HTMLElement>(
+          `.${p}-value-row`,
+        );
         // hide all except .f
         allRows.forEach(row => {
           if (row.classList.contains('f')) {
@@ -175,7 +183,9 @@ allPeriodBtns.forEach(btn => {
       const target = e.target as HTMLElement;
 
       // ----- Period buttons (.kpi-toggle-btn) -----
-      const periodBtn = target.closest('.kpi-toggle-btn') as HTMLElement | 'day';
+      const periodBtn = target.closest('.kpi-toggle-btn') as
+        | HTMLElement
+        | 'day';
       if (periodBtn) {
         const typeAttr = periodBtn.getAttribute('data-type'); // may be '0','1','2','3' or names
         const next = normalizePeriod(typeAttr);
@@ -196,8 +206,16 @@ allPeriodBtns.forEach(btn => {
           setPeriod(next);
         }
 
-        applyPeriodColumns();  // update visible columns
+        applyPeriodColumns(); // update visible columns
         applyCategoryFilter(); // re-apply rows for new period
+        return;
+      }
+
+      const openLink = target.closest('a.open-modal') as HTMLAnchorElement | null;
+      if (openLink) {
+        e.preventDefault();
+        e.stopPropagation();
+        setModalUrl(openLink.href);
         return;
       }
 
@@ -209,7 +227,6 @@ allPeriodBtns.forEach(btn => {
           catBtn.classList.remove('active');
           selectedCats.delete(cat);
         } else {
-          
           selectedCats.add(cat);
           catBtn.classList.add('active');
         }
@@ -226,5 +243,56 @@ allPeriodBtns.forEach(btn => {
     return () => root.removeEventListener('click', onClick);
   }, [html, props.formData.styles, template]);
 
-  return <div ref={containerRef} className="handlebars-root" />;
+  return (
+    <>
+      <div ref={containerRef} className="handlebars-root" />
+
+      {/* Модалка */}
+      {modalUrl && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+          }}
+          onClick={() => setModalUrl(null)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              width: '75%',
+              height: '75%',
+              position: 'relative',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <iframe
+              src={modalUrl}
+              style={{ width: '100%', height: '100%', border: 'none' ,padding:'50px'}}
+              title="Preview"
+            />
+            <button
+              onClick={() => setModalUrl(null)}
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                border: 'none',
+                background: 'transparent',
+                lineHeight:'25px',
+                cursor: 'pointer',
+                fontSize:'25px',
+              }}
+            >
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
 }
