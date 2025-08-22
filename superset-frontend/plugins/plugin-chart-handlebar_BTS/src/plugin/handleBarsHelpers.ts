@@ -145,5 +145,48 @@ Handlebars.registerHelper('parseDay', function (day, divisionClass) {
 Handlebars.registerHelper('stringify', function (context: any) {
   return JSON.stringify(context);
 });  
-  
+
+function toVals(v){
+  const strip = s => String(s).replace(/[\u200B-\u200D\uFEFF\u00A0]/g,'').trim();
+  if (Array.isArray(v)) return v.map(strip).filter(Boolean);
+  if (v == null) return [];
+  return String(v).split(',').map(strip).filter(Boolean); // "Хром,Алюминий" -> ["Хром","Алюминий"]
+}
+
+// Возвращает src/href для EMBEDDED CHART (Explore) с фильтрами
+Handlebars.registerHelper('createUrl', function(options){
+  const sliceId   = String(options.hash.slice_id);      // ← ТОЛЬКО slice_id
+  const column    = String(options.hash.filter_col);    // ← column_name в датасете (не лейбл)
+  const valuesArr = toVals(options.hash.filter_col_val);   // ← строка или массив
+  const height    = options.hash.height ? String(options.hash.height) : '100%';
+
+  const filter = {
+    clause: 'WHERE',
+    expressionType: 'SIMPLE',
+    subject: column,          // tech column_name
+    operator: 'IN',
+    comparator: valuesArr,    // ["Хром","Алюминий"]
+  };
+
+  const formData = {
+    force: true,                       // игнорировать сохранённые фильтры
+    adhoc_filters: [filter],           // для совместимости
+    extra_form_data: {
+      override_form_data: {
+        adhoc_filters: [filter],       // гарантированно переопределяет
+        filters: [{ col: column, op: 'IN', val: valuesArr }],
+      },
+    },
+  };
+
+  const base = `${window.location.origin}/superset/explore/`;
+  const url  = `${base}?slice_id=${encodeURIComponent(sliceId)}`
+             + `&standalone=1&force=1&&height=${encodeURIComponent(height)}`
+             +`&${column}=${valuesArr}`//${encodeURIComponent(JSON.stringify(valuesArr))}`
+            // + `&form_data=${encodeURIComponent(JSON.stringify(formData))}`;
+
+  return new Handlebars.SafeString(url);
+});
+
+
 }
