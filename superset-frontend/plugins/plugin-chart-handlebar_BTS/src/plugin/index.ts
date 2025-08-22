@@ -24,10 +24,11 @@ import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import { registerCustomHelpers } from './handleBarsHelpers';
+import HandlebarsChart from './Chart'; 
 
 registerCustomHelpers();
 
-export default class HandlebarsChartPlugin extends ChartPlugin {
+export default class HandlebarBTSChartPlugin extends ChartPlugin {
   /**
    * The constructor is used to pass relevant metadata and callbacks that get
    * registered in respective registries that are used throughout the library
@@ -41,16 +42,17 @@ export default class HandlebarsChartPlugin extends ChartPlugin {
   constructor() {
     const metadata = new ChartMetadata({
       description: t('Write a handlebars template to render the data'),
-      name: t('Handlebars'),
+      name: t('Handlebars BTS'),
       thumbnail,
       exampleGallery: [{ url: example1 }, { url: example2 }],
     });
 
     super({
+	  key:'handlebar_BTS',
       buildQuery,
       controlPanel,
-      loadChart: () => import('../Handlebars'),
-     // loadChart: () =>Promise.resolve(HandlebarsChart),
+      //loadChart: () => import('../Handlebars'),
+      loadChart: () =>Promise.resolve(HandlebarsChart),
       metadata,
       transformProps,
     });
