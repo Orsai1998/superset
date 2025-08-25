@@ -17,7 +17,8 @@ export function registerCustomHelpers() {
 Handlebars.registerHelper('json', function (context) {
   return JSON.stringify(context,null,2);
 });  
-  
+
+
 Handlebars.registerHelper('divisionClass', function(division) {
   switch (division) {
   case 'Алюминий': return 'al';
