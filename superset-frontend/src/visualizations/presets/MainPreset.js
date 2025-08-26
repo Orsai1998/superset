@@ -80,9 +80,11 @@ import {
 } from 'src/filters/components';
 import { PivotTableChartPlugin as PivotTableChartPluginV2 } from '@superset-ui/plugin-chart-pivot-table';
 import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
-import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS/src/plugin';
+
 import { FilterPlugins } from 'src/constants';
+
 import { SupersetPluginChartProductCounter } from 'superset-plugin-chart-product-counter/src';
+import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS/src/plugin';
 import TimeTableChartPlugin from '../TimeTable';
 
 export default class MainPreset extends Preset {
