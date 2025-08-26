@@ -21,6 +21,7 @@ import Handlebars from 'handlebars';
 import moment from 'moment';
 import { useMemo, useState } from 'react';
 import { isPlainObject } from 'lodash';
+// eslint-disable-next-line import/no-unresolved
 import Helpers from 'just-handlebars-helpers';
 
 export interface HandlebarsViewerProps {
