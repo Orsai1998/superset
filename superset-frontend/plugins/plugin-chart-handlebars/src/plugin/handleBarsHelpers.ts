@@ -42,11 +42,11 @@ export function registerCustomHelpers() {
       .toLowerCase()
       .replace(/^["']+|["']+$/g, '');
     const map = {
-      'алюминий': 'Al',
-      'железо': 'Fe',
-      'хром': 'Cr',
-      'уголь': 'C',
-      'энергетика': 'E',
+      алюминий: 'Al',
+      железо: 'Fe',
+      хром: 'Cr',
+      уголь: 'C',
+      энергетика: 'E',
     };
 
     const abbr = map[normalized] || '??';
