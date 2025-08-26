@@ -71,7 +71,7 @@ const config: ControlPanelConfig = {
         [handlebarsTemplateControlSetItem],
         [styleControlSetItem],
       ],
-    },  
+    },
   ],
   formDataOverrides: formData => ({
     ...formData,
