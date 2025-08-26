@@ -50,7 +50,7 @@ export default class HandlebarsChartPlugin extends ChartPlugin {
       buildQuery,
       controlPanel,
       loadChart: () => import('../Handlebars'),
-     // loadChart: () =>Promise.resolve(HandlebarsChart),
+      // loadChart: () =>Promise.resolve(HandlebarsChart),
       metadata,
       transformProps,
     });
