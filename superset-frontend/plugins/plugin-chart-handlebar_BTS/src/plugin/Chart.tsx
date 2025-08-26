@@ -1,6 +1,4 @@
-// plugin-chart-handlebars/src/plugin/Chart.tsx
-
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Handlebars from 'handlebars';
 import { ChartProps } from '@superset-ui/core';
 import './handleBarsHelpers';
@@ -41,11 +39,12 @@ const normalizePeriod = (v: string | null): Period => {
 
 // Helper to show/hide table cells by period
 const setCellsDisplay = (els: NodeListOf<HTMLElement>, on: boolean) => {
+  // eslint-disable-next-line no-return-assign,no-param-reassign
   els.forEach(el => (el.style.display = on ? 'table-cell' : 'none'));
 };
 
 export default function HandlebarsChart(props: HandlebarsProps) {
-  const template = props.formData.template;
+  const { template } = props.formData;
   const raw = props.data;
   const records: any[] = Array.isArray(raw)
     ? raw
@@ -62,18 +61,16 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     if (!root) return;
 
     if (!template) {
-      console.warn('HandlebarsChart: template is empty');
       root.innerHTML = '';
       return;
     }
-
 
     // Render handlebars HTML
     root.innerHTML = html;
 
     // Optional: inline user CSS (remove if CSP blocks it)
     const userStyles = (props.formData as any).styles as string | undefined;
-    if (userStyles && userStyles.trim()) {
+    if (userStyles?.trim()) {
       const exists = root.querySelector('style[data-origin="userStyles"]');
       if (exists) exists.remove();
       const styleTag = document.createElement('style');
@@ -85,7 +82,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     // ---- State kept across clicks (not React state) ------------------------
     // We keep the current period in both DOM (data-period) and a ref variable,
     // so it remains correct on every click.
-    let periodRef: Period = 'day'; //| null = null; // null => "no specific period" (show all columns)
+    let periodRef: Period = 'day'; // | null = null; // null => "no specific period" (show all columns)
 
     // Read from DOM if it existed (e.g., re-mount within same container)
     const attr = root.getAttribute('data-period');
@@ -94,7 +91,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     const setPeriod = (p: Period) => {
       periodRef = p;
       if (p) root.setAttribute('data-period', p);
-      //else root.removeAttribute('data-period');
+      // else root.removeAttribute('data-period');
     };
 
     const getPeriod = (): Period => periodRef;
@@ -109,7 +106,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       '.smypki-refresh-btn',
     );
     allCatBtns.forEach(btn => {
-      const cat = btn.dataset.cat;
+      const { cat } = btn.dataset;
       if (cat && selectedCats.has(cat)) {
         btn.classList.add('active');
       }
@@ -164,8 +161,10 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         // hide all except .f
         allRows.forEach(row => {
           if (row.classList.contains('f')) {
+            // eslint-disable-next-line no-param-reassign
             row.style.display = DISPLAY_ROW;
           } else {
+            // eslint-disable-next-line no-param-reassign
             row.style.display = 'none';
           }
         });
@@ -173,6 +172,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         catsToShow.forEach(cat => {
           document
             .querySelectorAll<HTMLElement>(`.${p}-value-row.xx.${cat}`)
+            // eslint-disable-next-line no-return-assign,no-param-reassign
             .forEach(row => (row.style.display = DISPLAY_ROW));
         });
       });
@@ -187,11 +187,13 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         | HTMLElement
         | 'day';
       if (periodBtn) {
+        // @ts-ignore
         const typeAttr = periodBtn.getAttribute('data-type'); // may be '0','1','2','3' or names
         const next = normalizePeriod(typeAttr);
         const allBtns = root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
 
         // Determine if clicked was already active BEFORE we clear classes
+        // @ts-ignore
         const wasActive = periodBtn.classList.contains('active');
 
         // Clear highlight on all period buttons
@@ -202,6 +204,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           setPeriod('day');
         } else {
           // Activate clicked button
+          // @ts-ignore
           periodBtn.classList.add('active');
           setPeriod(next);
         }
@@ -211,7 +214,9 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         return;
       }
 
-      const openLink = target.closest('a.open-modal') as HTMLAnchorElement | null;
+      const openLink = target.closest(
+        'a.open-modal',
+      ) as HTMLAnchorElement | null;
       if (openLink) {
         e.preventDefault();
         e.stopPropagation();
@@ -231,7 +236,6 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           catBtn.classList.add('active');
         }
         applyCategoryFilter();
-        return;
       }
     };
 
@@ -240,6 +244,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     applyCategoryFilter();
 
     root.addEventListener('click', onClick);
+    // eslint-disable-next-line consistent-return
     return () => root.removeEventListener('click', onClick);
   }, [html, props.formData.styles, template]);
 
@@ -249,10 +254,12 @@ export default function HandlebarsChart(props: HandlebarsProps) {
 
       {/* Модалка */}
       {modalUrl && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
           style={{
             position: 'fixed',
             inset: 0,
+            // eslint-disable-next-line theme-colors/no-literal-colors
             background: 'rgba(0,0,0,0.6)',
             display: 'flex',
             alignItems: 'center',
@@ -261,8 +268,10 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           }}
           onClick={() => setModalUrl(null)}
         >
+          {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
           <div
             style={{
+              // eslint-disable-next-line theme-colors/no-literal-colors
               background: '#fff',
               width: '75%',
               height: '75%',
@@ -272,9 +281,15 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           >
             <iframe
               src={modalUrl}
-              style={{ width: '100%', height: '100%', border: 'none' ,padding:'50px'}}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                padding: '50px',
+              }}
               title="Preview"
             />
+            {/* eslint-disable-next-line react/button-has-type */}
             <button
               onClick={() => setModalUrl(null)}
               style={{
@@ -283,9 +298,9 @@ export default function HandlebarsChart(props: HandlebarsProps) {
                 right: 8,
                 border: 'none',
                 background: 'transparent',
-                lineHeight:'25px',
+                lineHeight: '25px',
                 cursor: 'pointer',
-                fontSize:'25px',
+                fontSize: '25px',
               }}
             >
               &times;
