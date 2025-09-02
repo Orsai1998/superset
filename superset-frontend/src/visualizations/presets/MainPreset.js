@@ -86,6 +86,7 @@ import { FilterPlugins } from 'src/constants';
 import { SupersetPluginChartProductCounter } from 'superset-plugin-chart-product-counter/src';
 import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS/src/plugin';
 import TimeTableChartPlugin from '../TimeTable';
+import Top5BarsPlugin from '../../../plugins/superset-plugin-chart-top5bars/src/plugin';
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -184,6 +185,7 @@ export default class MainPreset extends Preset {
         new EchartsSunburstChartPlugin().configure({ key: 'sunburst_v2' }),
         new HandlebarsChartPlugin().configure({ key: 'handlebars' }),
         new HandlebarBTSChartPlugin().configure({ key: 'handlebar_BTS' }),
+        new Top5BarsPlugin().configure({ key: 'top5-bars' }).register(),
         new EchartsBubbleChartPlugin().configure({ key: 'bubble_v2' }),
         ...experimentalPlugins,
       ],
