@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { styled } from '@superset-ui/core';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
