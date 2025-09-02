@@ -1,32 +1,11 @@
-// transformProps.ts
-/**
- * Apache 2.0
- */
-import {
-  ChartProps,
-  DataRecord,
-  getNumberFormatter,
-  NumberFormats,
-  QueryFormData,
-} from '@superset-ui/core';
+import { ChartProps, DataRecord, getNumberFormatter } from '@superset-ui/core';
+import type { Top5BarsFormData } from '../types';
 
 type AdhocMetric = {
   label?: string;
   metric_name?: string;
   sqlExpression?: string;
 };
-
-interface Top5BarsFormData extends QueryFormData {
-  groupby?: string[];
-  metrics?: (string | AdhocMetric)[];
-  metric?: string | AdhocMetric;
-  metric_label?: string;
-  row_limit?: number;
-  numberFormat?: string;
-  headerText?: string;
-  headerFontSize?: keyof typeof NumberFormats | any;
-  boldText?: boolean;
-}
 
 export type Top5Row = { reason: string; value: number; raw?: DataRecord };
 
@@ -74,6 +53,7 @@ export default function transformProps(
   const formatter = getNumberFormatter(numberFormat);
 
   const mapped: Top5Row[] = rows.map(r => {
+    // @ts-ignore
     const reasonRaw = (r[groupbyCol] ?? (r as any).reason) as unknown;
     const valueRaw = (r[metricKey as keyof DataRecord] ??
       (r as any).value) as unknown;
