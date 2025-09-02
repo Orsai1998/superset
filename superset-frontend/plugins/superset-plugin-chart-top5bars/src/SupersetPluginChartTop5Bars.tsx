@@ -1,9 +1,15 @@
+// eslint-disable-next-line no-restricted-syntax
 import React, { useEffect, useRef } from 'react';
 import { styled } from '@superset-ui/core';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import * as echarts from 'echarts/core';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { BarChart } from 'echarts/charts';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { GridComponent, TooltipComponent } from 'echarts/components';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { CanvasRenderer } from 'echarts/renderers';
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { LabelLayout } from 'echarts/features';
 import type {
   SupersetPluginChartTop5BarsProps,
