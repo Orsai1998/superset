@@ -21,6 +21,7 @@ import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
+// eslint-disable-next-line import/no-unresolved
 import '@fontsource/russo-one';
 
 export default class SupersetPluginChartTop5Bars extends ChartPlugin {
