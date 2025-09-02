@@ -1,14 +1,14 @@
 import React, { useEffect, useRef } from 'react';
 import { styled } from '@superset-ui/core';
-import type {
-  SupersetPluginChartTop5BarsProps,
-  SupersetPluginChartTop5BarsStylesProps,
-} from './types';
 import * as echarts from 'echarts/core';
 import { BarChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import {LabelLayout} from "echarts/features";
+import { LabelLayout } from 'echarts/features';
+import type {
+  SupersetPluginChartTop5BarsProps,
+  SupersetPluginChartTop5BarsStylesProps,
+} from './types';
 
 echarts.use([
   BarChart,
@@ -19,6 +19,7 @@ echarts.use([
 ]);
 
 // @ts-ignore
+// eslint-disable-next-line theme-colors/no-literal-colors
 const Styles = styled.div<SupersetPluginChartTop5BarsStylesProps>`
   background: transparent;
   height: ${({ height }) => height}px;
@@ -49,7 +50,13 @@ type Row = { reason: string; value: number };
 
 // сопоставление размера из controls к px
 const headerSizePx: Record<string, number> = {
-  xxs: 10, xs: 12, s: 14, m: 16, l: 18, xl: 20, xxl: 24,
+  xxs: 10,
+  xs: 12,
+  s: 14,
+  m: 16,
+  l: 18,
+  xl: 20,
+  xxl: 24,
 };
 
 export default function SupersetPluginChartTop5Bars(
@@ -89,7 +96,8 @@ export default function SupersetPluginChartTop5Bars(
 
   const render = () => {
     const el = chartDivRef.current!;
-    if (!chartRef.current) chartRef.current = echarts.init(el, undefined, { renderer: 'canvas' });
+    if (!chartRef.current)
+      chartRef.current = echarts.init(el, undefined, { renderer: 'canvas' });
     const chart = chartRef.current;
 
     const { reasons, values, max } = prepare(data as Row[]);
@@ -134,6 +142,7 @@ export default function SupersetPluginChartTop5Bars(
             fontFamily: 'Russo One, "Helvetica Neue", Helvetica, sans-serif',
             fontWeight: 800,
             fontSize: 22,
+            // @ts-ignore
             formatter: ({ value }) => `${value}`,
           },
           itemStyle: {
@@ -198,6 +207,7 @@ export default function SupersetPluginChartTop5Bars(
   };
 
   // @ts-ignore
+  // eslint-disable-next-line consistent-return
   useEffect(() => {
     if (chartDivRef.current) {
       render();
@@ -210,11 +220,18 @@ export default function SupersetPluginChartTop5Bars(
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(data), height, width, headerText, boldText, headerFontSize]);
+  }, [
+    JSON.stringify(data),
+    height,
+    width,
+    headerText,
+    boldText,
+    headerFontSize,
+  ]);
 
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return (
-      <Styles height={height} width={width}>
+      <Styles height={height} width={width} headerFontSize={0} boldText={false}>
         {headerText ? (
           <div
             className="top5-header"
@@ -242,7 +259,7 @@ export default function SupersetPluginChartTop5Bars(
   }
 
   return (
-    <Styles height={height} width={width}>
+    <Styles height={height} width={width} headerFontSize={0} boldText={false}>
       {headerText ? (
         <div
           className="top5-header"
