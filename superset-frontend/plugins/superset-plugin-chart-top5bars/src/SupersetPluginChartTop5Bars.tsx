@@ -185,9 +185,9 @@ export default function SupersetPluginChartTop5Bars(
             position: 'insideLeft',
             distance: 6,
             // eslint-disable-next-line theme-colors/no-literal-colors
-            color: '#5F5F61',
+            color: '#C4C4C4',
             fontFamily: 'Arial, "Helvetica Neue", Helvetica, sans-serif',
-            fontSize: 14,
+            fontSize: 16,
             fontWeight: 400,
             formatter: (p: any) => p.name,
           },
@@ -253,7 +253,7 @@ export default function SupersetPluginChartTop5Bars(
         <div
           style={{
             // eslint-disable-next-line theme-colors/no-literal-colors
-            color: '#9CA3AF',
+            color: '#C4C4C4',
             fontFamily: 'Russo One, sans-serif',
             padding: 12,
           }}
