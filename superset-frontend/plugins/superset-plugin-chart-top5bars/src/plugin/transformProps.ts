@@ -66,7 +66,7 @@ export default function transformProps(
 
   const cleaned = mapped
     .filter(d => d.reason !== '' && Number.isFinite(d.value))
-    .sort((a, b) => b.value - a.value);
+    .sort((a, b) => a.value - b.value);
   const topN = toNumber(fd.row_limit, 5) || 5;
   const top = cleaned.slice(0, topN);
   const max = Math.max(1, ...top.map(d => d.value));
