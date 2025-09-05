@@ -91,7 +91,7 @@ export default function SupersetPluginChartTop5Bars(
   const prepare = (rows: Row[]) => {
     const sorted = [...rows]
       .filter(d => d && typeof d.value === 'number')
-      .sort((a, b) => b.value - a.value)
+      .sort((a, b) => a.value - b.value)
       .slice(0, 5);
     return {
       reasons: sorted.map(d => String(d.reason ?? '—')),
@@ -188,7 +188,7 @@ export default function SupersetPluginChartTop5Bars(
             color: '#C4C4C4',
             fontFamily: 'Arial, "Helvetica Neue", Helvetica, sans-serif',
             fontSize: 16,
-            fontWeight: 400,
+            fontWeight: 600,
             formatter: (p: any) => p.name,
           },
           labelLayout: (p: any) => {
