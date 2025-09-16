@@ -109,7 +109,7 @@ export default function SupersetPluginChartTop5Bars(
     const { reasons, values, max } = prepare(data as Row[]);
 
     // @ts-ignore
-    const option: echarts.EChartsOption = {
+    const option: echarts.EChartsCoreOption = {
       backgroundColor: 'transparent',
       grid: { left: 8, right: 64, top: 8, bottom: 8, containLabel: true },
 
@@ -212,28 +212,21 @@ export default function SupersetPluginChartTop5Bars(
     chart.resize({ width, height });
   };
 
-  // @ts-ignore
-  // eslint-disable-next-line consistent-return
   useEffect(() => {
-    if (chartDivRef.current) {
-      render();
-      const onResize = () => chartRef.current?.resize();
-      window.addEventListener('resize', onResize);
-      return () => {
-        window.removeEventListener('resize', onResize);
-        chartRef.current?.dispose();
-        chartRef.current = null;
-      };
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    JSON.stringify(data),
-    height,
-    width,
-    headerText,
-    boldText,
-    headerFontSize,
-  ]);
+    const el = chartDivRef.current;
+    if (!el) return undefined;
+
+    render();
+
+    const onResize = () => chartRef.current?.resize();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      chartRef.current?.dispose();
+      chartRef.current = null;
+    };
+  }, [width, height, headerText, boldText, headerFontSize, render]);
 
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return (

@@ -62,7 +62,7 @@ export default function SupersetPluginChartErgPlanFact(
       fontWeight: 700,
       fontSize: 16,
     };
-    const option: echarts.EChartsOption = {
+    const option: echarts.EChartsCoreOption = {
       backgroundColor: 'transparent',
       grid: { left: 88, right: 20, top: 90, bottom: 60 },
       xAxis: {
@@ -128,25 +128,21 @@ export default function SupersetPluginChartErgPlanFact(
   };
 
   useEffect(() => {
-    if (chartDivRef.current) {
-      render();
-      const onResize = () => chartRef.current?.resize();
-      window.addEventListener('resize', onResize);
-      return () => {
-        window.removeEventListener('resize', onResize);
-        chartRef.current?.dispose();
-        chartRef.current = null;
-      };
+    if (!chartDivRef.current) {
+      return undefined;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    width,
-    height,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    JSON.stringify(metrics),
-    formData.unitLabel,
-    formData.showBigValues,
-  ]);
+
+    render();
+
+    const onResize = () => chartRef.current?.resize();
+    window.addEventListener('resize', onResize);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      chartRef.current?.dispose();
+      chartRef.current = null;
+    };
+  }, [width, height, formData.unitLabel, formData.showBigValues, render]);
 
   if (
     !metrics ||
