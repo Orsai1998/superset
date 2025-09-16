@@ -1,5 +1,8 @@
 import { t } from '@superset-ui/core';
-import { ControlPanelConfig } from '@superset-ui/chart-controls';
+import {
+  ControlPanelConfig,
+  ControlPanelState,
+} from '@superset-ui/chart-controls';
 
 // @ts-ignore
 const config: ControlPanelConfig = {
@@ -17,9 +20,7 @@ const config: ControlPanelConfig = {
               description: t('Поле таблицы для значения «План».'),
               freeForm: true,
               default: 'plan',
-              mapStateToProps: (state: {
-                datasource?: { columns?: any[] };
-              }) => ({
+              mapStateToProps: (state: ControlPanelState) => ({
                 choices:
                   state.datasource?.columns?.map((c: any) => [
                     c.column_name,
@@ -39,9 +40,7 @@ const config: ControlPanelConfig = {
               description: t('Поле таблицы для значения «Факт».'),
               freeForm: true,
               default: 'fact',
-              mapStateToProps: (state: {
-                datasource?: { columns?: any[] };
-              }) => ({
+              mapStateToProps: (state: ControlPanelState) => ({
                 choices:
                   state.datasource?.columns?.map((c: any) => [
                     c.column_name,
@@ -84,9 +83,7 @@ const config: ControlPanelConfig = {
               default: null,
               visibility: ({ controls }) =>
                 controls?.deviationMode?.value === 'column',
-              mapStateToProps: (state: {
-                datasource?: { columns?: any[] };
-              }) => ({
+              mapStateToProps: (state: ControlPanelState) => ({
                 choices:
                   state.datasource?.columns?.map((c: any) => [
                     c.column_name,
