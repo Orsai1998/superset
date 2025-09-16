@@ -87,6 +87,7 @@ import { SupersetPluginChartProductCounter } from 'superset-plugin-chart-product
 import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS/src/plugin';
 import TimeTableChartPlugin from '../TimeTable';
 import Top5BarsPlugin from '../../../plugins/superset-plugin-chart-top5bars/src/plugin';
+import SupersetPluginChartErgPlanFact from '../../../plugins/superset-plugin-chart-erg-bars/src/plugin/index';
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -186,6 +187,9 @@ export default class MainPreset extends Preset {
         new HandlebarsChartPlugin().configure({ key: 'handlebars' }),
         new HandlebarBTSChartPlugin().configure({ key: 'handlebar_BTS' }),
         new Top5BarsPlugin().configure({ key: 'top5-bars' }).register(),
+        new SupersetPluginChartErgPlanFact().configure({
+          key: 'plan-fact-bars',
+        }),
         new EchartsBubbleChartPlugin().configure({ key: 'bubble_v2' }),
         ...experimentalPlugins,
       ],
