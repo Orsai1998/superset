@@ -5,18 +5,12 @@ import {
   getNumberFormatter,
   NumberFormats,
   QueryFormData,
+  QueryFormMetric,
 } from '@superset-ui/core';
 
-type AdhocMetric = {
-  label?: string;
-  metric_name?: string;
-  sqlExpression?: string;
-  expressionType?: string;
-  column?: any;
-};
-type MetricLike = string | AdhocMetric | undefined;
+type MetricLike = QueryFormMetric;
 
-interface ErgPlanFactFormData extends QueryFormData {
+interface ErgPlanFactFormData extends Omit<QueryFormData, 'metrics'> {
   planMetric?: MetricLike;
   factMetric?: MetricLike;
   deviationMetric?: MetricLike;
@@ -31,7 +25,8 @@ interface ErgPlanFactFormData extends QueryFormData {
   showBigValues?: boolean;
   numberFormat?: keyof typeof NumberFormats | string;
 
-  metrics?: MetricLike[];
+  // если нужно хранить массив метрик — объявляем тем же типом, что и в core
+  metrics?: QueryFormMetric[];
 }
 
 export interface ErgPlanFactTransformedProps {
@@ -46,7 +41,6 @@ export interface ErgPlanFactTransformedProps {
 const toNum = (v: unknown, fallback = 0): number => {
   if (v == null) return fallback;
   if (typeof v === 'string') {
-    // мягкая очистка строкового числа: уберём пробелы, заменим запятую на точку
     const s = v.replace(/\s/g, '').replace(',', '.');
     const n = Number(s);
     return Number.isFinite(n) ? n : fallback;
@@ -58,7 +52,7 @@ const toNum = (v: unknown, fallback = 0): number => {
 function metricKey(m?: MetricLike): string | undefined {
   if (!m) return undefined;
   if (typeof m === 'string') return m;
-  return m.label || (m as any).metric_name || getMetricLabel(m as any);
+  return (m as any).label || (m as any).metric_name || getMetricLabel(m as any);
 }
 
 function resolveKeyAgainstColnames(
@@ -66,18 +60,25 @@ function resolveKeyAgainstColnames(
   colnames?: string[],
 ): string | undefined {
   if (!key) return undefined;
-  if (colnames?.includes(key)) return key;
+  if (!colnames?.length) return key;
+  if (colnames.includes(key)) return key;
 
-  const candidates = [
+  const kNoQ = key.replace(/"/g, '');
+  const candidates = new Set([
     key,
-    key.replace(/"/g, ''),
     `"${key}"`,
+    kNoQ,
     key.toLowerCase(),
     key.toUpperCase(),
-  ];
-  const found = colnames?.find(
-    c => candidates.includes(c) || candidates.includes(c.replace(/"/g, '')),
-  );
+    kNoQ.toLowerCase(),
+    kNoQ.toUpperCase(),
+  ]);
+
+  const found = colnames.find(c => {
+    const cNoQ = c.replace(/"/g, '');
+    return candidates.has(c) || candidates.has(cNoQ);
+  });
+
   return found ?? key;
 }
 
@@ -85,10 +86,13 @@ export default function transformProps(
   chartProps: ChartProps,
 ): ErgPlanFactTransformedProps {
   const { width, height, queriesData, formData } = chartProps;
-  const fd = (formData as unknown as ErgPlanFactFormData) || {};
+  const fd = (formData as ErgPlanFactFormData) || ({} as ErgPlanFactFormData);
+
   const rows = (queriesData?.[0]?.data ?? []) as DataRecord[];
-  const colnames = (queriesData?.[0]?.colnames ?? []) as string[];
-  const row = rows[0] || ({} as DataRecord);
+  const row = rows[0] ?? ({} as DataRecord);
+  // colnames может отсутствовать — подстрахуемся
+  const colnames: string[] =
+    ((queriesData?.[0] as any)?.colnames as string[] | undefined) ?? [];
 
   const useColumns = Boolean(fd.planColumn && fd.factColumn);
 
@@ -103,9 +107,10 @@ export default function transformProps(
     if (fd.deviationMode === 'column' && fd.deviationColumn) {
       deviation = toNum(row[fd.deviationColumn], 0);
     } else {
-      deviation = plan - fact; // авто-отклонение
+      deviation = plan - fact; // авто
     }
   } else {
+    // fallback по метрикам, если оставил поддержку метрик
     const [fallback1, fallback2] = Array.isArray(fd.metrics) ? fd.metrics : [];
     const planKeyRaw = metricKey(fd.planMetric) ?? metricKey(fallback1);
     const factKeyRaw =
@@ -123,7 +128,7 @@ export default function transformProps(
     deviation =
       fd.deviationMode === 'metric'
         ? toNum(devKey ? row[devKey as keyof DataRecord] : undefined, 0)
-        : plan - fact; // авто-отклонение
+        : plan - fact;
   }
 
   const formatter = getNumberFormatter(
