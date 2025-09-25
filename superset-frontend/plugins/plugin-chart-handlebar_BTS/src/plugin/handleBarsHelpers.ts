@@ -6,13 +6,10 @@ export function registerCustomHelpers() {
     const grouped = {};
     items.forEach((item: { [x: string]: any }) => {
       const key = item[fieldName];
-      // @ts-ignore
       if (!grouped[key]) grouped[key] = [];
-      // @ts-ignore
       grouped[key].push(item);
     });
     // Return as array of objects for easier use in template
-    // @ts-ignore
     return Object.keys(grouped).map(key => ({
       group: key,
       rows: grouped[key],
@@ -218,31 +215,8 @@ export function registerCustomHelpers() {
     return new Handlebars.SafeString(url);
   });
 
-  Handlebars.registerHelper('createDashboardUrl', function (options) {
-    const dashboardId = String(options.hash.dashboard_id); // ID или slug дашборда
-    const column = String(options.hash.filter_col); // имя колонки в датасете
-    const valuesArr = toVals(options.hash.filter_col_val); // строка или массив
-    const height = options.hash.height ? String(options.hash.height) : '100%';
-    const preselectFilters = {
-      GLOBAL: {
-        [column]: valuesArr,
-      },
-    };
-
-    const base = `${
-      window.location.origin
-    }/superset/dashboard/${encodeURIComponent(dashboardId)}/`;
-    const url =
-      `${base}?standalone=1&force=1&height=${encodeURIComponent(height)}` +
-      `&preselect_filters=${encodeURIComponent(
-        JSON.stringify(preselectFilters),
-      )}`;
-
-    return new Handlebars.SafeString(url);
-  });
-
   // Helper: parse values from string/array to array of strings
-  function toValsToArray(v: any[] | null) {
+  function toValsArray(v: any[] | null) {
     if (Array.isArray(v)) return v.map(String).filter(Boolean);
     if (v == null) return [];
     // accept "11, 14,15" → ["11","14","15"]
@@ -255,7 +229,7 @@ export function registerCustomHelpers() {
   Handlebars.registerHelper('createUrlDash', function (options) {
     const target = String(options.hash.target || 'object'); // 'object' | 'dash'
     const column = String(options.hash.filter_col || '').trim();
-    const valuesArr = toValsToArray(options.hash.filter_col_val);
+    const valuesArr = toValsArray(options.hash.filter_col_val);
     const standalone =
       options.hash.standalone == null
         ? 1
@@ -388,7 +362,6 @@ export function registerCustomHelpers() {
     if (Array.isArray(value)) return value.slice(0, 3);
     if (value == null) return [];
     const s = String(value);
-    console.log(s);
     // split by comma or whitespace, trim, dedupe, cap 3
     const arr = s
       .split(/[,\s]+/)
