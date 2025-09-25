@@ -6,10 +6,13 @@ export function registerCustomHelpers() {
     const grouped = {};
     items.forEach((item: { [x: string]: any }) => {
       const key = item[fieldName];
+      // @ts-ignore
       if (!grouped[key]) grouped[key] = [];
+      // @ts-ignore
       grouped[key].push(item);
     });
     // Return as array of objects for easier use in template
+    // @ts-ignore
     return Object.keys(grouped).map(key => ({
       group: key,
       rows: grouped[key],
@@ -213,5 +216,193 @@ export function registerCustomHelpers() {
     // + `&form_data=${encodeURIComponent(JSON.stringify(formData))}`;
 
     return new Handlebars.SafeString(url);
+  });
+
+  Handlebars.registerHelper('createDashboardUrl', function (options) {
+    const dashboardId = String(options.hash.dashboard_id); // ID или slug дашборда
+    const column = String(options.hash.filter_col); // имя колонки в датасете
+    const valuesArr = toVals(options.hash.filter_col_val); // строка или массив
+    const height = options.hash.height ? String(options.hash.height) : '100%';
+    const preselectFilters = {
+      GLOBAL: {
+        [column]: valuesArr,
+      },
+    };
+
+    const base = `${
+      window.location.origin
+    }/superset/dashboard/${encodeURIComponent(dashboardId)}/`;
+    const url =
+      `${base}?standalone=1&force=1&height=${encodeURIComponent(height)}` +
+      `&preselect_filters=${encodeURIComponent(
+        JSON.stringify(preselectFilters),
+      )}`;
+
+    return new Handlebars.SafeString(url);
+  });
+
+  // Helper: parse values from string/array to array of strings
+  function toValsToArray(v: any[] | null) {
+    if (Array.isArray(v)) return v.map(String).filter(Boolean);
+    if (v == null) return [];
+    // accept "11, 14,15" → ["11","14","15"]
+    return String(v)
+      .split(',')
+      .map(s => s.trim())
+      .filter(Boolean);
+  }
+
+  Handlebars.registerHelper('createUrlDash', function (options) {
+    const target = String(options.hash.target || 'object'); // 'object' | 'dash'
+    const column = String(options.hash.filter_col || '').trim();
+    const valuesArr = toValsToArray(options.hash.filter_col_val);
+    const standalone =
+      options.hash.standalone == null
+        ? 1
+        : Number(Boolean(options.hash.standalone));
+    const height = options.hash.height ? String(options.hash.height) : '100%';
+
+    if (!column || valuesArr.length === 0) {
+      return '';
+    }
+
+    const { origin } = window.location;
+    let url = '';
+
+    if (target === 'dash') {
+      // Dashboard URL
+      const dashId = String(options.hash.dash_id || '').trim(); // numeric id or slug
+      if (!dashId) return '';
+      const base = `${origin}/superset/dashboard/${encodeURIComponent(
+        dashId,
+      )}/`;
+      // join multi-values with comma: ?prod=11,14,15
+      const valParam = valuesArr.map(encodeURIComponent).join(',');
+      url =
+        `${base}?standalone=${standalone}` +
+        `&${encodeURIComponent(column)}=${valParam}`;
+    } else {
+      // Chart Explore URL (object)
+      const sliceId = String(options.hash.slice_id || '').trim();
+      if (!sliceId) return '';
+      const base = `${origin}/superset/explore/`;
+      const valParam = valuesArr.map(encodeURIComponent).join(',');
+      url =
+        `${base}?slice_id=${encodeURIComponent(sliceId)}` +
+        `&standalone=${standalone}&force=1&height=${encodeURIComponent(
+          height,
+        )}` +
+        `&${encodeURIComponent(column)}=${valParam}`;
+    }
+
+    return new Handlebars.SafeString(url);
+  });
+
+  Handlebars.registerHelper('origin', () =>
+    typeof window !== 'undefined' ? window.location.origin : '',
+  );
+  Handlebars.registerHelper('thisIsDash', function (value) {
+    return value === '-';
+  });
+  Handlebars.registerHelper('notEq', function (a, b) {
+    return a !== b;
+  });
+  Handlebars.registerHelper('eq', function (a, b) {
+    return a === b;
+  });
+  Handlebars.registerHelper('parseDayQL', function (day, divisionClass) {
+    if (!day) return [];
+
+    const typeMap = {
+      БП: 'bp',
+      ОП: 'op',
+      ПС: 'ps',
+      П: 'ps',
+      Ф: 'f',
+    };
+
+    const divClass = typeof divisionClass === 'string' ? divisionClass : '';
+    const results = [];
+
+    // Normalize line endings, handle stray carriage returns (\r)
+    const lines = day
+      .replace(/\r/g, '')
+      .split(/\n/)
+      .filter(line => line.trim() !== '');
+
+    // Regex patterns
+    const arrowRegex = /^(▲|▼)-?\d+%$/;
+    const valueRegex = /^(БП|ОП|ПС|П|Ф):(.+)$/;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      // Arrow line (e.g. ▼-1%)
+      if (arrowRegex.test(trimmed)) {
+        const symbol = trimmed.charAt(0); // '▲' or '▼'
+        const direction = symbol === '▲' ? 'up' : 'down';
+        const percent = trimmed.slice(1); // e.g. "-1%"
+
+        results.push({
+          type: 'arrow',
+          label: '',
+          value: trimmed,
+          arrowSymbol: symbol,
+          arrowDirection: direction,
+          arrowValue: percent,
+          divisionClass: 'arrow',
+        });
+        continue;
+      }
+
+      // Value line like "П:71 - 100" or "Ф:69,94"
+      const match = trimmed.match(valueRegex);
+      if (match) {
+        const [_, label, rawValue] = match;
+        const type = typeMap[label] || '';
+        const value = `${label}:${rawValue.trim()}`;
+
+        results.push({
+          type,
+          label,
+          value,
+          change: null,
+          divisionClass: divClass ? `${divClass}-${type}` : type,
+        });
+        continue;
+      }
+
+      // Unknown or free text line (optional)
+      results.push({
+        type: 'text',
+        label: '',
+        value: trimmed,
+        change: null,
+        divisionClass: divClass ? `${divClass}-text` : 'text',
+      });
+    }
+
+    return results;
+  });
+  Handlebars.registerHelper('splitProds', function (value) {
+    if (Array.isArray(value)) return value.slice(0, 3);
+    if (value == null) return [];
+    const s = String(value);
+    console.log(s);
+    // split by comma or whitespace, trim, dedupe, cap 3
+    const arr = s
+      .split(/[,\s]+/)
+      .map(v => v.trim())
+      .filter(Boolean);
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const v of arr) {
+      if (!seen.has(v)) {
+        out.push(v);
+        seen.add(v);
+      }
+      if (out.length >= 8) break;
+    }
+    return out;
   });
 }
