@@ -43,6 +43,7 @@ export default function SupersetPluginChartErgPlanFact(
   const chartDivRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<echarts.EChartsType | null>(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const render = () => {
     const el = chartDivRef.current!;
     if (!chartRef.current) {
