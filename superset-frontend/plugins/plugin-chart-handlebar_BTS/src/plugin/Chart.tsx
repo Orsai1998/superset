@@ -37,24 +37,6 @@ const normalizePeriod = (v: string | null): Period => {
   }
 };
 // --- helpers -------------------------------
-function primeCollapsedFiltersFor(dashIds: string[]) {
-  try {
-    // global defaults
-    localStorage.setItem('DASHBOARD_FILTER_BAR_COLLAPSED', 'true');
-    localStorage.setItem('DASHBOARD_FILTERS_OPEN', 'false');
-    localStorage.setItem('NATIVE_FILTERS_PANEL_OPEN', 'false');
-    localStorage.setItem('NATIVE_FILTERS_COLLAPSED', 'true');
-    // per-dashboard keys
-    dashIds.forEach(id => {
-      const did = String(id).trim();
-      if (!did) return;
-      localStorage.setItem(`DASHBOARD_FILTER_BAR_COLLAPSED__${did}`, 'true');
-      localStorage.setItem(`DASHBOARD_FILTERS_OPEN__${did}`, 'false');
-      localStorage.setItem(`NATIVE_FILTERS_PANEL_OPEN__${did}`, 'false');
-      localStorage.setItem(`NATIVE_FILTERS_COLLAPSED__${did}`, 'true');
-    });
-  } catch {}
-}
 
 function addFilterFlags(url: string, show: '0' | '1' = '0') {
   const u = new URL(url, window.location.origin);
@@ -72,34 +54,55 @@ function extractDashIdFromHref(href: string): string | null {
 // -------------------------------------------------------------------------
 
 // Build URL that auto-applies a Native Filter (no button press)
-function buildDashWithAppliedFilterUrl(
+/**
+ * Build URL that auto-applies a Native Filter (no button press)
+ * and forwards optional standalone + show_filters query params.
+ */
+export function buildDashWithAppliedFilterUrl(
   dashboardId: number | string,
-  nativeFilterIdRaw: string,                      // short id from JSON (no "NATIVE_FILTER-" prefix)
-  value: string | number | (string | number)[],
-  opts?: { showFilters?: '1' | '0' }              // optional: left panel state
-) {
-  const shortId = nativeFilterIdRaw.replace(/^NATIVE_FILTER-/, '');
-  const esc = (s: any) => String(s).replace(/'/g, "\\'");
-  const list = Array.isArray(value) ? value : [value];
+  nativeFilterIdRaw: string,                                   // short или full
+  values: string | number | (string | number)[],
+  opts?: {
+    showFilters?: '0' | '1';                                   // скрыть/показать левую панель
+    standalone?: string | number;                              // прокидываем как есть (например 3)
+  },
+): string {
+  // --- id: short/full ---
+  const shortId = String(nativeFilterIdRaw).replace(/^NATIVE_FILTER-/, '');
+  const fullId  = `NATIVE_FILTER-${shortId}`;
+
+  // --- values -> массив строк ---
+  const list = Array.isArray(values)
+    ? values
+    : (typeof values === 'string' && values.includes(','))
+      ? values.split(',').map(s => s.trim()).filter(Boolean)
+      : [values];
+
+  const esc = (v: unknown) => String(v).replace(/'/g, "\\'");
   const risonList = `!(${list.map(v => `'${esc(v)}'`).join(',')})`;
 
-  // data_mask: applied + current states match -> Apply button not active
+  // --- data_mask: current == applied ---
   const dataMask =
-    `(${`NATIVE_FILTER-${shortId}`}:(` +
-      `filterState:(value:${risonList}),` +
-      `ownState:(),` +
-      `extraFormData:(),` +
-      `applied:(state:(value:${risonList}),extraFormData:())` +
-    `))`;
+    `(${fullId}:(filterState:(value:${risonList}),ownState:(),extraFormData:(),` +
+      `applied:(state:(value:${risonList}),extraFormData:())))`;
 
+  // --- native_filters: синхронизация UI ---
+  const nativeFilters =
+    `(${fullId}:(filterState:(value:${risonList}),id:${fullId},ownState:()))`;
+
+  // --- query params ---
   const params = new URLSearchParams();
   params.set('data_mask', dataMask);
-  // (Optional) also set native_filters so the UI control shows the same value
-  const nativeFilters =
-    `(${`NATIVE_FILTER-${shortId}`}:(filterState:(value:${risonList}),id:NATIVE_FILTER-${shortId},ownState:()))`;
   params.set('native_filters', nativeFilters);
 
-  if (opts?.showFilters) params.set('expand_filters', opts.showFilters);
+  if (opts?.showFilters === '0' || opts?.showFilters === '1') {
+    params.set('expand_filters', opts.showFilters);
+  }
+
+  if (opts?.standalone !== undefined && opts?.standalone !== null) {
+    const standalone = String(opts.standalone).trim();
+    if (standalone) params.set('standalone', standalone);      // будет ровно ?standalone=3
+  }
 
   return `/superset/dashboard/${dashboardId}/?${params.toString()}`;
 }
@@ -182,8 +185,7 @@ const dashIds = anchors
   .map(a => extractDashIdFromHref(a.getAttribute('href') || ''))
   .filter((v): v is string => Boolean(v));
 
-// 3) prime localStorage so a plain click opens with the filter bar CLOSED
-primeCollapsedFiltersFor(dashIds);
+
 
 // 4) also add URL flags (belt & suspenders)
 anchors.forEach(a => {
@@ -195,17 +197,49 @@ anchors.forEach(a => {
 });
 
 
-// === NEW: dashurl=== 
-      const dashLinks = root.querySelectorAll<HTMLAnchorElement>('a[data-open-dashboard]');
-      dashLinks.forEach(a => {
-      const did  = a.getAttribute('data-open-dashboard')!;
-      const nfId = (a.getAttribute('data-nf-id') || '').replace(/^NATIVE_FILTER-/, '');
-      const raw  = (a.getAttribute('data-val') || '').trim();
-      const vals = raw.includes(',') ? raw.split(',').map(s => s.trim()) : [raw];
-      const show = (a.getAttribute('data-show-filters') || '') as '1' | '0' | '';
-      a.href = buildDashWithAppliedFilterUrl(did, nfId, vals, { showFilters: show || undefined });
-      if (!a.hasAttribute('target')) a.target = '_blank';
-      });
+// --- NEW: dashUrl ---
+const dashLinks = root.querySelectorAll<HTMLAnchorElement>('a[data-open-dashboard]');
+dashLinks.forEach(a => {
+  const didAttr = (a.getAttribute('data-open-dashboard') || '').trim();
+  if (!didAttr) return;
+
+  // native filter id (short или full) → short
+  const nfIdRaw = (a.getAttribute('data-nf-id') || '').trim();
+  const nfId    = nfIdRaw.replace(/^NATIVE_FILTER-/, '');
+
+  // значения (поддержка CSV)
+  const raw  = (a.getAttribute('data-val') || '').trim();
+  const vals = raw
+    ? (raw.includes(',')
+        ? raw.split(',').map(s => s.trim()).filter(Boolean)
+        : [raw])
+    : [];
+
+  // show_filters: нужно явно передать '0' или '1', иначе Superset возьмёт дефолт
+  const showAttr = (a.getAttribute('data-show-filters') || '').trim(); // '0' | '1' | ''
+  const showFilters = (showAttr === '0' || showAttr === '1') ? (showAttr as '0' | '1') : undefined;
+
+  // standalone: прокидываем строкой без Boolean/Number (чтобы '3' не стало 1)
+  const stAttr = (a.getAttribute('data-standalone') || '').trim();
+  const standalone = stAttr !== '' ? stAttr : undefined;
+
+  if (nfId && vals.length) {
+    // URL c авто-применением Native Filter + опции
+    a.href = buildDashWithAppliedFilterUrl(didAttr, nfId, vals, {
+      showFilters,
+      standalone,
+    });
+  } else {
+    
+    const qs = new URLSearchParams();
+    if (vals.length) qs.set('prod', vals.join(','));            // если используете url_param('prod')
+    if (showFilters) qs.set('expand_filters', showFilters);
+    if (standalone)  qs.set('standalone', standalone);
+    a.href = `/superset/dashboard/${encodeURIComponent(didAttr)}/${qs.toString() ? `?${qs.toString()}` : ''}`;
+  }
+
+  if (!a.hasAttribute('target')) a.target = '_blank';
+});
 
 
 // === NEW: realize <div.auto-iframe data-src="..."> to real <iframe> ===

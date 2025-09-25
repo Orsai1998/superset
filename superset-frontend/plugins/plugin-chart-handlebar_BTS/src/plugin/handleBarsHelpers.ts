@@ -229,7 +229,7 @@ Handlebars.registerHelper('createUrlDash', function (options) {
   const target = String(options.hash.target || 'object'); // 'object' | 'dash'
   const column = String(options.hash.filter_col || '').trim();
   const valuesArr = toVals(options.hash.filter_col_val);
-  const standalone = options.hash.standalone == null ? 1 : Number(Boolean(options.hash.standalone));
+  const standalone = options.hash.standalone == null ? 1 : String(options.hash.standalone).trim();
   const height = options.hash.height ? String(options.hash.height) : '100%';
 
   if (!column || valuesArr.length === 0) {
