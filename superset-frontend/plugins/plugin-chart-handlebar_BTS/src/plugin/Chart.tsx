@@ -220,61 +220,61 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     };
     // === NEW: realize DASH <div.auto-iframe data-src="..."> to real <iframe> ===
     // ---------------------------------------------------------------------
-    const realizeAutoDashIframes = () => {
-      const slots = root.querySelectorAll<HTMLElement>(
-        '.auto-dash[data-base][data-dash]',
-      );
-      slots.forEach(slot => {
-        if (slot.dataset.realized === '1') return;
-
-        const base = slot.dataset.base!;
-        const dash = slot.dataset.dash!; // id or slug
-        const height = slot.dataset.height || '60vh';
-
-        // Optional JSON for query params (e.g., {"show_filters":"0","r":"last 7 days"})
-        let query: Record<string, string> = {};
-        const paramsJson = slot.dataset.params;
-        if (paramsJson) {
-          try {
-            query = JSON.parse(paramsJson);
-          } catch {
-            // ignore bad JSON
-          }
-        }
-
-        // Optional dynamic product filters via data-* (you can name them how you want)
-        // Example: data-filter_prod="WidgetA" -> ?filter_prod=WidgetA
-        // This keeps things generic (your dashboard can read URL params via Jinja/native filters mapping).
-        for (const { name, value } of Array.from(slot.attributes)) {
-          if (name.startsWith('data-filter_')) {
-            const key = name.replace(/^data-filter_/, '');
-            query[key] = value;
-          }
-        }
-
-        const src = buildDashboardUrl({
-          baseUrl: base,
-          dashboardIdOrSlug: dash,
-          query,
-        });
-
-        const iframe = document.createElement('iframe');
-        iframe.src = src;
-        iframe.title = slot.dataset.title || 'Dashboard';
-        Object.assign(iframe.style, {
-          width: '100%',
-          height,
-          border: 'none',
-          display: 'block',
-        } as CSSStyleDeclaration);
-
-        // eslint-disable-next-line no-param-reassign
-        slot.innerHTML = '';
-        slot.appendChild(iframe);
-        // eslint-disable-next-line no-param-reassign
-        slot.dataset.realized = '1';
-      });
-    };
+    // const realizeAutoDashIframes = () => {
+    //   const slots = root.querySelectorAll<HTMLElement>(
+    //     '.auto-dash[data-base][data-dash]',
+    //   );
+    //   slots.forEach(slot => {
+    //     if (slot.dataset.realized === '1') return;
+    //
+    //     const base = slot.dataset.base!;
+    //     const dash = slot.dataset.dash!; // id or slug
+    //     const height = slot.dataset.height || '60vh';
+    //
+    //     // Optional JSON for query params (e.g., {"show_filters":"0","r":"last 7 days"})
+    //     let query: Record<string, string> = {};
+    //     const paramsJson = slot.dataset.params;
+    //     if (paramsJson) {
+    //       try {
+    //         query = JSON.parse(paramsJson);
+    //       } catch {
+    //         // ignore bad JSON
+    //       }
+    //     }
+    //
+    //     // Optional dynamic product filters via data-* (you can name them how you want)
+    //     // Example: data-filter_prod="WidgetA" -> ?filter_prod=WidgetA
+    //     // This keeps things generic (your dashboard can read URL params via Jinja/native filters mapping).
+    //     for (const { name, value } of Array.from(slot.attributes)) {
+    //       if (name.startsWith('data-filter_')) {
+    //         const key = name.replace(/^data-filter_/, '');
+    //         query[key] = value;
+    //       }
+    //     }
+    //
+    //     const src = buildDashboardUrl({
+    //       baseUrl: base,
+    //       dashboardIdOrSlug: dash,
+    //       query,
+    //     });
+    //
+    //     const iframe = document.createElement('iframe');
+    //     iframe.src = src;
+    //     iframe.title = slot.dataset.title || 'Dashboard';
+    //     Object.assign(iframe.style, {
+    //       width: '100%',
+    //       height,
+    //       border: 'none',
+    //       display: 'block',
+    //     } as CSSStyleDeclaration);
+    //
+    //     // eslint-disable-next-line no-param-reassign
+    //     slot.innerHTML = '';
+    //     slot.appendChild(iframe);
+    //     // eslint-disable-next-line no-param-reassign
+    //     slot.dataset.realized = '1';
+    //   });
+    // };
 
     // ---- State kept across clicks (not React state) ------------------------
     // We keep the current period in both DOM (data-period) and a ref variable,
