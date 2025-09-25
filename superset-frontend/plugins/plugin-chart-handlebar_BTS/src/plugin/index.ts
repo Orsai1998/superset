@@ -24,7 +24,7 @@ import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
 import { registerCustomHelpers } from './handleBarsHelpers';
-import HandlebarsChart from './Chart'; 
+import HandlebarsChart from './Chart';
 
 registerCustomHelpers();
 
@@ -48,11 +48,12 @@ export default class HandlebarBTSChartPlugin extends ChartPlugin {
     });
 
     super({
-	  key:'handlebar_BTS',
+      // @ts-ignore
+      key: 'handlebar_BTS',
       buildQuery,
       controlPanel,
-      //loadChart: () => import('../Handlebars'),
-      loadChart: () =>Promise.resolve(HandlebarsChart),
+      // loadChart: () => import('../Handlebars'),
+      loadChart: () => Promise.resolve(HandlebarsChart),
       metadata,
       transformProps,
     });
