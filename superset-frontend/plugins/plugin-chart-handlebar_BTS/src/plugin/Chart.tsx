@@ -69,32 +69,32 @@ function buildDashWithAppliedFilterUrl(
   return `/superset/dashboard/${dashboardId}/?${params.toString()}`;
 }
 
-function buildDashboardUrl(opts: {
-  baseUrl: string; // e.g. https://superset.mycorp.local
-  dashboardIdOrSlug: string; // numeric id or slug
-  query?: Record<string, string>; // optional query params
-}) {
-  const { baseUrl, dashboardIdOrSlug, query = {} } = opts;
-
-  // Common useful params:
-  // standalone=3   -> hide chrome
-  // show_filters=0 -> hide native filter bar (optional)
-  const q = new URLSearchParams({
-    standalone: '3',
-    ...query,
-  });
-
-  // Prefer slug route if you have one; id also works
-  // /superset/dashboard/<slug>/
-  // /superset/dashboard/<id>/
-  const u = new URL(
-    `/superset/dashboard/${encodeURIComponent(
-      dashboardIdOrSlug,
-    )}/?${q.toString()}`,
-    baseUrl,
-  );
-  return u.toString();
-}
+// function buildDashboardUrl(opts: {
+//   baseUrl: string; // e.g. https://superset.mycorp.local
+//   dashboardIdOrSlug: string; // numeric id or slug
+//   query?: Record<string, string>; // optional query params
+// }) {
+//   const { baseUrl, dashboardIdOrSlug, query = {} } = opts;
+//
+//   // Common useful params:
+//   // standalone=3   -> hide chrome
+//   // show_filters=0 -> hide native filter bar (optional)
+//   const q = new URLSearchParams({
+//     standalone: '3',
+//     ...query,
+//   });
+//
+//   // Prefer slug route if you have one; id also works
+//   // /superset/dashboard/<slug>/
+//   // /superset/dashboard/<id>/
+//   const u = new URL(
+//     `/superset/dashboard/${encodeURIComponent(
+//       dashboardIdOrSlug,
+//     )}/?${q.toString()}`,
+//     baseUrl,
+//   );
+//   return u.toString();
+// }
 
 // Helper to show/hide table cells by period
 const setCellsDisplay = (els: NodeListOf<HTMLElement>, on: boolean) => {
@@ -161,6 +161,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       a.href = buildDashWithAppliedFilterUrl(did, nfId, vals, {
         showFilters: show || undefined,
       });
+      // eslint-disable-next-line no-param-reassign
       if (!a.hasAttribute('target')) a.target = '_blank';
     });
 
@@ -186,7 +187,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         const iframe = document.createElement('iframe');
         iframe.src = src;
         iframe.title = slot.dataset.title || `Embedded-${i}`;
-        //iframe.loading = 'eager'; // don’t defer
+        // iframe.loading = 'eager'; // don’t defer
         Object.assign(iframe.style, {
           width: '100%',
           height,
@@ -496,6 +497,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
                 top: 8,
                 right: 8,
                 border: 'none',
+                // eslint-disable-next-line theme-colors/no-literal-colors
                 background: '#333',
                 lineHeight: '25px',
                 cursor: 'pointer',
