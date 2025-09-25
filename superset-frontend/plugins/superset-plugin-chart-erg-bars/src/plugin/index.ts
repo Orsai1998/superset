@@ -22,7 +22,7 @@ export default class SupersetPluginChartErgPlanFact extends ChartPlugin {
       controlPanel,
       transformProps,
       loadChart: () =>
-        import('../SupersetPluginChartTop5Bars').then(m => m.default),
+        import('../SupersetPluginChartErgPlanFact').then(m => m.default),
       metadata,
     });
   }
