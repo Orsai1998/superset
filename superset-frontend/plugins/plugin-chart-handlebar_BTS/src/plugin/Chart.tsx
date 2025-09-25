@@ -186,7 +186,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         const iframe = document.createElement('iframe');
         iframe.src = src;
         iframe.title = slot.dataset.title || `Embedded-${i}`;
-        // iframe.loading = 'eager'; // don’t defer
+        //iframe.loading = 'eager'; // don’t defer
         Object.assign(iframe.style, {
           width: '100%',
           height,
@@ -484,7 +484,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
                 width: '100%',
                 height: '100%',
                 border: 'none',
-                padding: '50px',
+                padding: '10px',
               }}
               title="Preview"
             />
@@ -496,7 +496,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
                 top: 8,
                 right: 8,
                 border: 'none',
-                background: 'transparent',
+                background: '#333',
                 lineHeight: '25px',
                 cursor: 'pointer',
                 fontSize: '25px',
