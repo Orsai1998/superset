@@ -233,7 +233,7 @@ export function registerCustomHelpers() {
     const standalone =
       options.hash.standalone == null
         ? 1
-        : Number(Boolean(options.hash.standalone));
+        : String(options.hash.standalone).trim();
     const height = options.hash.height ? String(options.hash.height) : '100%';
 
     if (!column || valuesArr.length === 0) {
