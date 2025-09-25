@@ -1,7 +1,7 @@
 {
-  "name": "superset-plugin-chart-top5bars",
+  "name": "superset-plugin-chart-erg-bars",
   "version": "0.1.0",
-  "description": "Superset Plugin Chart Top 5 Bars",
+  "description": "Superset Plugin",
   "sideEffects": false,
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -21,7 +21,7 @@
     "ts-types": "tsc --build",
     "test": "jest"
   },
-  "author": "My Name",
+  "author": "Kuanysh Orsayev",
   "license": "Apache-2.0",
   "publishConfig": {
     "access": "public"

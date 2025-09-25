@@ -1,4 +1,4 @@
-# superset-plugin-chart-top5bars
+# superset-plugin-chart-erg-bars
 
 This is the Superset Plugin Chart Top 5 Bars Superset Chart Plugin.
 
