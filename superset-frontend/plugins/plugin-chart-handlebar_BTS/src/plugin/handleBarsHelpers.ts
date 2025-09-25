@@ -328,7 +328,7 @@ export function registerCustomHelpers() {
     const lines = day
       .replace(/\r/g, '')
       .split(/\n/)
-      .filter(line => line.trim() !== '');
+      .filter((line: string) => line.trim() !== '');
 
     // Regex patterns
     const arrowRegex = /^(▲|▼)-?\d+%$/;
