@@ -36,6 +36,40 @@ const normalizePeriod = (v: string | null): Period => {
       return 'day';
   }
 };
+// --- helpers -------------------------------
+function primeCollapsedFiltersFor(dashIds: string[]) {
+  try {
+    // global defaults
+    localStorage.setItem('DASHBOARD_FILTER_BAR_COLLAPSED', 'true');
+    localStorage.setItem('DASHBOARD_FILTERS_OPEN', 'false');
+    localStorage.setItem('NATIVE_FILTERS_PANEL_OPEN', 'false');
+    localStorage.setItem('NATIVE_FILTERS_COLLAPSED', 'true');
+    // per-dashboard keys
+    dashIds.forEach(id => {
+      const did = String(id).trim();
+      if (!did) return;
+      localStorage.setItem(`DASHBOARD_FILTER_BAR_COLLAPSED__${did}`, 'true');
+      localStorage.setItem(`DASHBOARD_FILTERS_OPEN__${did}`, 'false');
+      localStorage.setItem(`NATIVE_FILTERS_PANEL_OPEN__${did}`, 'false');
+      localStorage.setItem(`NATIVE_FILTERS_COLLAPSED__${did}`, 'true');
+    });
+  } catch {}
+}
+
+function addFilterFlags(url: string, show: '0' | '1' = '0') {
+  const u = new URL(url, window.location.origin);
+  // don’t double-add
+  if (!u.searchParams.has('show_filters')) u.searchParams.set('expand_filters', show);
+  if (!u.searchParams.has('show_native_filters')) u.searchParams.set('show_native_filters', show);
+  return u.pathname + '?' + u.searchParams.toString();
+}
+
+function extractDashIdFromHref(href: string): string | null {
+  // matches /superset/dashboard/<id-or-slug>[/ or ?]
+  const m = href.match(/\/superset\/dashboard\/([^/?#]+)[/?#]?/i);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+// -------------------------------------------------------------------------
 
 // Build URL that auto-applies a Native Filter (no button press)
 function buildDashWithAppliedFilterUrl(
@@ -65,7 +99,7 @@ function buildDashWithAppliedFilterUrl(
     `(${`NATIVE_FILTER-${shortId}`}:(filterState:(value:${risonList}),id:NATIVE_FILTER-${shortId},ownState:()))`;
   params.set('native_filters', nativeFilters);
 
-  if (opts?.showFilters) params.set('show_filters', opts.showFilters);
+  if (opts?.showFilters) params.set('expand_filters', opts.showFilters);
 
   return `/superset/dashboard/${dashboardId}/?${params.toString()}`;
 }
@@ -136,6 +170,31 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       root.prepend(styleTag);
     }
 
+// === NEW: dashurl with collapsed  filter===
+
+// 1) find anchors like your screenshot
+const anchors = Array.from(
+  root.querySelectorAll<HTMLAnchorElement>('a.open-modal[href*="/superset/dashboard/"]')
+);
+
+// 2) collect dash ids from hrefs
+const dashIds = anchors
+  .map(a => extractDashIdFromHref(a.getAttribute('href') || ''))
+  .filter((v): v is string => Boolean(v));
+
+// 3) prime localStorage so a plain click opens with the filter bar CLOSED
+primeCollapsedFiltersFor(dashIds);
+
+// 4) also add URL flags (belt & suspenders)
+anchors.forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (!href) return;
+  // default closed; if you ever need open for a single link, add data-show-filters="1"
+  const show = (a.getAttribute('data-show-filters') || '0') === '1' ? '1' : '0';
+  a.setAttribute('href', addFilterFlags(href, show));
+});
+
+
 // === NEW: dashurl=== 
       const dashLinks = root.querySelectorAll<HTMLAnchorElement>('a[data-open-dashboard]');
       dashLinks.forEach(a => {
@@ -197,7 +256,7 @@ const realizeAutoIframes = () => {
     const dash = slot.dataset.dash!; // id or slug
     const height = slot.dataset.height || '60vh';
 
-    // Optional JSON for query params (e.g., {"show_filters":"0","r":"last 7 days"})
+    // Optional JSON for query params (e.g., {"expand_filters":"0","r":"last 7 days"})
     let query: Record<string, string> = {};
     const paramsJson = slot.dataset.params;
     if (paramsJson) {

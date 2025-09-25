@@ -352,7 +352,7 @@ Handlebars.registerHelper('splitProds', function (value) {
   if (Array.isArray(value)) return value.slice(0, 3);
   if (value == null) return [];
   const s = String(value);
-  console.log(s);
+  //console.log(s);
   // split by comma or whitespace, trim, dedupe, cap 3
   const arr = s
     .split(/[,\s]+/)
