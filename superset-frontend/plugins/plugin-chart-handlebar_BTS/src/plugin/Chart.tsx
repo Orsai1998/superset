@@ -37,6 +37,65 @@ const normalizePeriod = (v: string | null): Period => {
   }
 };
 
+// Build URL that auto-applies a Native Filter (no button press)
+function buildDashWithAppliedFilterUrl(
+  dashboardId: number | string,
+  nativeFilterIdRaw: string, // short id from JSON (no "NATIVE_FILTER-" prefix)
+  value: string | number | (string | number)[],
+  opts?: { showFilters?: '1' | '0' }, // optional: left panel state
+) {
+  const shortId = nativeFilterIdRaw.replace(/^NATIVE_FILTER-/, '');
+  const esc = (s: any) => String(s).replace(/'/g, "\\'");
+  const list = Array.isArray(value) ? value : [value];
+  const risonList = `!(${list.map(v => `'${esc(v)}'`).join(',')})`;
+
+  // data_mask: applied + current states match -> Apply button not active
+  const dataMask =
+    `(${`NATIVE_FILTER-${shortId}`}:(` +
+    `filterState:(value:${risonList}),` +
+    `ownState:(),` +
+    `extraFormData:(),` +
+    `applied:(state:(value:${risonList}),extraFormData:())` +
+    `))`;
+
+  const params = new URLSearchParams();
+  params.set('data_mask', dataMask);
+  // (Optional) also set native_filters so the UI control shows the same value
+  const nativeFilters = `(${`NATIVE_FILTER-${shortId}`}:(filterState:(value:${risonList}),id:NATIVE_FILTER-${shortId},ownState:()))`;
+  params.set('native_filters', nativeFilters);
+
+  if (opts?.showFilters) params.set('show_filters', opts.showFilters);
+
+  return `/superset/dashboard/${dashboardId}/?${params.toString()}`;
+}
+
+function buildDashboardUrl(opts: {
+  baseUrl: string; // e.g. https://superset.mycorp.local
+  dashboardIdOrSlug: string; // numeric id or slug
+  query?: Record<string, string>; // optional query params
+}) {
+  const { baseUrl, dashboardIdOrSlug, query = {} } = opts;
+
+  // Common useful params:
+  // standalone=3   -> hide chrome
+  // show_filters=0 -> hide native filter bar (optional)
+  const q = new URLSearchParams({
+    standalone: '3',
+    ...query,
+  });
+
+  // Prefer slug route if you have one; id also works
+  // /superset/dashboard/<slug>/
+  // /superset/dashboard/<id>/
+  const u = new URL(
+    `/superset/dashboard/${encodeURIComponent(
+      dashboardIdOrSlug,
+    )}/?${q.toString()}`,
+    baseUrl,
+  );
+  return u.toString();
+}
+
 // Helper to show/hide table cells by period
 const setCellsDisplay = (els: NodeListOf<HTMLElement>, on: boolean) => {
   // eslint-disable-next-line no-return-assign,no-param-reassign
@@ -61,6 +120,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     if (!root) return;
 
     if (!template) {
+      console.warn('HandlebarsChart: template is empty');
       root.innerHTML = '';
       return;
     }
@@ -78,6 +138,143 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       styleTag.appendChild(document.createTextNode(userStyles));
       root.prepend(styleTag);
     }
+
+    // === NEW: dashurl===
+    const dashLinks = root.querySelectorAll<HTMLAnchorElement>(
+      'a[data-open-dashboard]',
+    );
+    dashLinks.forEach(a => {
+      const did = a.getAttribute('data-open-dashboard')!;
+      const nfId = (a.getAttribute('data-nf-id') || '').replace(
+        /^NATIVE_FILTER-/,
+        '',
+      );
+      const raw = (a.getAttribute('data-val') || '').trim();
+      const vals = raw.includes(',')
+        ? raw.split(',').map(s => s.trim())
+        : [raw];
+      const show = (a.getAttribute('data-show-filters') || '') as
+        | '1'
+        | '0'
+        | '';
+      // eslint-disable-next-line no-param-reassign
+      a.href = buildDashWithAppliedFilterUrl(did, nfId, vals, {
+        showFilters: show || undefined,
+      });
+      if (!a.hasAttribute('target')) a.target = '_blank';
+    });
+
+    // === NEW: realize <div.auto-iframe data-src="..."> to real <iframe> ===
+    const realizeAutoIframes = () => {
+      const slots = Array.from(
+        root.querySelectorAll<HTMLElement>('.auto-iframe[data-src]'),
+      );
+      let i = 0;
+
+      // @ts-ignore
+      const loadNext = () => {
+        if (i >= slots.length) return;
+        // eslint-disable-next-line no-plusplus
+        const slot = slots[i++];
+        // eslint-disable-next-line consistent-return
+        if (slot.dataset.realized === '1') return loadNext();
+
+        const src = slot.dataset.src!;
+        const height = slot.dataset.height || '33vh';
+        const padding = slot.dataset.padding || '0';
+
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = slot.dataset.title || `Embedded-${i}`;
+        //iframe.loading = 'eager'; // don’t defer
+        Object.assign(iframe.style, {
+          width: '100%',
+          height,
+          border: 'none',
+          display: 'block',
+          background: 'transparent',
+        });
+
+        // timeout + retry once
+        const t = window.setTimeout(() => {
+          iframe.src = src; // retry same URL once
+        }, 30000);
+
+        iframe.addEventListener('load', () => {
+          clearTimeout(t);
+          loadNext();
+        });
+        iframe.addEventListener('error', () => {
+          clearTimeout(t);
+          loadNext();
+        });
+
+        slot.innerHTML = '';
+        slot.style.padding = padding;
+        slot.appendChild(iframe);
+        slot.dataset.realized = '1';
+      };
+
+      // Start with a small stagger to let the page settle
+      setTimeout(loadNext, 50);
+    };
+    // === NEW: realize DASH <div.auto-iframe data-src="..."> to real <iframe> ===
+    // ---------------------------------------------------------------------
+    const realizeAutoDashIframes = () => {
+      const slots = root.querySelectorAll<HTMLElement>(
+        '.auto-dash[data-base][data-dash]',
+      );
+      slots.forEach(slot => {
+        if (slot.dataset.realized === '1') return;
+
+        const base = slot.dataset.base!;
+        const dash = slot.dataset.dash!; // id or slug
+        const height = slot.dataset.height || '60vh';
+
+        // Optional JSON for query params (e.g., {"show_filters":"0","r":"last 7 days"})
+        let query: Record<string, string> = {};
+        const paramsJson = slot.dataset.params;
+        if (paramsJson) {
+          try {
+            query = JSON.parse(paramsJson);
+          } catch {
+            // ignore bad JSON
+          }
+        }
+
+        // Optional dynamic product filters via data-* (you can name them how you want)
+        // Example: data-filter_prod="WidgetA" -> ?filter_prod=WidgetA
+        // This keeps things generic (your dashboard can read URL params via Jinja/native filters mapping).
+        for (const { name, value } of Array.from(slot.attributes)) {
+          if (name.startsWith('data-filter_')) {
+            const key = name.replace(/^data-filter_/, '');
+            query[key] = value;
+          }
+        }
+
+        const src = buildDashboardUrl({
+          baseUrl: base,
+          dashboardIdOrSlug: dash,
+          query,
+        });
+
+        const iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.title = slot.dataset.title || 'Dashboard';
+        Object.assign(iframe.style, {
+          width: '100%',
+          height,
+          border: 'none',
+          display: 'block',
+        } as CSSStyleDeclaration);
+
+        // eslint-disable-next-line no-param-reassign
+        slot.innerHTML = '';
+        slot.appendChild(iframe);
+        // eslint-disable-next-line no-param-reassign
+        slot.dataset.realized = '1';
+      });
+    };
 
     // ---- State kept across clicks (not React state) ------------------------
     // We keep the current period in both DOM (data-period) and a ref variable,
@@ -243,6 +440,8 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     applyPeriodColumns();
     applyCategoryFilter();
 
+    realizeAutoIframes();
+
     root.addEventListener('click', onClick);
     // eslint-disable-next-line consistent-return
     return () => root.removeEventListener('click', onClick);
@@ -285,7 +484,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
                 width: '100%',
                 height: '100%',
                 border: 'none',
-                padding: '50px',
+                padding: '10px',
               }}
               title="Preview"
             />
@@ -297,7 +496,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
                 top: 8,
                 right: 8,
                 border: 'none',
-                background: 'transparent',
+                background: '#333',
                 lineHeight: '25px',
                 cursor: 'pointer',
                 fontSize: '25px',
