@@ -52,6 +52,7 @@ module.exports = {
     ['@babel/plugin-proposal-private-methods', { loose: true }],
     ['@babel/plugin-proposal-nullish-coalescing-operator', { loose: true }],
     ['@babel/plugin-transform-runtime', { corejs: 3 }],
+    ['@babel/plugin-transform-class-static-block'],
     // only used in packages/superset-ui-core/src/chart/components/reactify.tsx
     ['babel-plugin-typescript-to-proptypes', { loose: true }],
     'react-hot-loader/babel',
