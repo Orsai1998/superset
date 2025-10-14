@@ -126,6 +126,7 @@ RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-micros
       unixodbc-dev \
       libgssapi-krb5-2 \
       libpq-dev \
+      pkg-config \
       libmariadb-dev-compat \
       libmariadb-dev \
       python3-dev \
@@ -149,7 +150,6 @@ RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     libasound2 \
     libxtst6 \
     git \
-    pkg-config \
     wget \
     bzip2 \
     && rm -rf /var/lib/apt/lists/* \
@@ -164,7 +164,9 @@ RUN pip install \
     pyodbc \
     psycopg2 \
     flask_cors \
-    mysqlclient
+    mysqlclient \
+    clickhouse-connect \
+    prometheus-flask-exporter
 
 RUN pip install playwright
 RUN python -m playwright install-deps && python -m playwright install chromium
