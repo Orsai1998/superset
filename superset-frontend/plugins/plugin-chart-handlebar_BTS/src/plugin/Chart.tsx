@@ -48,13 +48,101 @@ function addFilterFlags(url: string, show: '0' | '1' = '0') {
     u.searchParams.set('show_native_filters', show);
   return `${u.pathname}?${u.searchParams.toString()}`;
 }
-
+// --- helpers -------------------------------
 function extractDashIdFromHref(href: string): string | null {
   // matches /superset/dashboard/<id-or-slug>[/ or ?]
   const m = href.match(/\/superset\/dashboard\/([^/?#]+)[/?#]?/i);
   return m ? decodeURIComponent(m[1]) : null;
 }
+// --- helpers -------------------------------
 
+// DROP-IN: replace your current function with this one (same name/signature)
+function tryHideEmpty(iframe, slot) {
+  const maxMs   = +slot.dataset.hidePollMaxMs  || 15000; // total window to watch
+  const stepMs  = +slot.dataset.hidePollStepMs || 250;   // poll interval
+  const graceMs = +slot.dataset.hidePollGraceMs|| 1200;  // don't hide before this
+  const needHits= +slot.dataset.hidePollHits   || 2;     // consecutive empty detections
+  const debug   = slot.dataset.hideDebug === '1';
+
+  const started = performance.now();
+  let emptyHits = 0;
+
+  // Helper: (un)hide wrapper
+  function setHidden(on) {
+    if (on) {
+      if (slot.style.display !== 'none') slot.style.display = 'none';
+      slot.setAttribute('data-hidden-empty', '1');
+    } else {
+      if (slot.getAttribute('data-hidden-empty') === '1') {
+        slot.style.removeProperty('display');
+        slot.removeAttribute('data-hidden-empty');
+      }
+    }
+  }
+
+  // Look for empty state **inside chart containers only**
+  function isEmptyScoped(doc) {
+    // typical containers around charts on Superset dashboards
+    const containers = doc.querySelectorAll(
+      '.dashboard-component-chart, .slice_container, [data-test="chart"], .chart-container'
+    );
+    if (!containers.length) return false;
+
+    // ant empty & explicit empty markers inside containers
+    for (const c of containers) {
+      if (c.querySelector('.ant-empty, .ant-empty-normal, [data-test="empty-state"], .chart-empty, .slice-empty')) {
+        if (debug) console.log('[hideEmpty] ant/marker found in container');
+        return true;
+      }
+      // textual message inside the container
+      const t = (c.innerText || '').trim();
+      if (/No results were returned for this query|No data|Нет данных|Данные не найдены/i.test(t)) {
+        if (debug) console.log('[hideEmpty] text match in container:', t.slice(0,80));
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  function tick() {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc) {
+        if (performance.now() - started < maxMs) setTimeout(tick, stepMs);
+        return;
+      }
+
+      const emptyNow = isEmptyScoped(doc);
+      emptyHits = emptyNow ? emptyHits + 1 : 0;
+
+      const elapsed = performance.now() - started;
+
+      if (debug) {
+        // light debug line
+        console.log('[hideEmpty] elapsed=', Math.round(elapsed),
+          ' emptyNow=', emptyNow, ' hits=', emptyHits);
+      }
+
+      // Only hide after grace time AND enough consecutive confirmations
+      if (elapsed >= graceMs && emptyHits >= needHits) {
+        setHidden(true);
+        return;
+      }
+
+      // keep polling until timeout
+      if (elapsed < maxMs) {
+        setTimeout(tick, stepMs);
+      }
+    } catch (e) {
+      // cross-origin → cannot inspect; leave visible
+      if (debug) console.warn('[hideEmpty] cross-origin or error:', e);
+    }
+  }
+
+  // start short, time-boxed polling
+  setTimeout(tick, stepMs);
+}
 // -------------------------------------------------------------------------
 
 // Build URL that auto-applies a Native Filter (no button press)
@@ -248,11 +336,12 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         if (slot.dataset.realized === '1') return loadNext();
 
         const src = slot.dataset.src!;
-        const height = slot.dataset.height || '33vh';
+        const height = new URL(src,window.location.origin).searchParams.get('height')||slot.dataset.height || '33vh';
         const padding = slot.dataset.padding || '0';
 
         const iframe = document.createElement('iframe');
         iframe.src = src;
+        requestAnimationFrame(() => tryHideEmpty(iframe, slot));
         iframe.title = slot.dataset.title || `Embedded-${i}`;
         Object.assign(iframe.style, {
           width: '100%',
@@ -260,6 +349,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           border: 'none',
           display: 'block',
           background: 'transparent',
+          overflow:'hidden',
         });
 
         // timeout + retry once
@@ -269,10 +359,12 @@ export default function HandlebarsChart(props: HandlebarsProps) {
 
         iframe.addEventListener('load', () => {
           clearTimeout(t);
+          tryHideEmpty(iframe, slot);
           loadNext();
         });
         iframe.addEventListener('error', () => {
           clearTimeout(t);
+          tryHideEmpty(iframe, slot);
           loadNext();
         });
 
