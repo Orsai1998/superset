@@ -149,6 +149,7 @@ RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     libx11-xcb1 \
     libasound2 \
     libxtst6 \
+    libaio1 \
     git \
     wget \
     bzip2 \
