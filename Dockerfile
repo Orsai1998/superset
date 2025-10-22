@@ -166,7 +166,9 @@ RUN pip install \
     flask_cors \
     mysqlclient \
     clickhouse-connect \
-    prometheus-flask-exporter
+    prometheus-flask-exporter \
+    oracledb \
+    sqlalchemy-oracledb
 
 RUN pip install playwright
 RUN python -m playwright install-deps && python -m playwright install chromium
