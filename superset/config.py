@@ -1569,7 +1569,8 @@ TALISMAN_CONFIG = {
             "data:",
             "https://apachesuperset.gateway.scarf.sh",
             "https://static.scarf.sh/",
-            # "https://avatars.slack-edge.com", # Uncomment when SLACK_ENABLE_AVATARS is True
+            "https://ui-avatars.com",
+            "https://avatars.slack-edge.com",  # Uncomment when SLACK_ENABLE_AVATARS is True
         ],
         "worker-src": ["'self'", "blob:"],
         "connect-src": [
@@ -1600,6 +1601,7 @@ TALISMAN_DEV_CONFIG = {
             "https://apachesuperset.gateway.scarf.sh",
             "https://static.scarf.sh/",
             "https://avatars.slack-edge.com",
+            "https://ui-avatars.com",
         ],
         "worker-src": ["'self'", "blob:"],
         "connect-src": [
@@ -1653,7 +1655,7 @@ STATIC_ASSETS_PREFIX = ""
 
 # Some sqlalchemy connection strings can open Superset to security risks.
 # Typically these should not be allowed.
-PREVENT_UNSAFE_DB_CONNECTIONS = True
+PREVENT_UNSAFE_DB_CONNECTIONS = False
 
 # If true all default urls on datasets will be handled as relative URLs by the frontend
 PREVENT_UNSAFE_DEFAULT_URLS_ON_DATASET = True
