@@ -1,0 +1,216 @@
+######################################################################
+# Stage 1: Frontend (Node)
+######################################################################
+ARG PY_VER=3.10-slim-bullseye
+ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
+FROM --platform=${BUILDPLATFORM} node:18-bullseye-slim AS superset-node
+
+
+ARG NPM_BUILD_CMD="build"
+ENV BUILD_CMD=${NPM_BUILD_CMD} \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
+
+
+RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
+    build-essential \
+    python3
+
+RUN --mount=type=bind,target=/frontend-mem-nag.sh,src=./docker/frontend-mem-nag.sh \
+    /frontend-mem-nag.sh
+
+WORKDIR /app/superset-frontend
+RUN --mount=type=bind,target=./package.json,src=./superset-frontend/package.json \
+    --mount=type=bind,target=./package-lock.json,src=./superset-frontend/package-lock.json \
+    npm ci
+
+COPY superset-frontend /app/superset-frontend
+RUN npm run ${BUILD_CMD}
+
+RUN mkdir -p /app/superset/translations
+COPY superset/translations /app/superset/translations
+RUN npm run build-translation
+RUN rm /app/superset/translations/*/LC_MESSAGES/*.po
+RUN rm /app/superset/translations/messages.pot
+
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
+######################################################################
+# Stage 2: Lean Python Superset base
+######################################################################
+FROM python:${PY_VER} AS lean
+
+WORKDIR /app
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    SUPERSET_ENV=production \
+    FLASK_APP="superset.app:create_app()" \
+    PYTHONPATH="/app/pythonpath" \
+    SUPERSET_HOME="/app/superset_home" \
+    SUPERSET_PORT=8088
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
+
+RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info \
+    && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
+    && apt-get update -qq && apt-get install -yqq --no-install-recommends \
+        curl \
+        default-libmysqlclient-dev \
+        libsasl2-dev \
+        libsasl2-modules-gssapi-mit \
+        libpq-dev \
+        libecpg-dev \
+        libldap2-dev \
+    && touch superset/static/version_info.json \
+    && chown -R superset:superset ./* \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=superset:superset pyproject.toml setup.py MANIFEST.in README.md ./
+COPY --chown=superset:superset superset-frontend/package.json superset-frontend/
+COPY --chown=superset:superset requirements/base.txt requirements/
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    apt-get update -qq && apt-get install -yqq --no-install-recommends build-essential \
+    && pip install --upgrade setuptools pip \
+    && pip install -r requirements/base.txt \
+    && apt-get autoremove -yqq --purge build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --chown=superset:superset --from=superset-node /app/superset/static/assets superset/static/assets
+COPY --chown=superset:superset superset superset
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -e .
+
+COPY --chown=superset:superset --from=superset-node /app/superset/translations superset/translations
+COPY ./scripts/translations/generate_mo_files.sh ./scripts/translations/
+RUN ./scripts/translations/generate_mo_files.sh \
+    && chown -R superset:superset superset/translations \
+    && rm superset/translations/messages.pot \
+    && rm superset/translations/*/LC_MESSAGES/*.po
+
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
+COPY --chmod=755 ./docker/run-server.sh /usr/bin/
+HEALTHCHECK CMD curl -f "http://localhost:${SUPERSET_PORT}/health"
+EXPOSE ${SUPERSET_PORT}
+
+######################################################################
+# Stage 3: Custom Superset with MSSQL & Python deps
+######################################################################
+FROM lean AS custom
+
+USER root
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
+
+# Add Microsoft repo and install MSSQL drivers
+RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y \
+      msodbcsql17 \
+      mssql-tools \
+      unixodbc-dev \
+      libgssapi-krb5-2 \
+      libpq-dev \
+      pkg-config \
+      libmariadb-dev-compat \
+      libmariadb-dev \
+      python3-dev \
+      build-essential \
+      sudo && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PATH="${PATH}:/opt/mssql-tools/bin" \
+    PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+    http_proxy="" \
+    https_proxy=""
+
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
+
+RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
+    libnss3 \
+    libdbus-glib-1-2 \
+    libgtk-3-0 \
+    libx11-xcb1 \
+    libasound2 \
+    libxtst6 \
+    git \
+    wget \
+    bzip2 \
+    && rm -rf /var/lib/apt/lists/* \
+
+RUN pip install \
+    python-ldap==3.4.4 \
+    prophet==1.1.6 \
+    flask-oidc==2.2.2 \
+    flask-openid \
+    playwright \
+    authlib \
+    pyodbc \
+    psycopg2 \
+    flask_cors \
+    mysqlclient \
+    clickhouse-connect \
+    prometheus-flask-exporter
+
+RUN pip install playwright
+RUN python -m playwright install-deps && python -m playwright install chromium
+
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
+USER superset
+CMD ["/usr/bin/run-server.sh"]
+
+######################################################################
+# Stage 4: Dev
+######################################################################
+FROM custom AS dev
+
+USER root
+
+# Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
+
+
+ARG GECKODRIVER_VERSION=v0.34.0 \
+    FIREFOX_VERSION=125.0.3
+
+RUN wget -q https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz -O - | tar xfz - -C /usr/local/bin \
+ && wget -q https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 -O - | tar xfj - -C /opt \
+ && ln -s /opt/firefox/firefox /usr/local/bin/firefox \
+ && apt-get autoremove -yqq --purge wget bzip2 && rm -rf /var/log/* /tmp/* /var/lib/apt/lists/*
+
+COPY --chown=superset:superset requirements/development.txt requirements/
+RUN pip install -r requirements/development.txt
+
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
+USER superset
+
+######################################################################
+# Stage 5: CI
+######################################################################
+FROM custom AS ci
+COPY --chown=superset:superset --chmod=755 ./docker/*.sh /app/docker/
+CMD ["/app/docker/docker-ci.sh"]
