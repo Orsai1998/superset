@@ -1,6 +1,9 @@
 import { t, validateNonEmpty } from '@superset-ui/core';
-import { sections, sharedControls } from '@superset-ui/chart-controls';
-import { ControlPanelConfig } from '@superset-ui/chart-controls/lib/types';
+import {
+  sections,
+  sharedControls,
+  ControlPanelConfig,
+} from '@superset-ui/chart-controls';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
