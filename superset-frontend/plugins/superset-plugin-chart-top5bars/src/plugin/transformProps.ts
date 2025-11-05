@@ -19,6 +19,7 @@ export interface Top5BarsTransformedProps {
   boldText?: boolean;
   numberFormat?: string;
   formatValue: (n: number) => string;
+  formData: any;
 }
 
 function getMetricKey(
@@ -40,7 +41,6 @@ export default function transformProps(
   const { width, height, formData, queriesData } = chartProps;
   const fd = (formData as unknown as Top5BarsFormData) || {};
   const rows = (queriesData?.[0]?.data ?? []) as DataRecord[];
-
   const groupbyCol = (Array.isArray(fd.groupby) && fd.groupby[0]) || 'reason';
 
   const metricKeyFromArray = Array.isArray(fd.metrics)
@@ -81,5 +81,6 @@ export default function transformProps(
     boldText: Boolean(fd.boldText),
     numberFormat,
     formatValue: (n: number) => formatter(n),
+    formData: fd,
   };
 }
