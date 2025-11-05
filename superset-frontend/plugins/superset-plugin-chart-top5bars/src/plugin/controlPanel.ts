@@ -67,6 +67,20 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'subtitleText',
+            config: {
+              type: 'TextControl',
+              label: t('Subtitle text'),
+              default: '',
+              renderTrigger: true,
+              description: t(
+                'Необязательная подпись под заголовком (например, "часы / тонны" или "значение / количество")',
+              ),
+            },
+          },
+        ],
+        [
+          {
             name: 'boldText',
             config: {
               type: 'CheckboxControl',
@@ -98,14 +112,18 @@ const config: ControlPanelConfig = {
         ],
         [
           {
-            name: 'numberFormat',
+            name: 'styleType',
             config: {
-              type: 'TextControl',
-              label: t('Number format'),
-              default: 'SMART_NUMBER',
+              type: 'SelectControl',
+              label: t('Display style'),
+              default: 'classic',
+              choices: [
+                ['classic', t('Classic (Bar chart)')],
+                ['modern', t('Modern (card style)')],
+              ],
               renderTrigger: true,
               description: t(
-                'Формат чисел (например: SMART_NUMBER, ,.2f, 0.[00])',
+                'Выберите стиль отображения: классический график или карточка как на макете',
               ),
             },
           },
