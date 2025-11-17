@@ -57,7 +57,7 @@ export interface Top40Person {
   id?: number;
   rank?: number;
   name: string;
-  photo: string;
+  photo?: string;
   value: number;
 }
 
