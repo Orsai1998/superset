@@ -56,7 +56,7 @@ export default function transformProps(chartProps: ChartProps): {
 
   // --- Drivers sorted by efficiency ---
   const persons: Top40Person[] = rawData
-    .filter((r: any) => r.name && r.photo)
+    .filter((r: any) => r.name)
     .sort((a: any, b: any) => (a.value ?? 0) - (b.value ?? 0))
     .map((r: any, i: number) => ({
       id: r.id ?? i + 1,

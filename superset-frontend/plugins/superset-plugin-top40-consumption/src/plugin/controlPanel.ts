@@ -85,18 +85,13 @@ const config: ControlPanelConfig = {
           {
             name: 'photo_column',
             config: {
+              ...sharedControls.groupby,
               type: 'SelectControl',
               label: t('Photo URL column'),
               description: t(
                 'Column containing URLs or base64 photos for drivers.',
               ),
-              mapStateToProps: ({ datasource }) => ({
-                choices:
-                  datasource?.columns?.map((c: any) => [
-                    c.column_name,
-                    c.verbose_name || c.column_name,
-                  ]) || [],
-              }),
+              multi: false, // Allow only one selection for grouping by day
               renderTrigger: true,
             },
           },
