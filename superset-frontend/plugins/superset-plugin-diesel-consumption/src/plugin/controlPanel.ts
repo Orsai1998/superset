@@ -1,13 +1,11 @@
 import { t, validateNonEmpty } from '@superset-ui/core';
 import {
-  sections,
   sharedControls,
   ControlPanelConfig,
 } from '@superset-ui/chart-controls';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    sections.legacyTimeseriesTime,
     {
       label: t('Query'),
       expanded: true,
@@ -16,6 +14,7 @@ const config: ControlPanelConfig = {
           {
             name: 'groupby',
             config: {
+              ...sharedControls.groupby,
               type: 'SelectControl',
               label: t('Day column'),
               description: t(
@@ -40,16 +39,6 @@ const config: ControlPanelConfig = {
               ),
               validators: [validateNonEmpty],
               multi: true, // Allow selecting multiple metrics
-            },
-          },
-        ],
-        [
-          {
-            name: 'adhoc_filters',
-            config: {
-              ...sharedControls.adhoc_filters,
-              label: t('Filters'),
-              default: [],
             },
           },
         ],

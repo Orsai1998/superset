@@ -162,6 +162,7 @@ type Props = {
   factColor: string;
   showMonthTotals: boolean;
   totals: { plan: number; fact: number };
+  averages: { plan: number; fact: number };
   fmt: (n: number) => string;
   title?: string;
   formData?: {
@@ -179,6 +180,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
 
   showMonthTotals,
   totals,
+  averages,
   fmt,
   title,
   formData,
@@ -197,10 +199,10 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   useEffect(() => {
     if (!chartRef.current) return;
     const chart = echarts.init(chartRef.current);
-
     const prepared = data.map(d => ({
       day: String(d.day).padStart(2, '0'),
       fact: d.fact || 0,
+      plan: d.plan || 0,
     }));
 
     chart.setOption({
@@ -225,7 +227,10 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           data: prepared.map((d, i) => ({
             value: d.fact,
             itemStyle: {
-              color: i % 2 === 0 ? planColor : factColor,
+              color:
+                d.fact > d.plan
+                  ? factColor // превышение плана — красный
+                  : planColor, // выполнение плана — зелёный,
               borderRadius: [17, 17, 17, 17],
             },
           })),
@@ -316,7 +321,9 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
                       theme === 'light' ? 'rgba(109, 109, 109, 1)' : '#233040'
                     }
                   >
-                    <Value $themeMode={theme}>{formatValue(totals.plan)}</Value>
+                    <Value $themeMode={theme}>
+                      {formatValue(averages.plan)}
+                    </Value>
                   </Bar>
                   <Label $themeMode={theme}>План</Label>
                 </BarGroup>
@@ -325,7 +332,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
                   <Bar
                     h={factH}
                     bg={
-                      totals.fact > totals.plan
+                      averages.fact > averages.plan
                         ? theme === 'light'
                           ? 'rgba(34, 197, 94, 0.5)'
                           : 'rgba(74, 149, 70, 1)'
@@ -334,7 +341,9 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
                           : '#FF7875'
                     }
                   >
-                    <Value $themeMode={theme}>{formatValue(totals.fact)}</Value>
+                    <Value $themeMode={theme}>
+                      {formatValue(averages.fact)}
+                    </Value>
                   </Bar>
                   <Label $themeMode={theme}>Факт</Label>
                 </BarGroup>

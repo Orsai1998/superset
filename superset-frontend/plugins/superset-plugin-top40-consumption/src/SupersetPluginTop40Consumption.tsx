@@ -224,18 +224,31 @@ export default function SupersetPluginTop40Consumption({
   const topRight = data.topRight ?? [];
   const leftTop3 = topLeft.slice(0, 3);
   const leftRest = topLeft.slice(3, 15); // 12 more cards → 2 rows of 6
+  console.log(leftRest);
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
-  const generateAvatar = (name: string, url?: string) =>
-    url && url !== 'null'
-      ? url
-      : `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-          <rect width='80' height='80' rx='8' ry='8' fill='%230b1220'/>
-          <text x='50%' y='50%' dy='.3em' fill='white' font-family='Arial' font-size='22' text-anchor='middle'>
-            ${(name || 'NA').substring(0, 2).toUpperCase()}
-          </text>
-        </svg>`;
+  const generateAvatar = (name: string, url?: string) => {
+    const invalid =
+      !url ||
+      url.trim() === '' ||
+      url.toLowerCase() === 'null' ||
+      url.toLowerCase() === 'undefined' ||
+      url === '-';
+
+    if (!invalid) return url;
+
+    const initials = (name || 'NA').substring(0, 2).toUpperCase();
+
+    return `data:image/svg+xml;utf8,
+    <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
+      <rect width='80' height='80' rx='8' ry='8' fill='%230b1220'/>
+      <text x='50%' y='50%' dy='.3em' fill='white'
+            font-family='Arial' font-size='22' text-anchor='middle'>
+        ${initials}
+      </text>
+    </svg>`;
+  };
 
   return (
     <Container $themeMode={theme} $headerFontSize={titleFontSize}>
