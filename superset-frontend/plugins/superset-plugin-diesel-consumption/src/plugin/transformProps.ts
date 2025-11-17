@@ -6,11 +6,9 @@ export default function transformProps(chartProps: ChartProps) {
 
   // Handle undefined queriesData gracefully
   const records = queriesData?.[0]?.data ?? [];
-
   // Grouping and metrics extraction
   const groupby = formData.groupby ?? []; // Default to empty array if not provided
-  const [dayCol] = groupby;
-
+  const dayCol = groupby;
   // Safely handle metrics
   const [planMetric, factMetric] = formData.metrics ?? [];
   const planMetricName = planMetric?.label ?? planMetric; // Use label or fallback to the metric name itself
@@ -52,8 +50,15 @@ export default function transformProps(chartProps: ChartProps) {
       acc.fact += d.fact;
       return acc;
     },
-    { plan: 0, fact: 0 }, // Default values for the accumulator
+    { plan: 0, fact: 0 },
   );
+
+  const count = sorted.length;
+
+  const averages = {
+    plan: count > 0 ? totals.plan / count : 0,
+    fact: count > 0 ? totals.fact / count : 0,
+  };
 
   // Return the processed data and settings
   return {
@@ -65,6 +70,7 @@ export default function transformProps(chartProps: ChartProps) {
     factColor,
     showMonthTotals,
     totals,
+    averages,
     fmt,
     title: formData?.slice_name ?? '',
     formData,

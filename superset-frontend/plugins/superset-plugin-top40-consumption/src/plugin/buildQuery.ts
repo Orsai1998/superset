@@ -30,18 +30,12 @@ import { buildQueryContext, QueryFormData } from '@superset-ui/core';
  *  - filters and row limits
  */
 export default function buildQuery(formData: QueryFormData) {
-  const {
-    groupby = [],
-    metric,
-    plan_column,
-    photo_column,
-    row_limit,
-  } = formData as any;
+  const { groupby = [], metric, plan_column, row_limit } = formData as any;
 
   // Collect all columns to be returned by the query
   const columns = [...groupby];
   if (plan_column) columns.push(plan_column);
-  if (photo_column) columns.push(photo_column);
+  // if (photo_column) columns.push(photo_column);
 
   return buildQueryContext(formData, baseQueryObject => [
     {
