@@ -70,7 +70,7 @@ const Container = styled.div<{
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
     width: 100%;
-    height: 50%;
+    height: auto;
   }
 
   .top-cards .card {
@@ -224,7 +224,8 @@ export default function SupersetPluginTop40Consumption({
   const topRight = data.topRight ?? [];
   const leftTop3 = topLeft.slice(0, 3);
   const leftRest = topLeft.slice(3, 15); // 12 more cards → 2 rows of 6
-  console.log(leftRest);
+  console.log('DATA: ');
+  console.log(leftTop3);
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
