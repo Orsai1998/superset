@@ -221,29 +221,76 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         type: 'value',
         show: true,
       },
+      tooltip: {
+        trigger: 'axis',
+        // eslint-disable-next-line theme-colors/no-literal-colors
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderWidth: 0,
+        // eslint-disable-next-line theme-colors/no-literal-colors
+        textStyle: { color: '#fff', fontSize: 12 },
+        formatter: (params: any) => {
+          const day = params[0].axisValue;
+          const fact =
+            params.find((p: { seriesName: string }) => p.seriesName === 'Факт')
+              ?.value ?? 0;
+          const plan =
+            params.find((p: { seriesName: string }) => p.seriesName === 'План')
+              ?.value ?? 0;
+
+          return `
+      <div style="padding:4px 0 2px; font-size:13px;">
+        <b>День ${day}</b><br/>
+        Факт: <b>${fact}</b><br/>
+        План: <b>${plan}</b>
+      </div>
+    `;
+        },
+      },
       series: [
+        // === FACT ===
         {
+          name: 'Факт',
           type: 'bar',
-          data: prepared.map((d, i) => ({
-            value: d.fact,
-            itemStyle: {
-              color:
-                d.fact > d.plan
-                  ? factColor // превышение плана — красный
-                  : planColor, // выполнение плана — зелёный,
-              borderRadius: [17, 17, 17, 17],
+          data: prepared.map(d => d.fact),
+          barWidth: 14, // половина размера, чтобы влезли оба
+          barGap: '5%',
+          barCategoryGap: '40%',
+          itemStyle: {
+            color: (params: any) => {
+              const d = prepared[params.dataIndex];
+              return d.fact > d.plan ? factColor : planColor;
             },
-          })),
-          barWidth: 32,
+            borderRadius: [12, 12, 12, 12],
+          },
           label: {
-            show: true,
+            show: false,
             position: 'insideBottom',
             offset: [0, -4],
-            // eslint-disable-next-line theme-colors/no-literal-colors
-            color: '#ffffff',
             fontWeight: 700,
             fontSize: 11,
-            formatter: ({ value }: any) => fmt(value),
+            formatter: (params: any) => fmt(params.value),
+          },
+        },
+
+        // === PLAN ===
+        {
+          name: 'План',
+          type: 'bar',
+          data: prepared.map(d => d.plan),
+          barWidth: 14,
+          barGap: '5%',
+          barCategoryGap: '40%',
+          itemStyle: {
+            color: planColor,
+            borderRadius: [12, 12, 12, 12],
+          },
+          label: {
+            show: false,
+            position: 'top',
+            offset: [0, -4],
+            fontWeight: 700,
+            fontSize: 11,
+            formatter: (params: any) => fmt(params.value),
           },
         },
       ],
