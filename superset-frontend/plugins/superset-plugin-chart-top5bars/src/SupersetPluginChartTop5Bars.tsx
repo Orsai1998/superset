@@ -306,11 +306,11 @@ export default function SupersetPluginChartTop5Bars(
           data: rows.map(() => max),
           barWidth: 8,
           itemStyle: { color: 'transparent' },
-          barGap: '100%',
-          barCategoryGap: '-100%',
+          barGap: '-100%',
+          barCategoryGap: '-100px',
           label: {
             show: true,
-            position: [0, -20], // над баром
+            position: [0, -8], // над баром
             formatter: (p: any) => rows[p.dataIndex].reason,
             // eslint-disable-next-line theme-colors/no-literal-colors
             color: '#C4C4C4',
@@ -328,7 +328,7 @@ export default function SupersetPluginChartTop5Bars(
           type: 'bar',
           data: rows.map(r => r.value),
           barWidth: 8,
-          barCategoryGap: '-100%',
+          barCategoryGap: '100%',
           barGap: '70%',
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
