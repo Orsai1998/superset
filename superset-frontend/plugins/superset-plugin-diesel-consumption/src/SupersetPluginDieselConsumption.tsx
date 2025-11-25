@@ -28,10 +28,32 @@ const Span = styled.div<{
   color: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(50, 50, 50, 1)' : '#fff'};
 `;
+
+const ChartTitle = styled.div<{
+  $themeMode: 'light' | 'dark';
+  $fontSize: number;
+}>`
+  font-size: ${({ $fontSize }) => `${$fontSize}px`} !important;
+  font-weight: 700 !important;
+  color: ${({ $themeMode }) => ($themeMode === 'light' ? '#323232' : '#fff')};
+  font-family: 'Onest', sans-serif;
+`;
+
+const MetricTitle = styled.div<{
+  $themeMode: 'light' | 'dark';
+  $fontSize: number;
+}>`
+  font-size: ${({ $fontSize }) => `${$fontSize}px`} !important;
+  font-weight: 400 !important;
+  color: ${({ $themeMode }) => ($themeMode === 'light' ? '#323232' : '#fff')};
+  font-family: 'Onest', sans-serif;
+`;
 // === Styles ===
 const Container = styled.div<{
   $themeMode: 'light' | 'dark';
   $fontSize: number;
+  $width: number;
+  $height: number;
 }>`
   display: flex;
   align-items: stretch;
@@ -39,9 +61,26 @@ const Container = styled.div<{
   flex-direction: row;
   gap: 15px;
   padding: 6px;
-  font-family: 'Inter', 'Russo One', sans-serif;
-  height: 100%;
+  font-family: 'Onest', sans-serif;
   overflow: visible;
+`;
+
+const Wrapper = styled.div<{
+  $themeMode: 'light' | 'dark';
+  $width: number;
+  $height: number;
+}>`
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  font-family: 'Onest', sans-serif;
+  height: ${({ $height }) => `${$height}px`};
+  width: ${({ $width }) => `${$width}px`};
+
+  .titles {
+    display: flex;
+    justify-content: space-between;
+  }
 `;
 
 const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
@@ -56,6 +95,56 @@ const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
     $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
   padding: 8px 12px;
   min-width: 0;
+`;
+
+// eslint-disable-next-line theme-colors/no-literal-colors
+const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
+  border: 1px solid
+    ${({ $themeMode }) =>
+      $themeMode === 'light' ? '#E2E2E2' : 'rgba(26, 51, 111, 1)'};
+  border-radius: 12px;
+  background: ${({ $themeMode }) =>
+    $themeMode === 'light' ? '#F5F5F5' : 'rgba(9, 21, 44, 1)'};
+  padding: 8px 12px;
+  position: relative;
+  font-family: 'Onest', sans-serif;
+
+  .custom-legend {
+    position: absolute;
+    top: 8px;
+    left: 12px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .custom-legend .item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 18px;
+    color: #333;
+  }
+
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+
+  .dot.plan {
+    background: #d5d5d5;
+  }
+
+  .dot.fact {
+    background: conic-gradient(#e57373 0deg 180deg, #81c784 180deg 360deg);
+  }
+
+  .legend {
+    font-size: 14px;
+    font-weight: 400 !important;
+  }
 `;
 
 const Header = styled.div<{ $themeMode: 'light' | 'dark' }>`
@@ -167,7 +256,11 @@ type Props = {
   title?: string;
   formData?: {
     titleFontSize: number;
+    chartType: 'default' | 'plan_fact_daily';
+    chartTitle: string;
+    metricTitle: string;
     currentMonthFontSize: number;
+    metricTitleFontSize: number;
     theme?: 'light' | 'dark';
   };
 };
@@ -190,141 +283,252 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   const [maxHeight, setMaxHeight] = useState(0);
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
+  const chartType = formData?.chartType;
+  const chartTitle = formData?.chartTitle;
+  const metricTitle = formData?.metricTitle;
+  const metricTitleFontSize = formData?.metricTitleFontSize || 20;
   const currentMonthFontSize = formData?.currentMonthFontSize || 13;
   const planColor =
     theme === 'light' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(74, 149, 70, 1)';
   const factColor =
     theme === 'light' ? 'rgba(254, 38, 38, 0.5)' : 'rgba(255, 123, 123, 1)';
-  // === Left ECharts Chart ===
+
   useEffect(() => {
     if (!chartRef.current) return;
+
     const chart = echarts.init(chartRef.current);
-    const prepared = data.map(d => ({
-      day: String(d.day).padStart(2, '0'),
-      fact: d.fact || 0,
-      plan: d.plan || 0,
-    }));
 
-    chart.setOption({
-      backgroundColor: 'transparent',
-      grid: { left: 30, right: 10, top: 50, bottom: 40, containLabel: true },
-      xAxis: {
-        type: 'category',
-        data: prepared.map(d => d.day),
-        // eslint-disable-next-line theme-colors/no-literal-colors
-        axisLabel: { color: '#9CB0C5', fontSize: 11 },
-        axisLine: { show: false },
-        axisTick: { show: false },
-        min: 1,
-      },
-      yAxis: {
-        type: 'value',
-        show: true,
-      },
-      tooltip: {
-        trigger: 'axis',
-        // eslint-disable-next-line theme-colors/no-literal-colors
-        backgroundColor: 'rgba(0,0,0,0.8)',
-        borderWidth: 0,
-        // eslint-disable-next-line theme-colors/no-literal-colors
-        textStyle: { color: '#fff', fontSize: 12 },
-        formatter: (params: any) => {
-          const day = params[0].axisValue;
-          const fact =
-            params.find((p: { seriesName: string }) => p.seriesName === 'Факт')
-              ?.value ?? 0;
-          const plan =
-            params.find((p: { seriesName: string }) => p.seriesName === 'План')
-              ?.value ?? 0;
+    const prepared = data
+      .filter(d => d.day != null && d.day !== '')
+      .map(d => ({
+        day: String(d.day).padStart(2, '0'),
+        fact: d.fact || 0,
+        plan: d.plan || 0,
+      }));
 
-          return `
-      <div style="padding:4px 0 2px; font-size:13px;">
-        <b>День ${day}</b><br/>
-        Факт: <b>${fact}</b><br/>
-        План: <b>${plan}</b>
-      </div>
-    `;
-        },
-      },
-      series: [
-        // === FACT ===
-        {
-          name: 'Факт',
-          type: 'bar',
-          data: prepared.map(d => d.fact),
-          barWidth: 14, // половина размера, чтобы влезли оба
-          barGap: '5%',
-          barCategoryGap: '40%',
-          itemStyle: {
-            color: (params: any) => {
-              const d = prepared[params.dataIndex];
-              return d.fact > d.plan ? factColor : planColor;
-            },
-            borderRadius: [12, 12, 12, 12],
-          },
-          label: {
-            show: false,
-            position: 'insideBottom',
-            offset: [0, -4],
-            fontWeight: 700,
-            fontSize: 11,
-            formatter: (params: any) => fmt(params.value),
-          },
-        },
-
-        // === PLAN ===
-        {
-          name: 'План',
-          type: 'bar',
-          data: prepared.map(d => d.plan),
-          barWidth: 14,
-          barGap: '5%',
-          barCategoryGap: '40%',
-          itemStyle: {
-            color: planColor,
-            borderRadius: [12, 12, 12, 12],
-          },
-          label: {
-            show: false,
-            position: 'top',
-            offset: [0, -4],
-            fontWeight: 700,
-            fontSize: 11,
-            formatter: (params: any) => fmt(params.value),
-          },
-        },
-      ],
-
-      graphic: [
-        {
-          type: 'text',
-          left: 15,
-          top: 10,
-          style: {
-            text: '1685',
-            // eslint-disable-next-line theme-colors/no-literal-colors
-            fill: '#ffffff',
-            font: '700 20px "Russo One", sans-serif',
-          },
-        },
-        {
-          type: 'text',
-          left: 70,
-          top: 14,
-          style: {
-            text: title || '',
-            // eslint-disable-next-line theme-colors/no-literal-colors
-            fill: '#ffffff',
-            font: '600 13px "Inter", sans-serif',
-          },
-        },
-      ],
+    const preparedWithColors = prepared.map(item => {
+      const color = item.fact > item.plan ? '#EC8080' : '#7ECF9B';
+      const labelColor = item.fact > item.plan ? '#FF4646' : '#5A9A71';
+      return {
+        ...item,
+        color,
+        labelColor,
+      };
     });
 
-    chart.resize({ width: width - 260, height });
+    let option;
+
+    // ==========================================================
+    // === DEFAULT APPEARANCE (your existing one)
+    // ==========================================================
+    if (chartType === 'default') {
+      option = {
+        backgroundColor: 'transparent',
+        grid: { left: 30, right: 10, top: 50, bottom: 40, containLabel: true },
+
+        xAxis: {
+          type: 'category',
+          data: prepared.map(d => d.day),
+          // eslint-disable-next-line theme-colors/no-literal-colors
+          axisLabel: { color: '#9CB0C5', fontSize: 11 },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          min: 1,
+        },
+
+        yAxis: {
+          type: 'value',
+          show: true,
+        },
+
+        tooltip: {
+          trigger: 'axis',
+          // eslint-disable-next-line theme-colors/no-literal-colors
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          borderWidth: 0,
+          // eslint-disable-next-line theme-colors/no-literal-colors
+          textStyle: { color: '#fff', fontSize: 12 },
+          formatter: (params: any[]) => {
+            const day = params[0].axisValue;
+            const fact = params.find(p => p.seriesName === 'Факт')?.value ?? 0;
+            const plan = params.find(p => p.seriesName === 'План')?.value ?? 0;
+
+            return `
+            <div style="padding:4px 0 2px; font-size:13px;">
+              <b>День ${day}</b><br/>
+              Факт: <b>${fact}</b><br/>
+              План: <b>${plan}</b>
+            </div>
+          `;
+          },
+        },
+
+        series: [
+          {
+            name: 'Факт',
+            type: 'bar',
+            data: prepared.map(d => d.fact),
+            barWidth: 14,
+            barGap: '5%',
+            barCategoryGap: '40%',
+            itemStyle: {
+              color: (params: { dataIndex: string | number }) => {
+                // @ts-ignore
+                const d = prepared[params.dataIndex];
+                return d.fact > d.plan ? factColor : planColor;
+              },
+              borderRadius: [12, 12, 12, 12],
+            },
+          },
+          {
+            name: 'План',
+            type: 'bar',
+            data: prepared.map(d => d.plan),
+            barWidth: 14,
+            barGap: '5%',
+            barCategoryGap: '40%',
+            itemStyle: {
+              color: planColor,
+              borderRadius: [12, 12, 12, 12],
+            },
+          },
+        ],
+
+        graphic: [
+          {
+            type: 'text',
+            left: 15,
+            top: 10,
+            style: {
+              text: '1685',
+              // eslint-disable-next-line theme-colors/no-literal-colors
+              fill: '#ffffff',
+              font: '700 20px "Russo One", sans-serif',
+            },
+          },
+          {
+            type: 'text',
+            left: 70,
+            top: 14,
+            style: {
+              text: title || '',
+              // eslint-disable-next-line theme-colors/no-literal-colors
+              fill: '#ffffff',
+              font: '600 13px "Inter", sans-serif',
+            },
+          },
+        ],
+      };
+    }
+
+    // ==========================================================
+    // === NEW APPEARANCE (daily plan/fact like screenshot)
+    // ==========================================================
+    else if (chartType === 'plan_fact_daily') {
+      const planColorDefault = theme === 'light' ? '#D9D9D9' : '#D9D9D9';
+      // @ts-ignore
+      option = {
+        backgroundColor: 'transparent',
+
+        grid: {
+          left: '-3.5%',
+          right: '30px',
+          top: 50,
+          bottom: 0,
+          containLabel: true,
+        },
+
+        xAxis: {
+          type: 'category',
+          data: prepared.map(d => d.day),
+          axisLabel: {
+            // eslint-disable-next-line theme-colors/no-literal-colors
+            color: '#323232',
+            fontSize: 12,
+          },
+          axisLine: { show: false },
+          axisTick: { show: false },
+          min: 0,
+          boundaryGap: true,
+        },
+
+        yAxis: { show: false },
+
+        tooltip: {
+          trigger: 'axis',
+          // eslint-disable-next-line theme-colors/no-literal-colors
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          // eslint-disable-next-line theme-colors/no-literal-colors
+          textStyle: { color: '#fff' },
+        },
+
+        series: [
+          // PLAN (background style)
+          {
+            name: 'План',
+            type: 'bar',
+            data: prepared.map(d => d.plan),
+            barWidth: 10,
+            itemStyle: {
+              color: planColorDefault,
+              borderRadius: [6, 6, 0, 0],
+            },
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 10,
+              fontWeight: 700,
+              distance: 10,
+              // eslint-disable-next-line theme-colors/no-literal-colors
+              color: '#6C6B6B',
+              rotate: 90,
+              offset: [15, 3],
+              formatter: (p: { value: number }) => fmt(p.value),
+            },
+            emphasis: { disabled: true },
+          },
+
+          // FACT (foreground bar)
+          {
+            name: 'Факт',
+            type: 'bar',
+            data: preparedWithColors.map(d => ({
+              value: d.fact,
+              itemStyle: { color: d.color },
+              label: { color: d.labelColor },
+            })),
+            barWidth: 10,
+            label: {
+              show: true,
+              position: 'top',
+              fontSize: 10,
+              fontWeight: 700,
+              distance: 3,
+              rotate: 90,
+              offset: [15, 0],
+              formatter: (p: { value: number }) => fmt(p.value),
+            },
+            itemStyle: {
+              borderRadius: [6, 6, 0, 0],
+            },
+            emphasis: { disabled: true },
+          },
+        ],
+      };
+    }
+
+    // === APPLY OPTION AND RESIZE
+    // @ts-ignore
+    chart.setOption(option);
+    if (chartType === 'default') {
+      chart.resize({ width: width - 260, height });
+    } else {
+      chart.resize({ width, height: height - 100 });
+    }
+
     // eslint-disable-next-line consistent-return
     return () => chart.dispose();
-  }, [data, width, height]);
+  }, [data, width, height, chartType, planColor, factColor]);
 
   // === Dynamic height for right bars ===
   useEffect(() => {
@@ -339,14 +543,18 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   const factH = maxVal ? (totals.fact / maxVal) * maxHeight : 0;
 
   const formatValue = (v: number) => fmt(v);
-
-  return (
+  const renderDefaultAppearance = () => (
     <div>
       <Span $themeMode={theme} $fontSize={titleFontSize}>
         Показатели АТЦ по удельному расходу ДТ (Весь парк ЕН-4000) (г/тнкм)
       </Span>
 
-      <Container $themeMode={theme} $fontSize={titleFontSize}>
+      <Container
+        $themeMode={theme}
+        $fontSize={titleFontSize}
+        $width={width}
+        $height={height}
+      >
         {/* Left chart */}
         <LeftPanel $themeMode={theme}>
           {title && <Header $themeMode={theme}>{title}</Header>}
@@ -401,6 +609,43 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
       </Container>
     </div>
   );
+  const renderPlanFactDailyAppearance = () => (
+    <Wrapper $themeMode={theme} $height={height} $width={width}>
+      <div className="titles">
+        <div className="chart_title">
+          <ChartTitle $fontSize={titleFontSize} $themeMode={theme}>
+            {chartTitle}
+          </ChartTitle>
+        </div>
+        <div className="metric_title">
+          <MetricTitle $fontSize={metricTitleFontSize} $themeMode={theme}>
+            {metricTitle}
+          </MetricTitle>
+        </div>
+      </div>
+      <Panel $themeMode={theme}>
+        <div className="custom-legend">
+          <div className="item">
+            <div className="dot plan" />
+            <span className="legend">План</span>
+          </div>
+          <div className="item">
+            <div className="dot fact" />
+            <span className="legend">Факт</span>
+          </div>
+        </div>
+
+        <div id="chart" className="chart" />
+        <ChartContainer ref={chartRef} />
+      </Panel>
+    </Wrapper>
+  );
+
+  if (chartType === 'plan_fact_daily') {
+    return renderPlanFactDailyAppearance();
+  }
+
+  return renderDefaultAppearance();
 };
 
 export default SupersetPluginDieselConsumption;
