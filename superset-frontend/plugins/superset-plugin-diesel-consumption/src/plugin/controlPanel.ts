@@ -77,6 +77,49 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'chart_type',
+            config: {
+              type: 'SelectControl',
+              label: t('Chart type'),
+              default: 'default',
+              choices: [
+                ['default', t('Default view')],
+                ['plan_fact_daily', t('Daily Plan/Fact (bars)')],
+              ],
+              description: t(
+                'Choose how the data should be displayed: default layout or the daily Plan/Fact style.',
+              ),
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'chart_title',
+            config: {
+              type: 'TextControl',
+              label: t('Chart title'),
+              default: 'Добыча руды',
+              description: t('Title displayed above the chart.'),
+              renderTrigger: true,
+            },
+          },
+        ],
+
+        [
+          {
+            name: 'metric_title',
+            config: {
+              type: 'TextControl',
+              label: t('Metric title'),
+              default: 'тыс. тонн',
+              description: t('Label displayed above the metrics.'),
+              renderTrigger: true,
+            },
+          },
+        ],
         // ─── Font Size Control ──────────────────────────
         [
           {
@@ -105,6 +148,23 @@ const config: ControlPanelConfig = {
                 'Adjust the font size of chart titles and labels.',
               ),
               default: 16,
+              min: 8,
+              max: 48,
+              step: 1,
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'metric_title_font_size',
+            config: {
+              type: 'SliderControl',
+              label: t('Metric title font size'),
+              description: t(
+                'Adjust the font size of the metric title (e.g., units above chart).',
+              ),
+              default: 12,
               min: 8,
               max: 48,
               step: 1,
