@@ -24,6 +24,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+
         [
           {
             name: 'metrics',
@@ -48,7 +49,6 @@ const config: ControlPanelConfig = {
         ],
       ],
     },
-
     {
       label: t('Customize'),
       expanded: true,
@@ -125,6 +125,22 @@ const config: ControlPanelConfig = {
               description: t(
                 'Выберите стиль отображения: классический график или карточка как на макете',
               ),
+            },
+          },
+        ],
+        [
+          {
+            name: 'theme',
+            config: {
+              type: 'SelectControl',
+              label: t('Theme'),
+              default: 'dark',
+              choices: [
+                ['dark', t('Dark Theme')],
+                ['light', t('Light Theme')],
+              ],
+              description: t('Select the color theme for this visualization.'),
+              renderTrigger: true,
             },
           },
         ],
