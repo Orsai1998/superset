@@ -28,6 +28,7 @@ export interface SupersetPluginChartTop5BarsStylesProps {
   headerFontSize: HeaderFontSize;
   boldText: boolean;
   styleType: string;
+  theme: 'dark' | 'light';
 }
 
 /**
