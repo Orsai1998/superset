@@ -52,13 +52,15 @@ const Styles = styled.div<SupersetPluginChartTop5BarsStylesProps>`
   /* === Card style (screenshot) === */
 
   .card-wrapper {
-    background: rgba(20, 33, 64, 1);
-    border: 1px solid rgba(26, 51, 111, 1);
+    background: ${({ theme }) =>
+      theme === 'light' ? '#F5F5F5' : 'rgba(20, 33, 64, 1)'};
+    border: 1px solid
+      ${({ theme }) => (theme === 'light' ? '#E2E2E2' : 'rgba(26, 51, 111, 1)')};
     border-radius: 17px;
     padding: 16px 18px;
     display: flex;
     flex-direction: column;
-    color: #ffffff;
+    color: ${({ theme }) => (theme === 'light' ? '#323232' : '#FFFFFF')};
     font-family: 'Onest', sans-serif;
     flex: 1 1 auto;
     height: 100%;
@@ -80,7 +82,7 @@ const Styles = styled.div<SupersetPluginChartTop5BarsStylesProps>`
 
   .card-header span {
     font-size: 13px;
-    color: #9aa3b1;
+    color: ${({ theme }) => (theme === 'light' ? '#5F5F61' : '#9aa3b1')};
   }
 
   .card-row {
@@ -89,7 +91,7 @@ const Styles = styled.div<SupersetPluginChartTop5BarsStylesProps>`
 
   .card-label {
     font-size: 13px;
-    color: #c4c4c4;
+    color: ${({ theme }) => (theme === 'light' ? '#5F5F61' : '#c4c4c4')};
     margin-bottom: 4px;
   }
 
@@ -136,7 +138,7 @@ export default function SupersetPluginChartTop5Bars(
   const { data, height, width, formData } = props;
   const { styleType, headerText, boldText, headerFontSize, subtitleText } =
     formData;
-
+  const theme = formData?.theme || 'dark';
   const headerPx =
     typeof headerFontSize === 'number'
       ? headerFontSize
@@ -165,7 +167,6 @@ export default function SupersetPluginChartTop5Bars(
     if (!chartRef.current)
       chartRef.current = echarts.init(el, undefined, { renderer: 'canvas' });
     const chart = chartRef.current;
-
     const { reasons, values, max } = prepare(data as unknown as Row[]);
 
     // @ts-ignore
@@ -277,12 +278,20 @@ export default function SupersetPluginChartTop5Bars(
     if (!chartRef.current)
       chartRef.current = echarts.init(el, undefined, { renderer: 'canvas' });
     const chart = chartRef.current;
-
     const { rows, max } = prepare(data as unknown as Row[]);
+    const isLight = formData.theme === 'light';
+
+    const colors = {
+      background: isLight ? '#F5F5F5' : 'rgba(20, 33, 64, 1)',
+      labelTop: isLight ? '#5F5F61' : '#C4C4C4',
+      labelRight: isLight ? '#323232' : '#FFFFFF',
+      title: isLight ? '#323232' : '#FFFFFF',
+      gradientStart: isLight ? '#F97316' : '#142140',
+      gradientEnd: isLight ? '#FFFFFF' : '#0093FF',
+    };
 
     const option: echarts.EChartsCoreOption = {
       // eslint-disable-next-line theme-colors/no-literal-colors
-      backgroundColor: 'rgba(20, 33, 64, 1)',
       grid: { left: 10, right: 100, top: 30, bottom: 30, containLabel: true },
       xAxis: {
         type: 'value',
@@ -313,7 +322,7 @@ export default function SupersetPluginChartTop5Bars(
             position: [0, -8], // над баром
             formatter: (p: any) => rows[p.dataIndex].reason,
             // eslint-disable-next-line theme-colors/no-literal-colors
-            color: '#C4C4C4',
+            color: colors.labelTop,
             fontSize: 16,
             align: 'left',
             lineHeight: 16,
@@ -333,9 +342,9 @@ export default function SupersetPluginChartTop5Bars(
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
               // eslint-disable-next-line theme-colors/no-literal-colors
-              { offset: 0, color: '#142140' },
+              { offset: 0, color: colors.gradientEnd },
               // eslint-disable-next-line theme-colors/no-literal-colors
-              { offset: 1, color: '#0093FF' },
+              { offset: 1, color: colors.gradientStart },
             ]),
             borderRadius: [5, 5, 5, 5],
           },
@@ -365,20 +374,20 @@ export default function SupersetPluginChartTop5Bars(
             rich: {
               dot: {
                 // eslint-disable-next-line theme-colors/no-literal-colors
-                color: '#0093FF',
+                color: colors.labelRight,
                 fontSize: 14,
                 padding: [0, 4, 0, 0],
               },
               white: {
                 // eslint-disable-next-line theme-colors/no-literal-colors
-                color: '#FFFFFF',
+                color: colors.labelRight,
                 fontSize: 20,
                 fontWeight: 700,
                 fontFamily: 'Onest, sans-serif',
               },
               gray: {
                 // eslint-disable-next-line theme-colors/no-literal-colors
-                color: '#9AA3B1',
+                color: colors.labelRight,
                 fontSize: 16,
               },
             },
@@ -410,6 +419,7 @@ export default function SupersetPluginChartTop5Bars(
       headerFontSize={0}
       boldText={false}
       styleType=""
+      theme={theme}
     >
       {styleType === 'classic' ? (
         <>
