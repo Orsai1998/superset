@@ -144,12 +144,22 @@ export default function SupersetPluginChartTop5Bars(
       ? headerFontSize
       : headerSizePx[String(headerFontSize || 'xl')] ?? 20;
   const chartDivRef = useRef<HTMLDivElement>(null);
+  const metricTitleFontSize = formData?.metricTitleFontSize || 20;
   const chartRef = useRef<echarts.EChartsType | null>(null);
+  const sortOrder = formData?.sortOrder || 'desc';
+  const topN = formData?.rowLimit || 5;
+
   const prepare = (rows: Row[]) => {
-    const sorted = [...rows]
-      .filter(d => d && typeof d.value === 'number')
-      .sort((a, b) => a.value - b.value)
-      .slice(0, 5);
+    // 1. Filter valid rows
+    const cleaned = [...rows].filter(d => d && typeof d.value === 'number');
+
+    // 2. Apply sorting from control panel
+    if (sortOrder === 'asc') {
+      cleaned.sort((a, b) => a.value - b.value);
+    } else if (sortOrder === 'desc') {
+      cleaned.sort((a, b) => b.value - a.value);
+    }
+    const sorted = cleaned.slice(0, topN);
 
     return {
       reasons: sorted.map(d => String(d.reason ?? '—')),
@@ -280,19 +290,27 @@ export default function SupersetPluginChartTop5Bars(
     const chart = chartRef.current;
     const { rows, max } = prepare(data as unknown as Row[]);
     const isLight = formData.theme === 'light';
+    const colorScheme = formData?.colorScheme || 'blue';
+    const COLOR_SCHEMES: Record<string, { start: string; end: string }> = {
+      // eslint-disable-next-line theme-colors/no-literal-colors
+      blue: { start: '#0093FF', end: '#142140' },
+      // eslint-disable-next-line theme-colors/no-literal-colors
+      orange: { start: '#F97316', end: '#FFFFFF' },
+      // eslint-disable-next-line theme-colors/no-literal-colors
+      bronze: { start: '#AF784A', end: '#142140' },
+    };
+    const gradient = COLOR_SCHEMES[colorScheme];
 
     const colors = {
       background: isLight ? '#F5F5F5' : 'rgba(20, 33, 64, 1)',
       labelTop: isLight ? '#5F5F61' : '#C4C4C4',
       labelRight: isLight ? '#323232' : '#FFFFFF',
       title: isLight ? '#323232' : '#FFFFFF',
-      gradientStart: isLight ? '#F97316' : '#142140',
-      gradientEnd: isLight ? '#FFFFFF' : '#0093FF',
     };
 
     const option: echarts.EChartsCoreOption = {
       // eslint-disable-next-line theme-colors/no-literal-colors
-      grid: { left: 10, right: 100, top: 30, bottom: 30, containLabel: true },
+      grid: { left: 10, right: 100, top: 0, bottom: 0, containLabel: true },
       xAxis: {
         type: 'value',
         max,
@@ -319,13 +337,13 @@ export default function SupersetPluginChartTop5Bars(
           barCategoryGap: '-100px',
           label: {
             show: true,
-            position: [0, -8], // над баром
+            position: 'TopLeft',
+            offset: [0, -20],
             formatter: (p: any) => rows[p.dataIndex].reason,
             // eslint-disable-next-line theme-colors/no-literal-colors
             color: colors.labelTop,
             fontSize: 16,
             align: 'left',
-            lineHeight: 16,
             width: 300,
             overflow: 'break', // перенос длинных названий
             fontFamily: 'Onest, sans-serif',
@@ -342,9 +360,9 @@ export default function SupersetPluginChartTop5Bars(
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
               // eslint-disable-next-line theme-colors/no-literal-colors
-              { offset: 0, color: colors.gradientEnd },
+              { offset: 0, color: gradient.end },
               // eslint-disable-next-line theme-colors/no-literal-colors
-              { offset: 1, color: colors.gradientStart },
+              { offset: 1, color: gradient.start },
             ]),
             borderRadius: [5, 5, 5, 5],
           },
@@ -440,8 +458,23 @@ export default function SupersetPluginChartTop5Bars(
       ) : (
         <div className="card-wrapper">
           <div className="card-header">
-            <h3>{headerText || 'Топ 5 простоев КИВ'}</h3>
-            <span>{subtitleText || ''}</span>
+            <div
+              style={{
+                fontSize: headerPx,
+                fontWeight: boldText ? 700 : 400,
+                fontFamily: 'Onest, "Helvetica Neue", Helvetica, sans-serif',
+              }}
+            >
+              {headerText || 'Топ 5 простоев КИВ'}
+            </div>
+            <span
+              style={{
+                fontSize: metricTitleFontSize,
+                fontFamily: 'Onest, "Helvetica Neue", Helvetica, sans-serif',
+              }}
+            >
+              {subtitleText || ''}
+            </span>
           </div>
           <div ref={chartDivRef} className="top5-chart" />
         </div>
