@@ -1,54 +1,12 @@
 /**
  * Apache 2.0
  */
-import { t, validateNonEmpty } from '@superset-ui/core';
-import {
-  ControlPanelConfig,
-  sharedControls,
-} from '@superset-ui/chart-controls';
+import { t } from '@superset-ui/core';
+import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    {
-      label: t('Query'),
-      expanded: true,
-      controlSetRows: [
-        [
-          {
-            name: 'groupby',
-            config: {
-              ...sharedControls.groupby,
-              label: t('Group by (Category)'),
-              description: t('Категориальная ось (например, reason)'),
-              validators: [validateNonEmpty],
-            },
-          },
-        ],
-
-        [
-          {
-            name: 'metrics',
-            config: {
-              ...sharedControls.metrics,
-              label: t('Metric'),
-              description: t('Числовая метрика (например, SUM(value))'),
-              validators: [validateNonEmpty],
-            },
-          },
-        ],
-        ['adhoc_filters'],
-        [
-          {
-            name: 'row_limit',
-            config: {
-              ...sharedControls.row_limit,
-              default: 5,
-              description: t('Сколько категорий показывать (Top-N)'),
-            },
-          },
-        ],
-      ],
-    },
+    sections.echartsTimeSeriesQueryWithXAxisSort,
     {
       label: t('Customize'),
       expanded: true,
@@ -65,6 +23,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+
         [
           {
             name: 'subtitleText',
@@ -93,20 +52,29 @@ const config: ControlPanelConfig = {
           {
             name: 'headerFontSize',
             config: {
-              type: 'SelectControl',
+              type: 'SliderControl',
               label: t('Header font size'),
-              default: 'xl',
-              choices: [
-                ['xxs', 'xx-small'],
-                ['xs', 'x-small'],
-                ['s', 'small'],
-                ['m', 'medium'],
-                ['l', 'large'],
-                ['xl', 'x-large'],
-                ['xxl', 'xx-large'],
-              ],
+              default: 12,
+              min: 8,
+              max: 48,
+              step: 1,
               renderTrigger: true,
               description: t('Размер шрифта заголовка'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'metric_title_font_size',
+            config: {
+              type: 'SliderControl',
+              label: t('Metric title font size'),
+              description: t('Размер шрифта метрики'),
+              default: 12,
+              min: 8,
+              max: 48,
+              step: 1,
+              renderTrigger: true,
             },
           },
         ],
@@ -127,7 +95,22 @@ const config: ControlPanelConfig = {
               ),
             },
           },
+          {
+            name: 'color_scheme',
+            config: {
+              type: 'SelectControl',
+              label: t('Bar Color Scheme'),
+              renderTrigger: true,
+              choices: [
+                ['blue', 'Blue → Cyan'],
+                ['orange', 'Orange → Yellow'],
+                ['bronze', 'Bronze → Navy'],
+              ],
+              description: t('Switch bar gradient color theme'),
+            },
+          },
         ],
+
         [
           {
             name: 'theme',
@@ -141,6 +124,23 @@ const config: ControlPanelConfig = {
               ],
               description: t('Select the color theme for this visualization.'),
               renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'sort_order',
+            config: {
+              type: 'SelectControl',
+              label: t('Sort Order'),
+              description: t('Choose how to sort bars before taking Top N'),
+              default: 'desc',
+              renderTrigger: true,
+              choices: [
+                ['asc', t('Ascending')],
+                ['desc', t('Descending')],
+                ['none', t('Do not sort')],
+              ],
             },
           },
         ],
