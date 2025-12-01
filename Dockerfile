@@ -131,6 +131,10 @@ RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-micros
       libmariadb-dev \
       python3-dev \
       build-essential \
+      apt-transport-https \
+      ca-certificates \
+      gnupg \
+      lsb-release \
       sudo && \
     rm -rf /var/lib/apt/lists/*
 
@@ -173,6 +177,11 @@ RUN pip install \
 
 RUN pip install playwright
 RUN python -m playwright install-deps && python -m playwright install chromium
+
+RUN if [ ! -f /home/superset/bootstrap ]; then \
+      echo "Running Superset with uid $(id -u superset)" > /home/superset/bootstrap; \
+    fi && \
+    chown superset:superset /home/superset/bootstrap
 
 # Очистка переменных прокси
 ENV http_proxy=""
