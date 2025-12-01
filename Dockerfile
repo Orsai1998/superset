@@ -178,10 +178,11 @@ RUN pip install \
 RUN pip install playwright
 RUN python -m playwright install-deps && python -m playwright install chromium
 
-RUN if [ ! -f /home/superset/bootstrap ]; then \
-      echo "Running Superset with uid $(id -u superset)" > /home/superset/bootstrap; \
-    fi && \
-    chown superset:superset /home/superset/bootstrap
+RUN mkdir -p /home/superset \
+    && if [ ! -f /home/superset/bootstrap ]; then \
+         echo "Running Superset with uid $(id -u superset)" > /home/superset/bootstrap; \
+       fi \
+    && chown superset:superset /home/superset/bootstrap
 
 # Очистка переменных прокси
 ENV http_proxy=""
