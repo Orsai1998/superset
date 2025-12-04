@@ -1,64 +1,16 @@
-import { t, validateNonEmpty } from '@superset-ui/core';
-import {
-  sharedControls,
-  ControlPanelConfig,
-} from '@superset-ui/chart-controls';
+import { t } from '@superset-ui/core';
+import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    {
-      label: t('Query'),
-      expanded: true,
-      controlSetRows: [
-        [
-          {
-            name: 'groupby',
-            config: {
-              ...sharedControls.groupby,
-              type: 'SelectControl',
-              label: t('Day column'),
-              description: t(
-                'Categorical column for the day label (e.g., 01..31).',
-              ),
-              default: ['day'], // Default to 'day' column or an empty array if preferred
-              validators: [validateNonEmpty],
-              multi: false, // Allow only one selection for grouping by day
-              freeForm: false,
-              renderTrigger: true,
-            },
-          },
-        ],
-        [
-          {
-            name: 'metrics',
-            config: {
-              ...sharedControls.metrics,
-              label: t('Metrics (Plan, Fact)'),
-              description: t(
-                'Provide two metrics: first for Plan, second for Fact. Usually SUM(plan), SUM(fact).',
-              ),
-              validators: [validateNonEmpty],
-              multi: true, // Allow selecting multiple metrics
-            },
-          },
-        ],
-        [
-          {
-            name: 'row_limit',
-            config: {
-              type: 'NumberControl', // Use NumberControl for row limit
-              label: t('Row limit'),
-              default: 1000,
-              description: t('Limit the number of rows returned by the query'),
-              renderTrigger: true,
-            },
-          },
-        ],
-      ],
-    },
+    sections.echartsTimeSeriesQueryWithXAxisSort,
+    sections.advancedAnalyticsControls,
+    sections.annotationsAndLayersControls,
+    sections.forecastIntervalControls,
     {
       label: t('Appearance'),
       expanded: true,
+
       controlSetRows: [
         // ─── Theme Selector ───────────────────────────────────────
         [

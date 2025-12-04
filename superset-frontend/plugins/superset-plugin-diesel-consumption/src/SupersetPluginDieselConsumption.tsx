@@ -298,13 +298,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
 
     const chart = echarts.init(chartRef.current);
 
-    const prepared = data
-      .filter(d => d.day != null && d.day !== '')
-      .map(d => ({
-        day: String(d.day).padStart(2, '0'),
-        fact: d.fact || 0,
-        plan: d.plan || 0,
-      }));
+    const prepared = data.map(d => ({
+      day: String(d.day),
+      fact: d.fact || 0,
+      plan: d.plan || 0,
+    }));
 
     const preparedWithColors = prepared.map(item => {
       const color = item.fact > item.plan ? '#EC8080' : '#7ECF9B';
@@ -333,7 +331,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           axisLabel: { color: '#9CB0C5', fontSize: 11 },
           axisLine: { show: false },
           axisTick: { show: false },
-          min: 1,
+          min: 0,
         },
 
         yAxis: {
