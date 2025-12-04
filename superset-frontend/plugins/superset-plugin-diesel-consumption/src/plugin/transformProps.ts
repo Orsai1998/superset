@@ -4,47 +4,34 @@ import { DieselDatum } from '../types';
 export default function transformProps(chartProps: ChartProps) {
   const { width, height, theme, queriesData, formData } = chartProps;
 
-  // Handle undefined queriesData gracefully
   const records = queriesData?.[0]?.data ?? [];
-  // Grouping and metrics extraction
-  const groupby = formData.groupby ?? []; // Default to empty array if not provided
-  const dayCol = groupby;
-  // Safely handle metrics
+  console.log(queriesData);
+  // === STANDARD Superset time column ===
+  const timeCol =
+    formData.xAxis || formData.x_axis || formData.groupby?.[0] || '__timestamp';
+  if (!timeCol) {
+    console.warn('Superset did not provide x_axis column.');
+  }
+
+  // === METRICS ===
   const [planMetric, factMetric] = formData.metrics ?? [];
-  const planMetricName = planMetric?.label ?? planMetric; // Use label or fallback to the metric name itself
+
+  const planMetricName = planMetric?.label ?? planMetric;
   const factMetricName = factMetric?.label ?? factMetric;
 
-  // Colors and other settings
-  const planColor = formData.plan_color ?? '#E77E83'; // Use default color if not provided
-  const factColor = formData.fact_color ?? '#7DBE82';
-  const showMonthTotals = formData.show_month_totals ?? true; // Use nullish coalescing to fallback to true
-  const valueFormat = formData.value_format ?? ',.0f'; // Default to number format
+  // === FORMATTING ===
+  const fmt = getNumberFormatter(formData.value_format ?? ',.0f');
 
-  // Get the number formatter
-  const fmt = getNumberFormatter(valueFormat);
+  // === TRANSFORM WITHOUT SORTING (Superset already sorts!) ===
+  const data: DieselDatum[] = records.map((rec: Record<string, any>) => ({
+    day: rec[timeCol],
 
-  // Transform records into the required format
-  const data: DieselDatum[] = records.map((r: { [x: string]: any }) => ({
-    day: r[dayCol], // Use the day column
-    plan: Number(r[planMetricName]) || 0, // Ensure plan value is a number or fallback to 0
-    fact: Number(r[factMetricName]) || 0, // Ensure fact value is a number or fallback to 0
+    plan: Number(rec[planMetricName] ?? 0),
+    fact: Number(rec[factMetricName] ?? 0),
   }));
 
-  // Sort by day, treating day as a number if it's numeric, otherwise as a string
-  const sorted = [...data].sort((a, b) => {
-    const an = Number(a.day);
-    const bn = Number(b.day);
-
-    // If both are numbers, sort numerically
-    // eslint-disable-next-line no-restricted-globals
-    if (!isNaN(an) && !isNaN(bn)) return an - bn;
-
-    // If they are not numbers, sort lexicographically (as strings)
-    return String(a.day).localeCompare(String(b.day));
-  });
-
-  // Calculate totals for the plan and fact metrics
-  const totals = sorted.reduce(
+  // === TOTALS (based on filtered dataset) ===
+  const totals = data.reduce(
     (acc, d) => {
       acc.plan += d.plan;
       acc.fact += d.fact;
@@ -53,26 +40,25 @@ export default function transformProps(chartProps: ChartProps) {
     { plan: 0, fact: 0 },
   );
 
-  const count = sorted.length;
+  const count = data.length || 1;
 
   const averages = {
-    plan: count > 0 ? totals.plan / count : 0,
-    fact: count > 0 ? totals.fact / count : 0,
+    plan: totals.plan / count,
+    fact: totals.fact / count,
   };
 
-  // Return the processed data and settings
   return {
     width,
     height,
     theme,
-    data: sorted,
-    planColor,
-    factColor,
-    showMonthTotals,
+    data,
+    planColor: formData.plan_color ?? '#E77E83',
+    factColor: formData.fact_color ?? '#7DBE82',
+    showMonthTotals: formData.show_month_totals ?? true,
     totals,
     averages,
     fmt,
-    title: formData?.slice_name ?? '',
+    title: formData.slice_name ?? '',
     formData,
   };
 }
