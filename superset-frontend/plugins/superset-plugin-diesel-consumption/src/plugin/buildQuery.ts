@@ -10,20 +10,10 @@ import {
 } from '@superset-ui/core';
 import { extractExtraMetrics } from '@superset-ui/chart-controls';
 
-function buildSortMetric(op: string, column: string) {
-  return {
-    expressionType: 'SIMPLE',
-    aggregate: op.toUpperCase(),
-    column: { column_name: column },
-    label: `${op}__${column}`,
-  };
-}
-
 export default function buildQuery(formData: QueryFormData) {
   const sortByMetric = ensureIsArray(formData.timeseries_limit_metric)[0];
   const { groupby } = formData;
   return buildQueryContext(formData, baseQueryObject => {
-    let orderby = [];
     const query = buildQueryObject(formData);
     // @ts-ignore
     let metrics = [...query.metrics];
@@ -61,24 +51,6 @@ export default function buildQuery(formData: QueryFormData) {
     // === APPLY FILTERS ===
     if (Array.isArray(formData.filters)) {
       query.filters = formData.filters;
-    }
-
-    if (formData.x_axis_sort_series) {
-      const op = formData.x_axis_sort_series; // "min" | "max" | "sum"
-      const metric = buildSortMetric(op, xAxis);
-
-      // ensure metric is in SELECT
-      metrics = [...metrics, metric];
-      query.metrics = metrics;
-
-      orderby = [[metric, formData.x_axis_sort_series_ascending ?? true]];
-      // @ts-ignore
-      query.orderby = orderby;
-      return [query];
-    }
-
-    if (formData.x_axis_sort_asc !== undefined) {
-      query.orderby = [[xAxis, formData.x_axis_sort_asc]];
     }
 
     // === APPLY LIMIT ===
