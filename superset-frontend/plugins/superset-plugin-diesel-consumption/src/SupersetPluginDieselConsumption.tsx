@@ -100,11 +100,10 @@ const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
 // eslint-disable-next-line theme-colors/no-literal-colors
 const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   border: 1px solid
-    ${({ $themeMode }) =>
-      $themeMode === 'light' ? '#E2E2E2' : 'rgba(26, 51, 111, 1)'};
+    ${({ $themeMode }) => ($themeMode === 'light' ? '#E2E2E2' : '#1A336F')};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
-    $themeMode === 'light' ? '#F5F5F5' : 'rgba(9, 21, 44, 1)'};
+    $themeMode === 'light' ? '#F5F5F5' : '#142140'};
   padding: 8px 12px;
   position: relative;
   font-family: 'Onest', sans-serif;
@@ -134,7 +133,8 @@ const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   }
 
   .dot.plan {
-    background: #d5d5d5;
+    background: ${({ $themeMode }) =>
+      $themeMode === 'light' ? '#d5d5d5' : '#09152B'};
   }
 
   .dot.fact {
@@ -144,6 +144,7 @@ const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   .legend {
     font-size: 14px;
     font-weight: 400 !important;
+    color: ${({ $themeMode }) => ($themeMode === 'light' ? '#323232' : '#fff')};
   }
 `;
 
@@ -246,7 +247,7 @@ const Label = styled.div<{ $themeMode: 'light' | 'dark' }>`
 type Props = {
   width: number;
   height: number;
-  data: { day: string | number; plan: number; fact: number }[];
+  data: { day: any; plan: number; fact: number }[];
   planColor: string;
   factColor: string;
   showMonthTotals: boolean;
@@ -262,6 +263,7 @@ type Props = {
     currentMonthFontSize: number;
     metricTitleFontSize: number;
     theme?: 'light' | 'dark';
+    enableFactPlanColoring: boolean;
   };
 };
 
@@ -288,6 +290,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   const metricTitle = formData?.metricTitle;
   const metricTitleFontSize = formData?.metricTitleFontSize || 20;
   const currentMonthFontSize = formData?.currentMonthFontSize || 13;
+  const enable_fact_plan_coloring = formData?.enableFactPlanColoring;
   const planColor =
     theme === 'light' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(74, 149, 70, 1)';
   const factColor =
@@ -299,14 +302,19 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     const chart = echarts.init(chartRef.current);
 
     const prepared = data.map(d => ({
-      day: String(d.day),
+      day: d.day,
       fact: d.fact || 0,
       plan: d.plan || 0,
     }));
 
     const preparedWithColors = prepared.map(item => {
-      const color = item.fact > item.plan ? '#EC8080' : '#7ECF9B';
-      const labelColor = item.fact > item.plan ? '#FF4646' : '#5A9A71';
+      let color = item.fact < item.plan ? '#EC8080' : '#7ECF9B';
+      let labelColor = item.fact < item.plan ? '#FF4646' : '#5A9A71';
+
+      if (enable_fact_plan_coloring) {
+        color = item.fact > item.plan ? '#EC8080' : '#7ECF9B';
+        labelColor = item.fact > item.plan ? '#FF4646' : '#5A9A71';
+      }
       return {
         ...item,
         color,
@@ -317,7 +325,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     let option;
 
     // ==========================================================
-    // === DEFAULT APPEARANCE (your existing one)
+    // === DEFAULT APPEARANCE
     // ==========================================================
     if (chartType === 'default') {
       option = {
@@ -423,7 +431,9 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     // === NEW APPEARANCE (daily plan/fact like screenshot)
     // ==========================================================
     else if (chartType === 'plan_fact_daily') {
-      const planColorDefault = theme === 'light' ? '#D9D9D9' : '#D9D9D9';
+      const planColorDefault = theme === 'light' ? '#D9D9D9' : '#09152B';
+      const labelColor = theme === 'light' ? '#6C6B6B' : '#6C6B6B';
+      const xAxisLabelColor = theme === 'light' ? '#323232' : '#FFFFFF';
       // @ts-ignore
       option = {
         backgroundColor: 'transparent',
@@ -441,7 +451,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           data: prepared.map(d => d.day),
           axisLabel: {
             // eslint-disable-next-line theme-colors/no-literal-colors
-            color: '#323232',
+            color: xAxisLabelColor,
             fontSize: 12,
           },
           axisLine: { show: false },
@@ -478,7 +488,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               fontWeight: 700,
               distance: 10,
               // eslint-disable-next-line theme-colors/no-literal-colors
-              color: '#6C6B6B',
+              color: labelColor,
               rotate: 90,
               offset: [15, 3],
               formatter: (p: { value: number }) => fmt(p.value),
