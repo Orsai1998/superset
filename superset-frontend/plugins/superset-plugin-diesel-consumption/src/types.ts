@@ -22,7 +22,7 @@ export type SupersetPluginDieselConsumptionQueryFormData = QueryFormData &
   SupersetPluginDieselConsumptionCustomizeProps;
 
 export type DieselDatum = {
-  day: string | number;
+  day: any;
   plan: number;
   fact: number;
 };

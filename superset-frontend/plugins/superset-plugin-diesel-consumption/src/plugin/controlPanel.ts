@@ -123,6 +123,18 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
             },
           },
+          {
+            name: 'enable_fact_plan_coloring',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Enable fact/plan color logic'),
+              description: t(
+                'If enabled, metrics will be colored based on fact > plan.',
+              ),
+              default: true,
+              renderTrigger: true,
+            },
+          },
         ],
       ],
     },
