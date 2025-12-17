@@ -457,7 +457,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           axisLine: { show: false },
           axisTick: { show: false },
           min: 0,
-          boundaryGap: true,
+          boundaryGap: false,
         },
 
         yAxis: { show: false },
