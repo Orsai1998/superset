@@ -30,13 +30,75 @@ function resolveXAxisColumn(formData) {
   // Final fallback: Superset timestamp col
   return '__timestamp';
 }
+function resolveDay(value: any, timeGrainSqla?: string | null) {
+  if (!value) return value;
+
+  if (!timeGrainSqla) {
+    return value;
+  }
+
+  const d = new Date(value);
+
+  switch (timeGrainSqla) {
+    /* ======================
+       TIME
+    ====================== */
+    case 'PT1S':
+      return d.toISOString().slice(11, 19); // HH:mm:ss
+
+    case 'PT1M':
+    case 'PT5M':
+    case 'PT10M':
+    case 'PT15M':
+    case 'PT30M':
+      return d.toISOString().slice(11, 16); // HH:mm
+
+    case 'PT1H':
+      return d.toISOString().slice(11, 13); // HH
+
+    /* ======================
+       DAY → 01, 02, 03 ...
+    ====================== */
+    case 'P1D':
+      return String(d.getUTCDate()).padStart(2, '0');
+
+    /* ======================
+       WEEK
+    ====================== */
+    case 'P1W':
+    case '1969-12-28T00:00:00Z/P1W':
+    case '1969-12-29T00:00:00Z/P1W': {
+      const monday = new Date(d);
+      const day = monday.getUTCDay() || 7;
+      monday.setUTCDate(monday.getUTCDate() - day + 1);
+      return String(monday.getUTCDate()).padStart(2, '0');
+    }
+
+    /* ======================
+       MONTH / QUARTER / YEAR
+    ====================== */
+    case 'P1M':
+      return `${d.getUTCMonth() + 1}`.padStart(2, '0');
+
+    case 'P3M': {
+      const q = Math.floor(d.getUTCMonth() / 3) + 1;
+      return `Q${q}`;
+    }
+
+    case 'P1Y':
+      return `${d.getUTCFullYear()}`;
+
+    default:
+      return value;
+  }
+}
+
 export default function transformProps(chartProps: ChartProps) {
   const { width, height, theme, queriesData, formData } = chartProps;
-
+  const { timeGrainSqla } = formData;
   const records = queriesData?.[0]?.data ?? [];
   // === STANDARD Superset time column ===
   const timeCol = resolveXAxisColumn(formData);
-
   if (!timeCol) {
     console.warn('Superset did not provide x_axis column.');
   }
@@ -52,7 +114,7 @@ export default function transformProps(chartProps: ChartProps) {
 
   // === TRANSFORM WITHOUT SORTING (Superset already sorts!) ===
   const data: DieselDatum[] = records.map((rec: Record<any, any>) => ({
-    day: rec[timeCol],
+    day: resolveDay(rec[timeCol], timeGrainSqla),
 
     plan: Number(rec[planMetricName] ?? 0),
     fact: Number(rec[factMetricName] ?? 0),
