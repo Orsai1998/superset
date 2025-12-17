@@ -4,13 +4,9 @@ import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
 const config: ControlPanelConfig = {
   controlPanelSections: [
     sections.echartsTimeSeriesQueryWithXAxisSort,
-    sections.advancedAnalyticsControls,
-    sections.annotationsAndLayersControls,
-    sections.forecastIntervalControls,
     {
       label: t('Appearance'),
       expanded: true,
-
       controlSetRows: [
         // ─── Theme Selector ───────────────────────────────────────
         [
