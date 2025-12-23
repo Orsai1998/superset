@@ -55,7 +55,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-
         [
           {
             name: 'metric_title',
