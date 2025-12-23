@@ -439,8 +439,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         backgroundColor: 'transparent',
 
         grid: {
-          left: '-3.5%',
-          right: '30px',
+          left: '0%',
+          right: '45px',
           top: 50,
           bottom: 0,
           containLabel: true,
@@ -490,7 +490,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               // eslint-disable-next-line theme-colors/no-literal-colors
               color: labelColor,
               rotate: 90,
-              offset: [15, 3],
+              offset: [15, 5],
               formatter: (p: { value: number }) => fmt(p.value),
             },
             emphasis: { disabled: true },
@@ -513,7 +513,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               fontWeight: 700,
               distance: 3,
               rotate: 90,
-              offset: [15, 0],
+              offset: [15, 5],
               formatter: (p: { value: number }) => fmt(p.value),
             },
             itemStyle: {
