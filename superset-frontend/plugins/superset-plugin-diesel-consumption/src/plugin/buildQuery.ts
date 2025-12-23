@@ -7,6 +7,7 @@ import {
   normalizeOrderBy,
   isXAxisSet,
   getXAxisColumn,
+  QueryObject,
 } from '@superset-ui/core';
 import { extractExtraMetrics } from '@superset-ui/chart-controls';
 
@@ -47,7 +48,14 @@ export default function buildQuery(formData: QueryFormData) {
         metrics = [...metrics, sortByMetric];
       }
     }
-
+    let orderby: QueryObject['orderby'];
+    const asc = formData.sort_ascending !== false;
+    if (formData.sort_by === '__xaxis__' && xAxis) {
+      orderby = [[xAxis, asc]];
+    } else {
+      const { orderby: normalizedOrderby } = normalizeOrderBy(baseQueryObject);
+      orderby = normalizedOrderby;
+    }
     // === APPLY FILTERS ===
     if (Array.isArray(formData.filters)) {
       query.filters = formData.filters;
@@ -63,7 +71,7 @@ export default function buildQuery(formData: QueryFormData) {
         columns,
         series_columns: groupby,
         ...(isXAxisSet(formData) ? {} : { is_timeseries: true }),
-        orderby: normalizeOrderBy(baseQueryObject).orderby,
+        orderby,
       },
     ];
   });
