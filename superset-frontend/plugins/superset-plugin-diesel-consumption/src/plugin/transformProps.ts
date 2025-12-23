@@ -1,6 +1,50 @@
 import { ChartProps, getNumberFormatter } from '@superset-ui/core';
 import { DieselDatum } from '../types';
 
+function normalizeByTimeGrain(
+  data: DieselDatum[],
+  timeGrainSqla?: string | null,
+): DieselDatum[] {
+  if (!timeGrainSqla) return data;
+
+  const map = new Map<string, DieselDatum>();
+  data.forEach(d => map.set(d.day, d));
+
+  /* ======================
+     DAY → always 01..31
+  ====================== */
+  if (timeGrainSqla === 'P1D') {
+    return Array.from({ length: 31 }, (_, i) => {
+      const day = String(i + 1).padStart(2, '0');
+      return (
+        map.get(day) ?? {
+          day,
+          plan: 0,
+          fact: 0,
+        }
+      );
+    });
+  }
+
+  /* ======================
+     MONTH → always 01..12
+  ====================== */
+  if (timeGrainSqla === 'P1M') {
+    return Array.from({ length: 12 }, (_, i) => {
+      const month = String(i + 1).padStart(2, '0');
+      return (
+        map.get(month) ?? {
+          day: month,
+          plan: 0,
+          fact: 0,
+        }
+      );
+    });
+  }
+
+  return data;
+}
+
 // @ts-ignore
 function resolveXAxisColumn(formData) {
   const pick = (col: { label: any }) => {
@@ -113,13 +157,13 @@ export default function transformProps(chartProps: ChartProps) {
   const fmt = getNumberFormatter(formData.value_format ?? ',.0f');
 
   // === TRANSFORM WITHOUT SORTING (Superset already sorts!) ===
-  const data: DieselDatum[] = records.map((rec: Record<any, any>) => ({
+  const rawData: DieselDatum[] = records.map((rec: Record<any, any>) => ({
     day: resolveDay(rec[timeCol], timeGrainSqla),
 
     plan: Number(rec[planMetricName] ?? 0),
     fact: Number(rec[factMetricName] ?? 0),
   }));
-
+  const data = normalizeByTimeGrain(rawData, timeGrainSqla);
   // === TOTALS (based on filtered dataset) ===
   const totals = data.reduce(
     (acc, d) => {
