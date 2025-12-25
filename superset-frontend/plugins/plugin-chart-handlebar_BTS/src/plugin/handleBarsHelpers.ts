@@ -147,6 +147,8 @@ export function registerCustomHelpers() {
       БП: 'bp',
       ОП: 'op',
       ПС: 'ps',
+      П:  'p',
+      ПЗ: 'pz',
       Ф: 'f',
     };
     // Split by line, filter empty
@@ -459,4 +461,32 @@ Handlebars.registerHelper('createUrlDash', function (options) {
 
   return new Handlebars.SafeString(url);
 });
+
+Handlebars.registerHelper('colorLabels', function (line) {
+  if (!line) return '';
+
+  const map = {
+    'БП': 'bp',
+    'ОП': 'op',
+    'ПС': 'ps',
+    'Ф':  'f',
+    'П':  'p',
+    'ПЗ': 'pz',
+  };
+
+  // Важно: если line уже приходит как строка из данных — можно работать напрямую
+  // Если боишься XSS, сначала экранируй, а потом вставляй только свои спаны.
+  let s = String(line);
+
+  // Ловим "БП:" / "ОП:" / ... (обычно в строке именно так)
+  // Lifts "БП:" / "БП: " into just a span "БП" (colon removed)
+  s = s.replace(/(^|\s)(БП|ОП|ПС|ПЗ|П|Ф)\s*:\s*/g, (m, pre, lbl) => {
+  const cls = map[lbl] || 'x';
+  return `${pre}<span class="kpi-label kpi-${cls}">${lbl}</span> `;
+
+  });
+
+  return new Handlebars.SafeString(s);
+});
+
 }
