@@ -104,6 +104,36 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'metric_font_size',
+            config: {
+              type: 'SliderControl',
+              label: t('Metric font size'),
+              description: t('Metric font size.'),
+              default: 16,
+              min: 8,
+              max: 48,
+              step: 1,
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'x_axis_font_size',
+            config: {
+              type: 'SliderControl',
+              label: t('Axis font size'),
+              description: t('Axis font size.'),
+              default: 10,
+              min: 8,
+              max: 48,
+              step: 1,
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
             name: 'metric_title_font_size',
             config: {
               type: 'SliderControl',

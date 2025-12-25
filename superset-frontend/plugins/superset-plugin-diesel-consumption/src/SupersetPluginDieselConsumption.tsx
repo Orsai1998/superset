@@ -262,6 +262,8 @@ type Props = {
     metricTitle: string;
     currentMonthFontSize: number;
     metricTitleFontSize: number;
+    metricFontSize: number;
+    xAxisFontSize: number;
     theme?: 'light' | 'dark';
     enableFactPlanColoring: boolean;
   };
@@ -289,6 +291,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   const chartTitle = formData?.chartTitle;
   const metricTitle = formData?.metricTitle;
   const metricTitleFontSize = formData?.metricTitleFontSize || 20;
+  const metricFontSize = formData?.metricFontSize || 8;
+  const axisFontSize = formData?.xAxisFontSize || 8;
   const currentMonthFontSize = formData?.currentMonthFontSize || 13;
   const enable_fact_plan_coloring = formData?.enableFactPlanColoring;
   const planColor =
@@ -452,7 +456,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           axisLabel: {
             // eslint-disable-next-line theme-colors/no-literal-colors
             color: xAxisLabelColor,
-            fontSize: 12,
+            fontSize: axisFontSize,
           },
           axisLine: { show: false },
           axisTick: { show: false },
@@ -484,7 +488,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             label: {
               show: true,
               position: 'top',
-              fontSize: 10,
+              fontSize: metricFontSize,
               fontWeight: 700,
               distance: 10,
               // eslint-disable-next-line theme-colors/no-literal-colors
@@ -509,7 +513,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             label: {
               show: true,
               position: 'top',
-              fontSize: 10,
+              fontSize: metricFontSize,
               fontWeight: 700,
               distance: 3,
               rotate: 90,
