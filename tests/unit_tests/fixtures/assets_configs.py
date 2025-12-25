@@ -29,7 +29,7 @@ databases_config: dict[str, Any] = {
         "uuid": "a2dc77af-e654-49bb-b321-40f6b559a1ee",
         "version": "1.0.0",
         "password": None,
-        "allow_csv_upload": False,
+        "allow_csv_upload": True,
     },
 }
 datasets_config: dict[str, Any] = {

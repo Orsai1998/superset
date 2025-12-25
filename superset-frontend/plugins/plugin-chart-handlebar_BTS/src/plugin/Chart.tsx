@@ -57,47 +57,55 @@ function extractDashIdFromHref(href: string): string | null {
 // --- helpers -------------------------------
 
 // DROP-IN: replace your current function with this one (same name/signature)
-function tryHideEmpty(iframe, slot) {
-  const maxMs   = +slot.dataset.hidePollMaxMs  || 15000; // total window to watch
-  const stepMs  = +slot.dataset.hidePollStepMs || 250;   // poll interval
-  const graceMs = +slot.dataset.hidePollGraceMs|| 1200;  // don't hide before this
-  const needHits= +slot.dataset.hidePollHits   || 2;     // consecutive empty detections
-  const debug   = slot.dataset.hideDebug === '1';
+function tryHideEmpty(iframe: any, slot: any) {
+  const maxMs = +slot.dataset.hidePollMaxMs || 15000; // total window to watch
+  const stepMs = +slot.dataset.hidePollStepMs || 250; // poll interval
+  const graceMs = +slot.dataset.hidePollGraceMs || 1200; // don't hide before this
+  const needHits = +slot.dataset.hidePollHits || 2; // consecutive empty detections
+  const debug = slot.dataset.hideDebug === '1';
 
   const started = performance.now();
   let emptyHits = 0;
 
   // Helper: (un)hide wrapper
-  function setHidden(on) {
+  function setHidden(on: boolean) {
     if (on) {
+      // eslint-disable-next-line no-param-reassign
       if (slot.style.display !== 'none') slot.style.display = 'none';
       slot.setAttribute('data-hidden-empty', '1');
-    } else {
-      if (slot.getAttribute('data-hidden-empty') === '1') {
-        slot.style.removeProperty('display');
-        slot.removeAttribute('data-hidden-empty');
-      }
+    } else if (slot.getAttribute('data-hidden-empty') === '1') {
+      slot.style.removeProperty('display');
+      slot.removeAttribute('data-hidden-empty');
     }
   }
 
   // Look for empty state **inside chart containers only**
-  function isEmptyScoped(doc) {
+  function isEmptyScoped(doc: { querySelectorAll: (arg0: string) => any }) {
     // typical containers around charts on Superset dashboards
     const containers = doc.querySelectorAll(
-      '.dashboard-component-chart, .slice_container, [data-test="chart"], .chart-container'
+      '.dashboard-component-chart, .slice_container, [data-test="chart"], .chart-container',
     );
     if (!containers.length) return false;
 
     // ant empty & explicit empty markers inside containers
     for (const c of containers) {
-      if (c.querySelector('.ant-empty, .ant-empty-normal, [data-test="empty-state"], .chart-empty, .slice-empty')) {
+      if (
+        c.querySelector(
+          '.ant-empty, .ant-empty-normal, [data-test="empty-state"], .chart-empty, .slice-empty',
+        )
+      ) {
         if (debug) console.log('[hideEmpty] ant/marker found in container');
         return true;
       }
       // textual message inside the container
       const t = (c.innerText || '').trim();
-      if (/No results were returned for this query|No data|Нет данных|Данные не найдены/i.test(t)) {
-        if (debug) console.log('[hideEmpty] text match in container:', t.slice(0,80));
+      if (
+        /No results were returned for this query|No data|Нет данных|Данные не найдены/i.test(
+          t,
+        )
+      ) {
+        if (debug)
+          console.log('[hideEmpty] text match in container:', t.slice(0, 80));
         return true;
       }
     }
@@ -120,8 +128,14 @@ function tryHideEmpty(iframe, slot) {
 
       if (debug) {
         // light debug line
-        console.log('[hideEmpty] elapsed=', Math.round(elapsed),
-          ' emptyNow=', emptyNow, ' hits=', emptyHits);
+        console.log(
+          '[hideEmpty] elapsed=',
+          Math.round(elapsed),
+          ' emptyNow=',
+          emptyNow,
+          ' hits=',
+          emptyHits,
+        );
       }
 
       // Only hide after grace time AND enough consecutive confirmations
@@ -336,7 +350,10 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         if (slot.dataset.realized === '1') return loadNext();
 
         const src = slot.dataset.src!;
-        const height = new URL(src,window.location.origin).searchParams.get('height')||slot.dataset.height || '33vh';
+        const height =
+          new URL(src, window.location.origin).searchParams.get('height') ||
+          slot.dataset.height ||
+          '33vh';
         const padding = slot.dataset.padding || '0';
 
         const iframe = document.createElement('iframe');
@@ -349,7 +366,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           border: 'none',
           display: 'block',
           background: 'transparent',
-          overflow:'hidden',
+          overflow: 'hidden',
         });
 
         // timeout + retry once
