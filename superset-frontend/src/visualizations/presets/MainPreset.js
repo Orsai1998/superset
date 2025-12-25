@@ -88,6 +88,8 @@ import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS
 import TimeTableChartPlugin from '../TimeTable';
 import Top5BarsPlugin from '../../../plugins/superset-plugin-chart-top5bars/src/plugin';
 import SupersetPluginChartErgPlanFact from '../../../plugins/superset-plugin-chart-erg-bars/src/plugin/index';
+import SupersetPluginTop40Consumption from '../../../plugins/superset-plugin-top40-consumption/src/plugin/index';
+import SupersetPluginDieselConsumption from '../../../plugins/superset-plugin-diesel-consumption/src/plugin/index';
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -186,6 +188,10 @@ export default class MainPreset extends Preset {
         new EchartsSunburstChartPlugin().configure({ key: 'sunburst_v2' }),
         new HandlebarsChartPlugin().configure({ key: 'handlebars' }),
         new HandlebarBTSChartPlugin().configure({ key: 'handlebar_BTS' }),
+        new SupersetPluginTop40Consumption().configure({ key: 'top-40' }),
+        new SupersetPluginDieselConsumption().configure({
+          key: 'diesel-consumption',
+        }),
         new Top5BarsPlugin().configure({ key: 'top5-bars' }).register(),
         new SupersetPluginChartErgPlanFact().configure({
           key: 'plan-fact-bars',
