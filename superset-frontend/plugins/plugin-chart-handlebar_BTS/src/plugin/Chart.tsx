@@ -399,7 +399,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     // ---- State kept across clicks (not React state) ------------------------
     // We keep the current period in both DOM (data-period) and a ref variable,
     // so it remains correct on every click.
-    let periodRef: Period = 'day'; // | null = null; // null => "no specific period" (show all columns)
+    let periodRef: Period = 'week'; // | null = null; // null => "no specific period" (show all columns)
 
     // Read from DOM if it existed (e.g., re-mount within same container)
     const attr = root.getAttribute('data-period');
@@ -453,7 +453,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     const allPeriodBtns = root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
     allPeriodBtns.forEach(btn => {
       const typeAttr = btn.getAttribute('data-type');
-      if (normalizePeriod(typeAttr) === 'day') {
+      if (normalizePeriod(typeAttr) === 'week') {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
@@ -502,7 +502,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       // ----- Period buttons (.kpi-toggle-btn) -----
       const periodBtn = target.closest('.kpi-toggle-btn') as
         | HTMLElement
-        | 'day';
+        | 'week';
       if (periodBtn) {
         // @ts-ignore
         const typeAttr = periodBtn.getAttribute('data-type'); // may be '0','1','2','3' or names
@@ -518,7 +518,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
 
         if (wasActive) {
           // Toggle off -> no specific period
-          setPeriod('day');
+          setPeriod('week');
         } else {
           // Activate clicked button
           // @ts-ignore
