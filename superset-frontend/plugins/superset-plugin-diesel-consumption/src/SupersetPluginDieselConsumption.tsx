@@ -126,6 +126,9 @@ const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
     color: #333;
   }
 
+  .spacer {
+    margin-bottom: 30px;
+  }
   .dot {
     width: 16px;
     height: 16px;
@@ -517,7 +520,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               fontWeight: 700,
               distance: 3,
               rotate: 90,
-              offset: [15, 5],
+              offset: [15, 10],
               formatter: (p: { value: number }) => fmt(p.value),
             },
             itemStyle: {
@@ -646,7 +649,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             <span className="legend">Факт</span>
           </div>
         </div>
-
+        <div className="spacer"></div>
         <div id="chart" className="chart" />
         <ChartContainer ref={chartRef} />
       </Panel>
