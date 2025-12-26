@@ -649,7 +649,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             <span className="legend">Факт</span>
           </div>
         </div>
-        <div className="spacer"></div>
+        <div className="spacer" />
         <div id="chart" className="chart" />
         <ChartContainer ref={chartRef} />
       </Panel>
