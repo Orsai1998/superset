@@ -80,6 +80,21 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'metric_width',
+            config: {
+              type: 'SliderControl',
+              label: t('Metric width'),
+              description: t('Размер ширины'),
+              default: 350,
+              min: 8,
+              max: 800,
+              step: 1,
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
             name: 'styleType',
             config: {
               type: 'SelectControl',
