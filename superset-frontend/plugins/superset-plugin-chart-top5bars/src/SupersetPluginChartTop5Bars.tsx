@@ -136,8 +136,14 @@ export default function SupersetPluginChartTop5Bars(
   props: SupersetPluginChartTop5BarsProps,
 ) {
   const { data, height, width, formData } = props;
-  const { styleType, headerText, boldText, headerFontSize, subtitleText } =
-    formData;
+  const {
+    styleType,
+    headerText,
+    boldText,
+    headerFontSize,
+    subtitleText,
+    metricWidth,
+  } = formData;
   const theme = formData?.theme || 'dark';
   const headerPx =
     typeof headerFontSize === 'number'
@@ -344,7 +350,7 @@ export default function SupersetPluginChartTop5Bars(
             color: colors.labelTop,
             fontSize: 16,
             align: 'left',
-            width: 300,
+            width: metricWidth,
             overflow: 'break', // перенос длинных названий
             fontFamily: 'Onest, sans-serif',
           },
@@ -356,7 +362,7 @@ export default function SupersetPluginChartTop5Bars(
           data: rows.map(r => r.value),
           barWidth: 8,
           barCategoryGap: '100%',
-          barGap: '70%',
+          barGap: '100%',
           itemStyle: {
             color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
               // eslint-disable-next-line theme-colors/no-literal-colors
