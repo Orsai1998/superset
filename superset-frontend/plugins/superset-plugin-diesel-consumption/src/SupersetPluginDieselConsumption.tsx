@@ -127,7 +127,7 @@ const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   }
 
   .spacer {
-    margin-bottom: 30px;
+    margin-bottom: 40px;
   }
   .dot {
     width: 16px;
