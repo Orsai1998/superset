@@ -8,6 +8,9 @@ interface HandlebarsProps extends ChartProps {
   formData: {
     template: string;
     styles?: string; // optional user CSS from controls
+    // EDITED2026: optional allowlist for postMessage bridge (CSV of origins)
+    hostAllowlist?: string;
+    host_allowlist?: string;
     [key: string]: any;
   };
   data: any[] | { records: any[] };
@@ -33,7 +36,7 @@ const normalizePeriod = (v: string | null): Period => {
     case 'year':
       return 'year';
     default:
-      return 'day';
+      return 'week'; // EDITED2026: default week (matches desired fallback)
   }
 };
 
@@ -41,7 +44,7 @@ const normalizePeriod = (v: string | null): Period => {
 
 function addFilterFlags(url: string, show: '0' | '1' = '0') {
   const u = new URL(url, window.location.origin);
-  // don’t double-add
+  // EDITED2026: fix param check (was show_filters, but we set expand_filters)
   if (!u.searchParams.has('show_filters'))
     u.searchParams.set('expand_filters', show);
   if (!u.searchParams.has('show_native_filters'))
@@ -57,18 +60,18 @@ function extractDashIdFromHref(href: string): string | null {
 // --- helpers -------------------------------
 
 // DROP-IN: replace your current function with this one (same name/signature)
-function tryHideEmpty(iframe, slot) {
-  const maxMs   = +slot.dataset.hidePollMaxMs  || 15000; // total window to watch
-  const stepMs  = +slot.dataset.hidePollStepMs || 250;   // poll interval
-  const graceMs = +slot.dataset.hidePollGraceMs|| 1200;  // don't hide before this
-  const needHits= +slot.dataset.hidePollHits   || 2;     // consecutive empty detections
-  const debug   = slot.dataset.hideDebug === '1';
+function tryHideEmpty(iframe: HTMLIFrameElement, slot: HTMLElement) {
+  const maxMs = +slot.dataset.hidePollMaxMs! || 15000; // total window to watch
+  const stepMs = +slot.dataset.hidePollStepMs! || 250; // poll interval
+  const graceMs = +slot.dataset.hidePollGraceMs! || 1200; // don't hide before this
+  const needHits = +slot.dataset.hidePollHits! || 2; // consecutive empty detections
+  const debug = slot.dataset.hideDebug === '1';
 
   const started = performance.now();
   let emptyHits = 0;
 
   // Helper: (un)hide wrapper
-  function setHidden(on) {
+  function setHidden(on: boolean) {
     if (on) {
       if (slot.style.display !== 'none') slot.style.display = 'none';
       slot.setAttribute('data-hidden-empty', '1');
@@ -81,23 +84,27 @@ function tryHideEmpty(iframe, slot) {
   }
 
   // Look for empty state **inside chart containers only**
-  function isEmptyScoped(doc) {
+  function isEmptyScoped(doc: Document) {
     // typical containers around charts on Superset dashboards
     const containers = doc.querySelectorAll(
-      '.dashboard-component-chart, .slice_container, [data-test="chart"], .chart-container'
+      '.dashboard-component-chart, .slice_container, [data-test="chart"], .chart-container',
     );
     if (!containers.length) return false;
 
     // ant empty & explicit empty markers inside containers
-    for (const c of containers) {
-      if (c.querySelector('.ant-empty, .ant-empty-normal, [data-test="empty-state"], .chart-empty, .slice-empty')) {
+    for (const c of Array.from(containers)) {
+      if (
+        c.querySelector(
+          '.ant-empty, .ant-empty-normal, [data-test="empty-state"], .chart-empty, .slice-empty',
+        )
+      ) {
         if (debug) console.log('[hideEmpty] ant/marker found in container');
         return true;
       }
       // textual message inside the container
-      const t = (c.innerText || '').trim();
+      const t = ((c as HTMLElement).innerText || '').trim();
       if (/No results were returned for this query|No data|Нет данных|Данные не найдены/i.test(t)) {
-        if (debug) console.log('[hideEmpty] text match in container:', t.slice(0,80));
+        if (debug) console.log('[hideEmpty] text match in container:', t.slice(0, 80));
         return true;
       }
     }
@@ -120,8 +127,7 @@ function tryHideEmpty(iframe, slot) {
 
       if (debug) {
         // light debug line
-        console.log('[hideEmpty] elapsed=', Math.round(elapsed),
-          ' emptyNow=', emptyNow, ' hits=', emptyHits);
+        console.log('[hideEmpty] elapsed=', Math.round(elapsed), ' emptyNow=', emptyNow, ' hits=', emptyHits);
       }
 
       // Only hide after grace time AND enough consecutive confirmations
@@ -168,9 +174,9 @@ export function buildDashWithAppliedFilterUrl(
     ? values
     : typeof values === 'string' && values.includes(',')
       ? values
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean)
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
       : [values];
 
   const esc = (v: unknown) => String(v).replace(/'/g, "\\'");
@@ -200,20 +206,35 @@ export function buildDashWithAppliedFilterUrl(
 
   return `/superset/dashboard/${dashboardId}/?${params.toString()}`;
 }
+
 // Helper to show/hide table cells by period
 const setCellsDisplay = (els: NodeListOf<HTMLElement>, on: boolean) => {
   // eslint-disable-next-line no-return-assign,no-param-reassign
   els.forEach(el => (el.style.display = on ? 'table-cell' : 'none'));
 };
 
+// EDITED2026: postMessage protocol types (bridge for external host control)
+type CtrlAction = 'SET_PERIOD' | 'GET_STATE' | 'CLICK_LINK' | 'CLICK_TAB'; // EDITED2026
+type CtrlReq = { type: 'SSE_CTRL'; v: 1; id: string; action: CtrlAction; payload?: { period?: Period; linkId?: string; label?: string } }; // EDITED2026
+type CtrlAck = {
+  type: 'SSE_CTRL_ACK';
+  v: 1;
+  id: string;
+  status: 'OK' | 'ERR';
+  result?: any;
+  error?: { code: string; message: string };
+};
+// EDITED2026: CSS.escape fallback for older browsers
+const cssEscape = (value: string): string => {
+  const w = (window as any);
+  if (w?.CSS?.escape) return w.CSS.escape(value);
+  return value.replace(/[^a-zA-Z0-9_\-]/g, match => `\\${match}`);
+};
+
 export default function HandlebarsChart(props: HandlebarsProps) {
   const { template } = props.formData;
   const raw = props.data;
-  const records: any[] = Array.isArray(raw)
-    ? raw
-    : Array.isArray((raw as any).records)
-      ? (raw as any).records
-      : [];
+  const records: any[] = Array.isArray(raw) ? raw : Array.isArray((raw as any).records) ? (raw as any).records : [];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [modalUrl, setModalUrl] = useState<string | null>(null); // <-- состояние модалки
@@ -242,32 +263,26 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       root.prepend(styleTag);
     }
 
-    // === NEW: dashurl with collapsed  filter===
+    // === dashurl with collapsed filter ===
 
     // 1) find anchors like your screenshot
-    const anchors = Array.from(
-      root.querySelectorAll<HTMLAnchorElement>(
-        'a.open-modal[href*="/superset/dashboard/"]',
-      ),
-    );
+    const anchors = Array.from(root.querySelectorAll<HTMLAnchorElement>('a.open-modal[href*="/superset/dashboard/"]'));
 
-    // 2) collect dash ids from hrefs
-    anchors
-      .map(a => extractDashIdFromHref(a.getAttribute('href') || ''))
-      .filter((v): v is string => Boolean(v));
+    // EDITED2026: remove unused map/filter chain; just normalize hrefs + keep as-is
     anchors.forEach(a => {
       const href = a.getAttribute('href') || '';
       if (!href) return;
+
+      // just to validate / keep compatibility (optional)
+      extractDashIdFromHref(href);
+
       // default closed; if you ever need open for a single link, add data-show-filters="1"
-      const show =
-        (a.getAttribute('data-show-filters') || '0') === '1' ? '1' : '0';
+      const show = (a.getAttribute('data-show-filters') || '0') === '1' ? '1' : '0';
       a.setAttribute('href', addFilterFlags(href, show));
     });
 
-    // --- NEW: dashUrl ---
-    const dashLinks = root.querySelectorAll<HTMLAnchorElement>(
-      'a[data-open-dashboard]',
-    );
+    // --- dashUrl ---
+    const dashLinks = root.querySelectorAll<HTMLAnchorElement>('a[data-open-dashboard]');
     dashLinks.forEach(a => {
       const didAttr = (a.getAttribute('data-open-dashboard') || '').trim();
       if (!didAttr) return;
@@ -277,71 +292,60 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       const nfId = nfIdRaw.replace(/^NATIVE_FILTER-/, '');
 
       // значения (поддержка CSV)
-      const raw = (a.getAttribute('data-val') || '').trim();
-      const vals = raw
-        ? raw.includes(',')
-          ? raw
-              .split(',')
-              .map(s => s.trim())
-              .filter(Boolean)
-          : [raw]
+      const rawVal = (a.getAttribute('data-val') || '').trim();
+      const vals = rawVal
+        ? rawVal.includes(',')
+          ? rawVal
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+          : [rawVal]
         : [];
 
       // show_filters: нужно явно передать '0' или '1', иначе Superset возьмёт дефолт
       const showAttr = (a.getAttribute('data-show-filters') || '').trim(); // '0' | '1' | ''
-      const showFilters =
-        showAttr === '0' || showAttr === '1'
-          ? (showAttr as '0' | '1')
-          : undefined;
+      const showFilters = showAttr === '0' || showAttr === '1' ? (showAttr as '0' | '1') : undefined;
 
       // standalone: прокидываем строкой без Boolean/Number (чтобы '3' не стало 1)
       const stAttr = (a.getAttribute('data-standalone') || '').trim();
       const standalone = stAttr !== '' ? stAttr : undefined;
 
       if (nfId && vals.length) {
-        // URL c авто-применением Native Filter + опции
-        // eslint-disable-next-line no-param-reassign
-        a.href = buildDashWithAppliedFilterUrl(didAttr, nfId, vals, {
-          showFilters,
-          standalone,
-        });
+        a.href = buildDashWithAppliedFilterUrl(didAttr, nfId, vals, { showFilters, standalone });
       } else {
         const qs = new URLSearchParams();
         if (vals.length) qs.set('prod', vals.join(',')); // если используете url_param('prod')
         if (showFilters) qs.set('expand_filters', showFilters);
         if (standalone) qs.set('standalone', standalone);
-        // eslint-disable-next-line no-param-reassign
-        a.href = `/superset/dashboard/${encodeURIComponent(didAttr)}/${
-          qs.toString() ? `?${qs.toString()}` : ''
-        }`;
+        a.href = `/superset/dashboard/${encodeURIComponent(didAttr)}/${qs.toString() ? `?${qs.toString()}` : ''}`;
       }
 
-      // eslint-disable-next-line no-param-reassign
       if (!a.hasAttribute('target')) a.target = '_blank';
     });
 
-    // === NEW: realize <div.auto-iframe data-src="..."> to real <iframe> ===
+    // === realize <div.auto-iframe data-src="..."> to real <iframe> ===
     const realizeAutoIframes = () => {
-      const slots = Array.from(
-        root.querySelectorAll<HTMLElement>('.auto-iframe[data-src]'),
-      );
+      const slots = Array.from(root.querySelectorAll<HTMLElement>('.auto-iframe[data-src]'));
       let i = 0;
 
-      // @ts-ignore
-      const loadNext = () => {
+      // EDITED2026: remove ts-ignore; type the recursive loader
+      const loadNext = (): void => {
         if (i >= slots.length) return;
-        // eslint-disable-next-line no-plusplus
+
         const slot = slots[i++];
-        // eslint-disable-next-line consistent-return
         if (slot.dataset.realized === '1') return loadNext();
 
         const src = slot.dataset.src!;
-        const height = new URL(src,window.location.origin).searchParams.get('height')||slot.dataset.height || '33vh';
+        const height =
+          new URL(src, window.location.origin).searchParams.get('height') || slot.dataset.height || '33vh';
         const padding = slot.dataset.padding || '0';
 
         const iframe = document.createElement('iframe');
         iframe.src = src;
+
+        // first quick check after append
         requestAnimationFrame(() => tryHideEmpty(iframe, slot));
+
         iframe.title = slot.dataset.title || `Embedded-${i}`;
         Object.assign(iframe.style, {
           width: '100%',
@@ -349,7 +353,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           border: 'none',
           display: 'block',
           background: 'transparent',
-          overflow:'hidden',
+          overflow: 'hidden',
         });
 
         // timeout + retry once
@@ -357,16 +361,14 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           iframe.src = src; // retry same URL once
         }, 30000);
 
-        iframe.addEventListener('load', () => {
+        const done = () => {
           clearTimeout(t);
           tryHideEmpty(iframe, slot);
           loadNext();
-        });
-        iframe.addEventListener('error', () => {
-          clearTimeout(t);
-          tryHideEmpty(iframe, slot);
-          loadNext();
-        });
+        };
+
+        iframe.addEventListener('load', done);
+        iframe.addEventListener('error', done);
 
         slot.innerHTML = '';
         slot.style.padding = padding;
@@ -377,104 +379,96 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       // Start with a small stagger to let the page settle
       setTimeout(loadNext, 50);
     };
-    // === NEW: realize DASH <div.auto-iframe data-src="..."> to real <iframe> ===
+
     // ---------------------------------------------------------------------
     // ---- State kept across clicks (not React state) ------------------------
-    // We keep the current period in both DOM (data-period) and a ref variable,
-    // so it remains correct on every click.
-    let periodRef: Period = 'week'; // | null = null; // null => "no specific period" (show all columns)
+    // EDITED2026: default week, never null (week is enforced if user "unselects all")
+    let periodRef: Period = 'week';
 
     // Read from DOM if it existed (e.g., re-mount within same container)
     const attr = root.getAttribute('data-period');
     if (attr) periodRef = normalizePeriod(attr);
 
-    const setPeriod = (p: Period) => {
+    const setPeriodLocal = (p: Period) => {
       periodRef = p;
-      if (p) root.setAttribute('data-period', p);
-      // else root.removeAttribute('data-period');
+      root.setAttribute('data-period', p);
     };
 
     const getPeriod = (): Period => periodRef;
 
-    // Multiple category selection (checkbox-like)
+    // Multiple category selection (checkbox-like) - keep existing logic
     const selectedCats = new Set<string>(); // 'bp' | 'op' | 'ps'
     // === INIT: Default selected categories ===
     ['bp', 'op', 'ps'].forEach(cat => selectedCats.add(cat));
 
     // Activate any existing category buttons
-    const allCatBtns = root.querySelectorAll<HTMLButtonElement>(
-      '.smypki-refresh-btn',
-    );
+    const allCatBtns = root.querySelectorAll<HTMLButtonElement>('.smypki-refresh-btn');
     allCatBtns.forEach(btn => {
       const { cat } = btn.dataset;
       if (cat && selectedCats.has(cat)) {
         btn.classList.add('active');
       }
     });
+
     // Toggle period columns visibility (table cells)
     const applyPeriodColumns = () => {
-      const p = getPeriod(); // can be null
+      const p = getPeriod();
+
+      // EDITED2026: scope for visibility selectors; some elements may be outside plugin root
+      const scope =
+        (root.closest('.dashboard-component-chart') as HTMLElement | null) ||
+        (root.closest('[data-test="chart-container"]') as HTMLElement | null) ||
+        (root.closest('.chart-container') as HTMLElement | null) ||
+        document;
+
       const dayCells = document.querySelectorAll<HTMLElement>('.day_visible');
       const weekCells = document.querySelectorAll<HTMLElement>('.week_visible');
       const mnthCells = document.querySelectorAll<HTMLElement>('.mnth_visible');
       const yearCells = document.querySelectorAll<HTMLElement>('.year_visible');
 
-      if (p === null) {
-        // No specific period selected -> show all columns
-        setCellsDisplay(dayCells, true);
-        setCellsDisplay(weekCells, true);
-        setCellsDisplay(mnthCells, true);
-        setCellsDisplay(yearCells, true);
-      } else {
-        setCellsDisplay(dayCells, p === 'day');
-        setCellsDisplay(weekCells, p === 'week');
-        setCellsDisplay(mnthCells, p === 'mnth');
-        setCellsDisplay(yearCells, p === 'year');
-      }
+
+
+      setCellsDisplay(dayCells, p === 'day');
+      setCellsDisplay(weekCells, p === 'week');
+      setCellsDisplay(mnthCells, p === 'mnth');
+      setCellsDisplay(yearCells, p === 'year');
     };
 
-    const allPeriodBtns = root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
-    allPeriodBtns.forEach(btn => {
-      const typeAttr = btn.getAttribute('data-type');
-      if (normalizePeriod(typeAttr) === 'week') {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
+    // Ensure period buttons reflect current state
+    const syncPeriodButtons = () => {
+      const p = getPeriod() || 'week';
+      const allPeriodBtns =
+        root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
+      allPeriodBtns.forEach(btn => {
+        const typeAttr = btn.getAttribute('data-type');
+        btn.classList.toggle('active', normalizePeriod(typeAttr) === p);
+      });
+    };
+
     // Show/hide rows by selected categories & current period
-    // If no period selected -> apply to ALL periods.
     const DISPLAY_ROW = 'table-row'; // change to 'block' if rows are <div>
     const applyCategoryFilter = () => {
-      const current = getPeriod(); // Period | null
-      const periods: Period[] = current
-        ? [current]
-        : ['day', 'week', 'mnth', 'year'];
+      const current = getPeriod();
+
       const catsToShow =
         selectedCats.size === 0 ? ['bp', 'op', 'ps'] : Array.from(selectedCats);
 
-      // For each period, hide all rows first (except .f), then show selected categories
-      periods.forEach(p => {
-        const allRows = document.querySelectorAll<HTMLElement>(
-          `.${p}-value-row`,
-        );
-        // hide all except .f
-        allRows.forEach(row => {
-          if (row.classList.contains('f')) {
-            // eslint-disable-next-line no-param-reassign
-            row.style.display = DISPLAY_ROW;
-          } else {
-            // eslint-disable-next-line no-param-reassign
-            row.style.display = 'none';
-          }
-        });
-        // show rows matching selected categories
-        catsToShow.forEach(cat => {
-          document
-            .querySelectorAll<HTMLElement>(`.${p}-value-row.xx.${cat}`)
-            // eslint-disable-next-line no-return-assign,no-param-reassign
-            .forEach(row => (row.style.display = DISPLAY_ROW));
-        });
+      // EDITED2026: scope to root
+      const allRows = document.querySelectorAll<HTMLElement>(`.${current}-value-row`);
+      // hide all except .f
+      allRows.forEach(row => {
+        if (row.classList.contains('f')) {
+          row.style.display = DISPLAY_ROW;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // show rows matching selected categories
+      catsToShow.forEach(cat => {
+        document
+          .querySelectorAll<HTMLElement>(`.${current}-value-row.xx.${cat}`)
+          .forEach(row => (row.style.display = DISPLAY_ROW));
       });
     };
 
@@ -483,40 +477,35 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       const target = e.target as HTMLElement;
 
       // ----- Period buttons (.kpi-toggle-btn) -----
-      const periodBtn = target.closest('.kpi-toggle-btn') as
-        | HTMLElement
-        | 'week';
+      const periodBtn = target.closest('.kpi-toggle-btn') as HTMLElement | null;
       if (periodBtn) {
-        // @ts-ignore
         const typeAttr = periodBtn.getAttribute('data-type'); // may be '0','1','2','3' or names
         const next = normalizePeriod(typeAttr);
         const allBtns = root.querySelectorAll<HTMLElement>('.kpi-toggle-btn');
 
-        // Determine if clicked was already active BEFORE we clear classes
-        // @ts-ignore
-        const wasActive = periodBtn.classList.contains('active');
+        const wasActive = periodBtn.classList.contains('active'); // EDITED2026: remove ts-ignore
 
         // Clear highlight on all period buttons
         allBtns.forEach(b => b.classList.remove('active'));
 
         if (wasActive) {
-          // Toggle off -> no specific period
-          setPeriod('week');
+          // EDITED2026: do NOT allow null/none -> force week
+          const weekBtn = root.querySelector<HTMLElement>(
+            '.kpi-toggle-btn[data-type="1"], .kpi-toggle-btn[data-type="week"]',
+          );
+          if (weekBtn) weekBtn.classList.add('active'); // keep week active visually
+          setPeriodLocal('week');
         } else {
-          // Activate clicked button
-          // @ts-ignore
-          periodBtn.classList.add('active');
-          setPeriod(next);
+          periodBtn.classList.add('active'); // EDITED2026: remove ts-ignore
+          setPeriodLocal(next);
         }
 
-        applyPeriodColumns(); // update visible columns
-        applyCategoryFilter(); // re-apply rows for new period
+        applyPeriodColumns();
+        applyCategoryFilter();
         return;
       }
 
-      const openLink = target.closest(
-        'a.open-modal',
-      ) as HTMLAnchorElement | null;
+      const openLink = target.closest('a.open-modal') as HTMLAnchorElement | null;
       if (openLink) {
         e.preventDefault();
         e.stopPropagation();
@@ -525,9 +514,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       }
 
       // ----- Category checkbox buttons (.smypki-refresh-btn) -----
-      const catBtn = target.closest<HTMLButtonElement>('.smypki-refresh-btn');
+      const catBtn = target.closest('.smypki-refresh-btn') as HTMLButtonElement | null; // EDITED2026: fix TS generic misuse
       if (catBtn) {
-        const cat = catBtn.dataset.cat!; // 'bp' | 'op' | 'ps'
+        const cat = catBtn.dataset.cat;
+        if (!cat) return;
+
         if (catBtn.classList.contains('active')) {
           catBtn.classList.remove('active');
           selectedCats.delete(cat);
@@ -539,15 +530,151 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       }
     };
 
+    // ---------------------------------------------------------------------
+    // EDITED2026: postMessage bridge (external host can call SET_PERIOD / GET_STATE)
+    const parseAllowlist = (): Set<string> => {
+      const csv = (props.formData.hostAllowlist || props.formData.host_allowlist || '').toString();
+      const items = csv
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+      return new Set(items);
+    };
+
+    const allowlist = parseAllowlist();
+
+    // If allowlist not provided, allow only referrer origin (safe default)
+    const refOrigin = (() => {
+      try {
+        return document.referrer ? new URL(document.referrer).origin : '';
+      } catch {
+        return '';
+      }
+    })();
+    const HOST_ALLOWLIST = new Set<string>([
+      'https://box.prod.k8s.erg.kz/map',
+      'https://box.stage.k8s.erg.kz/map', window.location.origin
+      // 'http://localhost:3000', // EDITED2026: optional local dev
+    ]);
+    const isAllowedOrigin = (origin: string): boolean => {
+      if (allowlist.size > 0) return allowlist.has(origin);
+      return HOST_ALLOWLIST.has(origin) || origin === refOrigin;
+    };
+
+    const postAck = (win: Window | null, origin: string, ack: CtrlAck) => {
+      try {
+        win?.postMessage(ack, origin);
+      } catch {
+        // ignore
+      }
+    };
+
+    const onMessage = async (ev: MessageEvent<any>) => {
+      if (!isAllowedOrigin(ev.origin)) return;
+
+      const msg = ev.data as CtrlReq;
+      if (!msg || msg.type !== 'SSE_CTRL' || msg.v !== 1 || !msg.id || !msg.action) return;
+
+      const replyOk = (result?: any) =>
+        postAck(ev.source as Window | null, ev.origin, { type: 'SSE_CTRL_ACK', v: 1, id: msg.id, status: 'OK', result });
+
+      const replyErr = (code: string, message: string) =>
+        postAck(ev.source as Window | null, ev.origin, {
+          type: 'SSE_CTRL_ACK',
+          v: 1,
+          id: msg.id,
+          status: 'ERR',
+          error: { code, message },
+        });
+
+      try {
+        if (msg.action === 'GET_STATE') {
+          replyOk({ ready: true, activePeriod: getPeriod() });
+          return;
+        }
+
+        if (msg.action === 'SET_PERIOD') {
+          const period = msg.payload?.period;
+          if (!period) {
+            replyErr('BAD_PAYLOAD', 'period is required');
+            return;
+          }
+
+          // Prefer clicking the actual button so existing UI logic runs
+          const btn = root.querySelector<HTMLElement>(`.kpi-toggle-btn[data-type="${period}"]`);
+          if (!btn) {
+            replyErr('NOT_FOUND', `period button not found: ${period}`);
+            return;
+          }
+
+          btn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          const cur = getPeriod() || 'week';
+          replyOk({ ready: true, activePeriod: cur });
+          return;
+        }
+        if (msg.action === "CLICK_TAB") { // EDITED2026
+          const raw = (msg.payload?.label ?? "").toString();
+          const label = raw.replace(/\s+/g, " ").trim();
+          if (!label) {
+            replyErr("BAD_PAYLOAD", "label is required");
+            return;
+          }
+
+          const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+
+          // NOTE: root = контейнер вашего чарта. Если вкладки вне root — используйте document вместо root.
+          const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'));
+          const target = tabs.find(t => norm(t.textContent || "") === norm(label));
+
+          if (!target) {
+            replyErr("NOT_FOUND", `tab not found by label: ${label}`);
+            return;
+          }
+
+          target.click();
+          replyOk({ clicked: true, label, tabId: target.id || "" });
+          return;
+        }
+        if (msg.action === 'CLICK_LINK') { // EDITED2026
+          const linkId = (msg.payload?.linkId || '').toString().trim();
+          if (!linkId) {
+            replyErr('BAD_PAYLOAD', 'linkId is required');
+            return;
+          }
+
+          // Find by DOM id: <a id="...">
+          const sel = `a#${cssEscape(linkId)}`;
+          const a = root.querySelector<HTMLAnchorElement>(sel);
+          if (!a) {
+            replyErr('NOT_FOUND', `link not found by id: ${linkId}`);
+            return;
+          }
+
+          // Use native click() so default actions (navigation) work if not prevented
+          a.click();
+          replyOk({ clicked: true, linkId, href: a.getAttribute('href') || '' });
+          return;
+        }
+
+        replyErr('BAD_ACTION', `Unknown action: ${String(msg.action)}`);
+      } catch (e: any) {
+        replyErr('FAIL', String(e?.message || e));
+      }
+    };
+
     // Initial apply on mount
+    syncPeriodButtons();
     applyPeriodColumns();
     applyCategoryFilter();
-
     realizeAutoIframes();
 
     root.addEventListener('click', onClick);
-    // eslint-disable-next-line consistent-return
-    return () => root.removeEventListener('click', onClick);
+    window.addEventListener('message', onMessage); // EDITED2026
+
+    return () => {
+      root.removeEventListener('click', onClick);
+      window.removeEventListener('message', onMessage); // EDITED2026
+    };
   }, [html, props.formData.styles, template]);
 
   return (

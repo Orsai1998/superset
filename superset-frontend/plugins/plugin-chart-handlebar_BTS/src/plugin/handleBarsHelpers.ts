@@ -123,11 +123,16 @@ export function registerCustomHelpers() {
   });
 
   Handlebars.registerHelper('kpiToggleButtons', function () {
+   const now = new Date();
+   const currentMonth = now.getMonth() + 1; // 1-12
+   const currentYear = now.getFullYear();
+   const displayYear = currentMonth <= 1 ? currentYear - 1 : currentYear;
+
     return `<div class="smypkpi-toggle-buttons">
       <button type="button" class="kpi-toggle-btn" data-type="day" id="btn-day">День</button>
       <button type="button" class="kpi-toggle-btn" data-type="week" id="btn-week">Неделя</button>
       <button type="button" class="kpi-toggle-btn" data-type="mnth" id="btn-mnth">Месяц</button>
-      <button type="button" class="kpi-toggle-btn" data-type="year" id="btn-year">Год</button>
+      <button type="button" class="kpi-toggle-btn" data-type="year" id="btn-year">${displayYear}</button>
     </div>`;
   });
 
