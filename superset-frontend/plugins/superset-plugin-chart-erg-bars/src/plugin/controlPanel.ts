@@ -5,6 +5,7 @@ import {
 } from '@superset-ui/chart-controls';
 
 // @ts-ignore
+
 const config: ControlPanelConfig = {
   controlPanelSections: [
     {

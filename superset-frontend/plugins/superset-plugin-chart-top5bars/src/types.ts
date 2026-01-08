@@ -27,6 +27,8 @@ export interface SupersetPluginChartTop5BarsStylesProps {
   width: number;
   headerFontSize: HeaderFontSize;
   boldText: boolean;
+  styleType: string;
+  theme: 'dark' | 'light';
 }
 
 /**
@@ -48,6 +50,7 @@ export interface Top5BarsFormData extends QueryFormData {
   headerFontSize?: HeaderFontSize;
   boldText?: boolean;
   numberFormat?: string;
+  styleType: string;
 }
 
 export type SupersetPluginChartTop5BarsProps =
@@ -55,4 +58,5 @@ export type SupersetPluginChartTop5BarsProps =
     SupersetPluginChartTop5BarsCustomizeProps & {
       data: Top5Row[];
       max?: number;
+      formData: Top5BarsFormData;
     };

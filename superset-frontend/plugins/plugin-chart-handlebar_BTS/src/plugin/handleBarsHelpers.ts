@@ -2,13 +2,12 @@ import Handlebars from 'handlebars';
 
 // @ts-ignore
 export function registerCustomHelpers() {
-
   // put ABOVE template compile
-  const norm = v =>
+  const norm = (v: any) =>
     String(v ?? '')
-      .replace(/\r\n/g, '\n')       // Windows -> \n
-      .replace(/\r/g, '\n')         // old Mac -> \n
-      .replace(/\u00A0/g, ' ')      // NBSP -> space
+      .replace(/\r\n/g, '\n') // Windows -> \n
+      .replace(/\r/g, '\n') // old Mac -> \n
+      .replace(/\u00A0/g, ' ') // NBSP -> space
       .replace(/[\u200B-\u200D\uFEFF]/g, '') // zero-width
       .trim();
 
@@ -152,8 +151,6 @@ export function registerCustomHelpers() {
       БП: 'bp',
       ОП: 'op',
       ПС: 'ps',
-      П:  'p',
-      ПЗ: 'pz',
       Ф: 'f',
     };
     // Split by line, filter empty
@@ -231,267 +228,262 @@ export function registerCustomHelpers() {
 
     return new Handlebars.SafeString(url);
   });
-// Helper: parse values from string/array to array of strings
-function toVals(v) {
-  if (Array.isArray(v)) return v.map(String).filter(Boolean);
-  if (v == null) return [];
-  // accept "11, 14,15" → ["11","14","15"]
-  return String(v)
-    .split(',')
-    .map(s => s.trim())
-    .filter(Boolean);
-}
 
-Handlebars.registerHelper('origin', () =>
-  (typeof window !== 'undefined' ? window.location.origin : '')
-);
-Handlebars.registerHelper('thisIsDash', function(value) {
-  return value === "-";
-});
+  // Helper: parse values from string/array to array of strings
+  Handlebars.registerHelper('origin', () =>
+    typeof window !== 'undefined' ? window.location.origin : '',
+  );
+  Handlebars.registerHelper('thisIsDash', function (value) {
+    return value === '-';
+  });
 
+  Handlebars.registerHelper('eq', (a, b) => norm(a) === norm(b));
+  Handlebars.registerHelper('notEq', (a, b) => norm(a) !== norm(b));
 
-Handlebars.registerHelper('eq',    (a, b) => norm(a) === norm(b));
-Handlebars.registerHelper('notEq', (a, b) => norm(a) !== norm(b));
+  Handlebars.registerHelper('parseDayQL', function (day, divisionClass) {
+    if (!day) return [];
 
+    const typeMap = {
+      БП: 'bp',
+      ОП: 'op',
+      ПС: 'ps',
+      П: 'ps',
+      Ф: 'f',
+    };
 
+    const divClass = typeof divisionClass === 'string' ? divisionClass : '';
+    const results = [];
 
-Handlebars.registerHelper('parseDayQL', function (day, divisionClass) {
-  if (!day) return [];
+    // Normalize line endings, handle stray carriage returns (\r)
+    const lines = day
+      .replace(/\r/g, '')
+      .split(/\n/)
+      .filter((line: string) => line.trim() !== '');
 
-  const typeMap = {
-    БП: 'bp',
-    ОП: 'op',
-    ПС: 'ps',
-    П: 'ps',
-    Ф: 'f',
-  };
+    // Regex patterns
+    const arrowRegex = /^(▲|▼)-?\d+%$/;
+    const valueRegex = /^(БП|ОП|ПС|П|Ф):(.+)$/;
 
-  const divClass = typeof divisionClass === 'string' ? divisionClass : '';
-  const results = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
 
-  // Normalize line endings, handle stray carriage returns (\r)
-  const lines = day.replace(/\r/g, '').split(/\n/).filter(line => line.trim() !== '');
+      // Arrow line (e.g. ▼-1%)
+      if (arrowRegex.test(trimmed)) {
+        const symbol = trimmed.charAt(0); // '▲' or '▼'
+        const direction = symbol === '▲' ? 'up' : 'down';
+        const percent = trimmed.slice(1); // e.g. "-1%"
 
-  // Regex patterns
-  const arrowRegex = /^(▲|▼)-?\d+%$/;
-  const valueRegex = /^(БП|ОП|ПС|П|Ф):(.+)$/;
+        results.push({
+          type: 'ps',
+          label: '',
+          value: trimmed,
+          arrowSymbol: symbol,
+          arrowDirection: direction,
+          arrowValue: percent,
+          divisionClass: 'ps',
+        });
+        continue;
+      }
 
-  for (const line of lines) {
-    const trimmed = line.trim();
+      // Value line like "П:71 - 100" or "Ф:69,94"
+      const match = trimmed.match(valueRegex);
+      if (match) {
+        const [_, label, rawValue] = match;
+        const type = typeMap[label] || '';
+        const value = `${label}:${rawValue.trim()}`;
 
-    // Arrow line (e.g. ▼-1%)
-    if (arrowRegex.test(trimmed)) {
-      const symbol = trimmed.charAt(0); // '▲' or '▼'
-      const direction = symbol === '▲' ? 'up' : 'down';
-      const percent = trimmed.slice(1); // e.g. "-1%"
-    
+        results.push({
+          type,
+          label,
+          value,
+          change: null,
+          divisionClass: divClass ? `${divClass}-${type}` : type,
+        });
+        continue;
+      }
+
+      // Unknown or free text line (optional)
       results.push({
         type: 'ps',
         label: '',
         value: trimmed,
-        arrowSymbol: symbol,
-        arrowDirection: direction,
-        arrowValue: percent,
-        divisionClass: 'ps'
-      });
-      continue;
-    }
-
-
-    // Value line like "П:71 - 100" or "Ф:69,94"
-    const match = trimmed.match(valueRegex);
-    if (match) {
-      const [_, label, rawValue] = match;
-      const type = typeMap[label] || '';
-      const value = `${label}:${rawValue.trim()}`;
-
-      results.push({
-        type,
-        label,
-        value,
         change: null,
-        divisionClass: divClass ? `${divClass}-${type}` : type,
+        divisionClass: 'ps',
       });
-      continue;
     }
 
-    // Unknown or free text line (optional)
-    results.push({
-      type: 'ps',
-      label: '',
-      value: trimmed,
-      change: null,
-      divisionClass: 'ps',
-    });
-  }
-
-  return results;
-});
-Handlebars.registerHelper('splitProds', function (value) {
-  if (Array.isArray(value)) return value.slice(0, 3);
-  if (value == null) return [];
-  const s = String(value);
-  //console.log(s);
-  // split by comma or whitespace, trim, dedupe, cap 3
-  const arr = s
-    .split(/[,\s]+/)
-    .map(v => v.trim())
-    .filter(Boolean);
-  const seen = new Set<string>();
-  const out: string[] = [];
-  for (const v of arr) {
-    if (!seen.has(v)) {
-      out.push(v);
-      seen.add(v);
+    return results;
+  });
+  Handlebars.registerHelper('splitProds', function (value) {
+    if (Array.isArray(value)) return value.slice(0, 3);
+    if (value == null) return [];
+    const s = String(value);
+    // split by comma or whitespace, trim, dedupe, cap 3
+    const arr = s
+      .split(/[,\s]+/)
+      .map(v => v.trim())
+      .filter(Boolean);
+    const seen = new Set<string>();
+    const out: string[] = [];
+    for (const v of arr) {
+      if (!seen.has(v)) {
+        out.push(v);
+        seen.add(v);
+      }
+      if (out.length >= 8) break;
     }
-    if (out.length >= 8) break;
-  }
-  return out;
-});
-
-
-// Turn anything into an array of strings (comma/semicolon separated supported)
-function toValsAny(v) {
-  if (v == null) return [];
-  if (Array.isArray(v)) return v.map(String).map(s=>s.trim()).filter(Boolean);
-  const s = String(v).trim();
-  if (!s) return [];
-  return s.split(/[;,]/).map(x => x.trim()).filter(Boolean);
-}
-
-// Resolve "foo", "a.b.c", or "{{a.b.c}}" against current context/root
-function resolvePathLike(raw, ctx, root) {
-  if (raw == null) return '';
-  let t = String(raw).trim();
-  // if quoted, strip surrounding quotes
-  t = t.replace(/^['"]|['"]$/g, '');
-  // strip {{ }}
-  t = t.replace(/^\{\{|\}\}$/g, '');
-  if (!t) return '';
-
-  let base = ctx;
-  if (t.startsWith('root.')) { base = root; t = t.slice(5); }
-
-  let cur = base;
-  for (const k of t.split('.')) {
-    if (!k || k === 'this') continue;
-    if (cur != null && (k in cur)) cur = cur[k];
-    else return raw; // fallback to original literal if not found
-  }
-  return cur;
-}
-
-Handlebars.registerHelper('createUrlDash', function (options) {
-  const target     = String(options.hash.target || '').trim();     // 'dash' | 'object'
-  const standalone = options.hash.standalone != null ? String(options.hash.standalone).trim() : '1';
-  const height     = options.hash.height ? String(options.hash.height).trim() : '100%';
-
-  // filters
-  const col0 = String(options.hash.filter_col  || '').trim();
-  let  val0  = options.hash.filter_val;
-
-  const col1 = String(options.hash.filter_col1 || '').trim();
-  let  val1  = options.hash.filter_val1;
-
-  const col2 = String(options.hash.filter_col2 || '').trim();
-  let  val2  = options.hash.filter_val2;
-
-  // raw extra params (may contain variables)
-  let many = (options.hash.manyparams ?? '').toString().trim();
-  if (many.startsWith('?') || many.startsWith('&')) many = many.slice(1);
-
-  const origin = window.location.origin;
-  const root = (options.data && options.data.root) || this;
-  const ctx  = this;
-
-  // If a filter value is a single token/path, resolve it; otherwise treat as list
-  function normalizeVals(v) {
-    if (Array.isArray(v)) return v.map(x => String(x));
-    const s = String(v ?? '').trim();
-    if (!s) return [];
-    // single token case -> resolve
-    if (!s.includes(',') && !s.includes(';')) {
-      const resolved = resolvePathLike(s, ctx, root);
-      return toValsAny(resolved);
-    }
-    // comma/semicolon list -> keep as literals
-    return toValsAny(s);
-  }
-
-  const filters = [];
-  val0 = normalizeVals(val0); if (col0 && val0.length) filters.push({col: col0, vals: val0});
-  val1 = normalizeVals(val1); if (col1 && val1.length) filters.push({col: col1, vals: val1});
-  val2 = normalizeVals(val2); if (col2 && val2.length) filters.push({col: col2, vals: val2});
-
-  // Build query
-  const qp = [
-    `standalone=${encodeURIComponent(standalone)}`,
-    `force=1`,
-    `height=${encodeURIComponent(height)}`
-  ];
-
-  for (const f of filters) {
-    qp.push(`${encodeURIComponent(f.col)}=${f.vals.map(encodeURIComponent).join(',')}`);
-  }
-
-  // Resolve variables inside manyparams
-  if (many) {
-    const extra = many
-      .split('&')
-      .filter(Boolean)
-      .map(pair => {
-        const i = pair.indexOf('=');
-        const key = i === -1 ? pair : pair.slice(0, i);
-        const rawVal = i === -1 ? '' : pair.slice(i + 1);
-        const resolved = resolvePathLike(rawVal, ctx, root);
-        return `${encodeURIComponent(key)}=${encodeURIComponent(resolved)}`;
-      })
-      .join('&');
-    if (extra) qp.push(extra);
-  }
-
-  // Need at least one filter or manyparams to build
-  if (!filters.length && !many) return '';
-
-  let url;
-  if (target === 'dash') {
-    const dashId = String(options.hash.dash_id || '').trim();
-    if (!dashId) return '';
-    url = `${origin}/superset/dashboard/${encodeURIComponent(dashId)}/?${qp.join('&')}`;
-  } else {
-    const sliceId = String(options.hash.slice_id || '').trim();
-    if (!sliceId) return '';
-    url = `${origin}/superset/explore/?slice_id=${encodeURIComponent(sliceId)}&${qp.join('&')}`;
-  }
-
-  return new Handlebars.SafeString(url);
-});
-
-Handlebars.registerHelper('colorLabels', function (line) {
-  if (!line) return '';
-
-  const map = {
-    'БП': 'bp',
-    'ОП': 'op',
-    'ПС': 'ps',
-    'Ф':  'f',
-    'П':  'p',
-    'ПЗ': 'pz',
-  };
-
-  // Важно: если line уже приходит как строка из данных — можно работать напрямую
-  // Если боишься XSS, сначала экранируй, а потом вставляй только свои спаны.
-  let s = String(line);
-
-  // Ловим "БП:" / "ОП:" / ... (обычно в строке именно так)
-  // Lifts "БП:" / "БП: " into just a span "БП" (colon removed)
-  s = s.replace(/(^|\s)(БП|ОП|ПС|ПЗ|П|Ф)\s*:\s*/g, (m, pre, lbl) => {
-  const cls = map[lbl] || 'x';
-  return `${pre}<span class="kpi-label kpi-${cls}">${lbl}</span> `;
-
+    return out;
   });
 
-  return new Handlebars.SafeString(s);
-});
+  // Turn anything into an array of strings (comma/semicolon separated supported)
+  function toValsAny(v: string | any[] | null) {
+    if (v == null) {
+      // @ts-ignore
+      return [];
+    }
+    if (Array.isArray(v))
+      return v
+        .map(String)
+        .map(s => s.trim())
+        .filter(Boolean);
+    const s = String(v).trim();
+    if (!s) return [];
+    return s
+      .split(/[;,]/)
+      .map(x => x.trim())
+      .filter(Boolean);
+  }
 
+  // Resolve "foo", "a.b.c", or "{{a.b.c}}" against current context/root
+  function resolvePathLike(raw: string | null, ctx: any, root: any) {
+    if (raw == null) return '';
+    let t = String(raw).trim();
+    // if quoted, strip surrounding quotes
+    t = t.replace(/^['"]|['"]$/g, '');
+    // strip {{ }}
+    t = t.replace(/^\{\{|\}\}$/g, '');
+    if (!t) return '';
+
+    let base = ctx;
+    if (t.startsWith('root.')) {
+      base = root;
+      t = t.slice(5);
+    }
+
+    let cur = base;
+    for (const k of t.split('.')) {
+      if (!k || k === 'this') continue;
+      if (cur != null && k in cur) cur = cur[k];
+      else return raw; // fallback to original literal if not found
+    }
+    return cur;
+  }
+
+  Handlebars.registerHelper('createUrlDash', options => {
+    const target = String(options.hash.target || '').trim(); // 'dash' | 'object'
+    const standalone =
+      options.hash.standalone != null
+        ? String(options.hash.standalone).trim()
+        : '1';
+    const height = options.hash.height
+      ? String(options.hash.height).trim()
+      : '100%';
+
+    // filters
+    const col0 = String(options.hash.filter_col || '').trim();
+    let val0 = options.hash.filter_val;
+
+    const col1 = String(options.hash.filter_col1 || '').trim();
+    let val1 = options.hash.filter_val1;
+
+    const col2 = String(options.hash.filter_col2 || '').trim();
+    let val2 = options.hash.filter_val2;
+
+    // raw extra params (may contain variables)
+    let many = (options.hash.manyparams ?? '').toString().trim();
+    if (many.startsWith('?') || many.startsWith('&')) many = many.slice(1);
+
+    const { origin } = window.location;
+    // @ts-ignore
+    const root = options.data?.root || this;
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const ctx = this;
+
+    // If a filter value is a single token/path, resolve it; otherwise treat as list
+    function normalizeVals(v: any[]) {
+      if (Array.isArray(v)) return v.map(x => String(x));
+      const s = String(v ?? '').trim();
+      if (!s) return [];
+      // single token case -> resolve
+      if (!s.includes(',') && !s.includes(';')) {
+        const resolved = resolvePathLike(s, ctx, root);
+        return toValsAny(resolved);
+      }
+      // comma/semicolon list -> keep as literals
+      return toValsAny(s);
+    }
+
+    const filters = [];
+    val0 = normalizeVals(val0);
+    if (col0 && val0.length) filters.push({ col: col0, vals: val0 });
+    val1 = normalizeVals(val1);
+    if (col1 && val1.length) filters.push({ col: col1, vals: val1 });
+    val2 = normalizeVals(val2);
+    if (col2 && val2.length) filters.push({ col: col2, vals: val2 });
+
+    // Build query
+    const qp = [
+      `standalone=${encodeURIComponent(standalone)}`,
+      `force=1`,
+      `height=${encodeURIComponent(height)}`,
+    ];
+
+    for (const f of filters) {
+      qp.push(
+        `${encodeURIComponent(f.col)}=${f.vals
+          .map(encodeURIComponent)
+          .join(',')}`,
+      );
+    }
+
+    // Resolve variables inside manyparams
+    if (many) {
+      const extra = Array.isArray(many)
+        ? many // If 'many' is an array, process it directly
+        : many.split('&').filter(Boolean); // If 'many' is a string, split it by '&'
+      const queryString = extra
+        .map((pair: string) => {
+          const i = pair.indexOf('=');
+          const key = i === -1 ? pair : pair.slice(0, i);
+          const rawVal = i === -1 ? '' : pair.slice(i + 1);
+          const resolved = resolvePathLike(rawVal, ctx, root);
+          // @ts-ignore
+          return `${encodeURIComponent(key)}=${encodeURIComponent(resolved)}`;
+        })
+        .join('&');
+
+      if (queryString) qp.push(queryString);
+    }
+
+    // Need at least one filter or manyparams to build
+    if (!filters.length && !many) return '';
+
+    let url;
+    if (target === 'dash') {
+      const dashId = String(options.hash.dash_id || '').trim();
+      if (!dashId) return '';
+      url = `${origin}/superset/dashboard/${encodeURIComponent(
+        dashId,
+      )}/?${qp.join('&')}`;
+    } else {
+      const sliceId = String(options.hash.slice_id || '').trim();
+      if (!sliceId) return '';
+      url = `${origin}/superset/explore/?slice_id=${encodeURIComponent(
+        sliceId,
+      )}&${qp.join('&')}`;
+    }
+
+    return new Handlebars.SafeString(url);
+  });
 }
