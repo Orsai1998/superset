@@ -51,12 +51,14 @@ function addFilterFlags(url: string, show: '0' | '1' = '0') {
     u.searchParams.set('show_native_filters', show);
   return `${u.pathname}?${u.searchParams.toString()}`;
 }
+
 // --- helpers -------------------------------
 function extractDashIdFromHref(href: string): string | null {
   // matches /superset/dashboard/<id-or-slug>[/ or ?]
   const m = href.match(/\/superset\/dashboard\/([^/?#]+)[/?#]?/i);
   return m ? decodeURIComponent(m[1]) : null;
 }
+
 // --- helpers -------------------------------
 
 // DROP-IN: replace your current function with this one (same name/signature)
@@ -160,6 +162,7 @@ function tryHideEmpty(iframe: any, slot: any) {
   // start short, time-boxed polling
   setTimeout(tick, stepMs);
 }
+
 // -------------------------------------------------------------------------
 
 // Build URL that auto-applies a Native Filter (no button press)
@@ -185,9 +188,9 @@ export function buildDashWithAppliedFilterUrl(
     ? values
     : typeof values === 'string' && values.includes(',')
       ? values
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean)
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean)
       : [values];
 
   const esc = (v: unknown) => String(v).replace(/'/g, "\\'");
@@ -226,7 +229,13 @@ const setCellsDisplay = (els: NodeListOf<HTMLElement>, on: boolean) => {
 
 // EDITED2026: postMessage protocol types (bridge for external host control)
 type CtrlAction = 'SET_PERIOD' | 'GET_STATE' | 'CLICK_LINK' | 'CLICK_TAB'; // EDITED2026
-type CtrlReq = { type: 'SSE_CTRL'; v: 1; id: string; action: CtrlAction; payload?: { period?: Period; linkId?: string; label?: string } }; // EDITED2026
+type CtrlReq = {
+  type: 'SSE_CTRL';
+  v: 1;
+  id: string;
+  action: CtrlAction;
+  payload?: { period?: Period; linkId?: string; label?: string };
+}; // EDITED2026
 type CtrlAck = {
   type: 'SSE_CTRL_ACK';
   v: 1;
@@ -237,15 +246,19 @@ type CtrlAck = {
 };
 // EDITED2026: CSS.escape fallback for older browsers
 const cssEscape = (value: string): string => {
-  const w = (window as any);
+  const w = window as any;
   if (w?.CSS?.escape) return w.CSS.escape(value);
-  return value.replace(/[^a-zA-Z0-9_\-]/g, match => `\\${match}`);
+  return value.replace(/[^a-zA-Z0-9_-]/g, match => `\\${match}`);
 };
 
 export default function HandlebarsChart(props: HandlebarsProps) {
   const { template } = props.formData;
   const raw = props.data;
-  const records: any[] = Array.isArray(raw) ? raw : Array.isArray((raw as any).records) ? (raw as any).records : [];
+  const records: any[] = Array.isArray(raw)
+    ? raw
+    : Array.isArray((raw as any).records)
+      ? (raw as any).records
+      : [];
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [modalUrl, setModalUrl] = useState<string | null>(null); // <-- состояние модалки
@@ -277,7 +290,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     // === dashurl with collapsed filter ===
 
     // 1) find anchors like your screenshot
-    const anchors = Array.from(root.querySelectorAll<HTMLAnchorElement>('a.open-modal[href*="/superset/dashboard/"]'));
+    const anchors = Array.from(
+      root.querySelectorAll<HTMLAnchorElement>(
+        'a.open-modal[href*="/superset/dashboard/"]',
+      ),
+    );
 
     // EDITED2026: remove unused map/filter chain; just normalize hrefs + keep as-is
     anchors.forEach(a => {
@@ -288,12 +305,15 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       extractDashIdFromHref(href);
 
       // default closed; if you ever need open for a single link, add data-show-filters="1"
-      const show = (a.getAttribute('data-show-filters') || '0') === '1' ? '1' : '0';
+      const show =
+        (a.getAttribute('data-show-filters') || '0') === '1' ? '1' : '0';
       a.setAttribute('href', addFilterFlags(href, show));
     });
 
     // --- dashUrl ---
-    const dashLinks = root.querySelectorAll<HTMLAnchorElement>('a[data-open-dashboard]');
+    const dashLinks = root.querySelectorAll<HTMLAnchorElement>(
+      'a[data-open-dashboard]',
+    );
     dashLinks.forEach(a => {
       const didAttr = (a.getAttribute('data-open-dashboard') || '').trim();
       if (!didAttr) return;
@@ -307,43 +327,58 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       const vals = rawVal
         ? rawVal.includes(',')
           ? rawVal
-            .split(',')
-            .map(s => s.trim())
-            .filter(Boolean)
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean)
           : [rawVal]
         : [];
 
       // show_filters: нужно явно передать '0' или '1', иначе Superset возьмёт дефолт
       const showAttr = (a.getAttribute('data-show-filters') || '').trim(); // '0' | '1' | ''
-      const showFilters = showAttr === '0' || showAttr === '1' ? (showAttr as '0' | '1') : undefined;
+      const showFilters =
+        showAttr === '0' || showAttr === '1'
+          ? (showAttr as '0' | '1')
+          : undefined;
 
       // standalone: прокидываем строкой без Boolean/Number (чтобы '3' не стало 1)
       const stAttr = (a.getAttribute('data-standalone') || '').trim();
       const standalone = stAttr !== '' ? stAttr : undefined;
 
       if (nfId && vals.length) {
-        a.href = buildDashWithAppliedFilterUrl(didAttr, nfId, vals, { showFilters, standalone });
+        // eslint-disable-next-line no-param-reassign
+        a.href = buildDashWithAppliedFilterUrl(didAttr, nfId, vals, {
+          showFilters,
+          standalone,
+        });
       } else {
         const qs = new URLSearchParams();
         if (vals.length) qs.set('prod', vals.join(',')); // если используете url_param('prod')
         if (showFilters) qs.set('expand_filters', showFilters);
         if (standalone) qs.set('standalone', standalone);
-        a.href = `/superset/dashboard/${encodeURIComponent(didAttr)}/${qs.toString() ? `?${qs.toString()}` : ''}`;
+        // eslint-disable-next-line no-param-reassign
+        a.href = `/superset/dashboard/${encodeURIComponent(didAttr)}/${
+          qs.toString() ? `?${qs.toString()}` : ''
+        }`;
       }
 
+      // eslint-disable-next-line no-param-reassign
       if (!a.hasAttribute('target')) a.target = '_blank';
     });
 
     // === realize <div.auto-iframe data-src="..."> to real <iframe> ===
     const realizeAutoIframes = () => {
-      const slots = Array.from(root.querySelectorAll<HTMLElement>('.auto-iframe[data-src]'));
+      const slots = Array.from(
+        root.querySelectorAll<HTMLElement>('.auto-iframe[data-src]'),
+      );
       let i = 0;
 
       // EDITED2026: remove ts-ignore; type the recursive loader
       const loadNext = (): void => {
         if (i >= slots.length) return;
 
+        // eslint-disable-next-line no-plusplus
         const slot = slots[i++];
+        // eslint-disable-next-line consistent-return
         if (slot.dataset.realized === '1') return loadNext();
 
         const src = slot.dataset.src!;
@@ -415,7 +450,9 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     ['bp', 'op', 'ps'].forEach(cat => selectedCats.add(cat));
 
     // Activate any existing category buttons
-    const allCatBtns = root.querySelectorAll<HTMLButtonElement>('.smypki-refresh-btn');
+    const allCatBtns = root.querySelectorAll<HTMLButtonElement>(
+      '.smypki-refresh-btn',
+    );
     allCatBtns.forEach(btn => {
       const { cat } = btn.dataset;
       if (cat && selectedCats.has(cat)) {
@@ -428,18 +465,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       const p = getPeriod();
 
       // EDITED2026: scope for visibility selectors; some elements may be outside plugin root
-      const scope =
-        (root.closest('.dashboard-component-chart') as HTMLElement | null) ||
-        (root.closest('[data-test="chart-container"]') as HTMLElement | null) ||
-        (root.closest('.chart-container') as HTMLElement | null) ||
-        document;
 
       const dayCells = document.querySelectorAll<HTMLElement>('.day_visible');
       const weekCells = document.querySelectorAll<HTMLElement>('.week_visible');
       const mnthCells = document.querySelectorAll<HTMLElement>('.mnth_visible');
       const yearCells = document.querySelectorAll<HTMLElement>('.year_visible');
-
-
 
       setCellsDisplay(dayCells, p === 'day');
       setCellsDisplay(weekCells, p === 'week');
@@ -467,12 +497,16 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         selectedCats.size === 0 ? ['bp', 'op', 'ps'] : Array.from(selectedCats);
 
       // EDITED2026: scope to root
-      const allRows = document.querySelectorAll<HTMLElement>(`.${current}-value-row`);
+      const allRows = document.querySelectorAll<HTMLElement>(
+        `.${current}-value-row`,
+      );
       // hide all except .f
       allRows.forEach(row => {
         if (row.classList.contains('f')) {
+          // eslint-disable-next-line no-param-reassign
           row.style.display = DISPLAY_ROW;
         } else {
+          // eslint-disable-next-line no-param-reassign
           row.style.display = 'none';
         }
       });
@@ -481,6 +515,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       catsToShow.forEach(cat => {
         document
           .querySelectorAll<HTMLElement>(`.${current}-value-row.xx.${cat}`)
+          // eslint-disable-next-line no-return-assign,no-param-reassign
           .forEach(row => (row.style.display = DISPLAY_ROW));
       });
     };
@@ -518,7 +553,9 @@ export default function HandlebarsChart(props: HandlebarsProps) {
         return;
       }
 
-      const openLink = target.closest('a.open-modal') as HTMLAnchorElement | null;
+      const openLink = target.closest(
+        'a.open-modal',
+      ) as HTMLAnchorElement | null;
       if (openLink) {
         e.preventDefault();
         e.stopPropagation();
@@ -527,9 +564,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       }
 
       // ----- Category checkbox buttons (.smypki-refresh-btn) -----
-      const catBtn = target.closest('.smypki-refresh-btn') as HTMLButtonElement | null; // EDITED2026: fix TS generic misuse
+      const catBtn = target.closest(
+        '.smypki-refresh-btn',
+      ) as HTMLButtonElement | null; // EDITED2026: fix TS generic misuse
       if (catBtn) {
-        const cat = catBtn.dataset.cat;
+        const { cat } = catBtn.dataset;
         if (!cat) return;
 
         if (catBtn.classList.contains('active')) {
@@ -546,7 +585,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     // ---------------------------------------------------------------------
     // EDITED2026: postMessage bridge (external host can call SET_PERIOD / GET_STATE)
     const parseAllowlist = (): Set<string> => {
-      const csv = (props.formData.hostAllowlist || props.formData.host_allowlist || '').toString();
+      const csv = (
+        props.formData.hostAllowlist ||
+        props.formData.host_allowlist ||
+        ''
+      ).toString();
       const items = csv
         .split(',')
         .map(s => s.trim())
@@ -566,7 +609,8 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     })();
     const HOST_ALLOWLIST = new Set<string>([
       'https://box.prod.k8s.erg.kz/map',
-      'https://box.stage.k8s.erg.kz/map', window.location.origin
+      'https://box.stage.k8s.erg.kz/map',
+      window.location.origin,
       // 'http://localhost:3000', // EDITED2026: optional local dev
     ]);
     const isAllowedOrigin = (origin: string): boolean => {
@@ -586,10 +630,23 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       if (!isAllowedOrigin(ev.origin)) return;
 
       const msg = ev.data as CtrlReq;
-      if (!msg || msg.type !== 'SSE_CTRL' || msg.v !== 1 || !msg.id || !msg.action) return;
+      if (
+        !msg ||
+        msg.type !== 'SSE_CTRL' ||
+        msg.v !== 1 ||
+        !msg.id ||
+        !msg.action
+      )
+        return;
 
       const replyOk = (result?: any) =>
-        postAck(ev.source as Window | null, ev.origin, { type: 'SSE_CTRL_ACK', v: 1, id: msg.id, status: 'OK', result });
+        postAck(ev.source as Window | null, ev.origin, {
+          type: 'SSE_CTRL_ACK',
+          v: 1,
+          id: msg.id,
+          status: 'OK',
+          result,
+        });
 
       const replyErr = (code: string, message: string) =>
         postAck(ev.source as Window | null, ev.origin, {
@@ -614,7 +671,9 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           }
 
           // Prefer clicking the actual button so existing UI logic runs
-          const btn = root.querySelector<HTMLElement>(`.kpi-toggle-btn[data-type="${period}"]`);
+          const btn = root.querySelector<HTMLElement>(
+            `.kpi-toggle-btn[data-type="${period}"]`,
+          );
           if (!btn) {
             replyErr('NOT_FOUND', `period button not found: ${period}`);
             return;
@@ -625,30 +684,37 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           replyOk({ ready: true, activePeriod: cur });
           return;
         }
-        if (msg.action === "CLICK_TAB") { // EDITED2026
-          const raw = (msg.payload?.label ?? "").toString();
-          const label = raw.replace(/\s+/g, " ").trim();
+        if (msg.action === 'CLICK_TAB') {
+          // EDITED2026
+          const raw = (msg.payload?.label ?? '').toString();
+          const label = raw.replace(/\s+/g, ' ').trim();
           if (!label) {
-            replyErr("BAD_PAYLOAD", "label is required");
+            replyErr('BAD_PAYLOAD', 'label is required');
             return;
           }
 
-          const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
+          const norm = (s: string) =>
+            s.replace(/\s+/g, ' ').trim().toLowerCase();
 
           // NOTE: root = контейнер вашего чарта. Если вкладки вне root — используйте document вместо root.
-          const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'));
-          const target = tabs.find(t => norm(t.textContent || "") === norm(label));
+          const tabs = Array.from(
+            document.querySelectorAll<HTMLElement>('[role="tab"]'),
+          );
+          const target = tabs.find(
+            t => norm(t.textContent || '') === norm(label),
+          );
 
           if (!target) {
-            replyErr("NOT_FOUND", `tab not found by label: ${label}`);
+            replyErr('NOT_FOUND', `tab not found by label: ${label}`);
             return;
           }
 
           target.click();
-          replyOk({ clicked: true, label, tabId: target.id || "" });
+          replyOk({ clicked: true, label, tabId: target.id || '' });
           return;
         }
-        if (msg.action === 'CLICK_LINK') { // EDITED2026
+        if (msg.action === 'CLICK_LINK') {
+          // EDITED2026
           const linkId = (msg.payload?.linkId || '').toString().trim();
           if (!linkId) {
             replyErr('BAD_PAYLOAD', 'linkId is required');
@@ -665,7 +731,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
 
           // Use native click() so default actions (navigation) work if not prevented
           a.click();
-          replyOk({ clicked: true, linkId, href: a.getAttribute('href') || '' });
+          replyOk({
+            clicked: true,
+            linkId,
+            href: a.getAttribute('href') || '',
+          });
           return;
         }
 
@@ -684,6 +754,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     root.addEventListener('click', onClick);
     window.addEventListener('message', onMessage); // EDITED2026
 
+    // eslint-disable-next-line consistent-return
     return () => {
       root.removeEventListener('click', onClick);
       window.removeEventListener('message', onMessage); // EDITED2026
