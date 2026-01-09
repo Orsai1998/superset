@@ -569,7 +569,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
       }
     };
 
-    const onMessage = async (ev: MessageEvent<any>) => {
+     const onMessage = async (ev: MessageEvent<any>) => {
       if (!isAllowedOrigin(ev.origin)) return;
 
       const msg = ev.data as CtrlReq;
@@ -600,7 +600,6 @@ export default function HandlebarsChart(props: HandlebarsProps) {
             return;
           }
 
-          // Prefer clicking the actual button so existing UI logic runs
           const btn = root.querySelector<HTMLElement>(`.kpi-toggle-btn[data-type="${period}"]`);
           if (!btn) {
             replyErr('NOT_FOUND', `period button not found: ${period}`);
@@ -612,7 +611,8 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           replyOk({ ready: true, activePeriod: cur });
           return;
         }
-        if (msg.action === "CLICK_TAB") { // EDITED2026
+
+        if (msg.action === "CLICK_TAB") {
           const raw = (msg.payload?.label ?? "").toString();
           const label = raw.replace(/\s+/g, " ").trim();
           if (!label) {
@@ -621,8 +621,6 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           }
 
           const norm = (s: string) => s.replace(/\s+/g, " ").trim().toLowerCase();
-
-          // NOTE: root = контейнер вашего чарта. Если вкладки вне root — используйте document вместо root.
           const tabs = Array.from(document.querySelectorAll<HTMLElement>('[role="tab"]'));
           const target = tabs.find(t => norm(t.textContent || "") === norm(label));
 
@@ -635,24 +633,31 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           replyOk({ clicked: true, label, tabId: target.id || "" });
           return;
         }
-        if (msg.action === 'CLICK_LINK') { // EDITED2026
+
+        if (msg.action === 'CLICK_LINK') {
           const linkId = (msg.payload?.linkId || '').toString().trim();
           if (!linkId) {
             replyErr('BAD_PAYLOAD', 'linkId is required');
             return;
           }
 
-          // Find by DOM id: <a id="...">
           const sel = `a#${cssEscape(linkId)}`;
           const a = root.querySelector<HTMLAnchorElement>(sel);
-          if (!a) {
-            replyErr('NOT_FOUND', `link not found by id: ${linkId}`);
+          if (a) {
+            a.click();
+            replyOk({ clicked: true, linkId, href: a.getAttribute('href') || '' });
             return;
           }
 
-          // Use native click() so default actions (navigation) work if not prevented
-          a.click();
-          replyOk({ clicked: true, linkId, href: a.getAttribute('href') || '' });
+          const bSel = `button#${cssEscape(linkId)}`;
+          const b = document.querySelector<HTMLButtonElement>(bSel);
+          if (!b) {
+            replyErr('NOT_FOUND', `a/button not found by id: ${linkId}`);
+            return;
+          }
+
+          b.click();
+          replyOk({ clicked: true, linkId, tag: 'BUTTON' });
           return;
         }
 
@@ -669,11 +674,11 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     realizeAutoIframes();
 
     root.addEventListener('click', onClick);
-    window.addEventListener('message', onMessage); // EDITED2026
+    window.addEventListener('message', onMessage);
 
     return () => {
       root.removeEventListener('click', onClick);
-      window.removeEventListener('message', onMessage); // EDITED2026
+      window.removeEventListener('message', onMessage);
     };
   }, [html, props.formData.styles, template]);
 
@@ -720,6 +725,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
             />
             {/* eslint-disable-next-line react/button-has-type */}
             <button
+              id="closeframe"
               onClick={() => setModalUrl(null)}
               style={{
                 position: 'absolute',
