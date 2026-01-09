@@ -6,6 +6,8 @@ import { styled } from '@superset-ui/core';
 import React from 'react';
 import type { SupersetPluginTop40ConsumptionProps } from './types';
 
+import DefaultAvatar from './images/default_avatar.jpg';
+
 const Container = styled.div<{
   $themeMode: 'light' | 'dark';
   $headerFontSize: number;
@@ -50,8 +52,8 @@ const Container = styled.div<{
     min-width: 420px;
     container-type: inline-size;
     border: 1px solid
-      ${({ $themeMode }) =>
-        $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
+    ${({ $themeMode }) =>
+      $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
   }
 
   h3 {
@@ -132,7 +134,7 @@ const Container = styled.div<{
   .card.good img,
   .card.bad img {
     width: 60%;
-    height: auto;
+    height: 60%;
     border-radius: 8px;
     object-fit: cover;
   }
@@ -213,42 +215,45 @@ const Container = styled.div<{
 `;
 
 export default function SupersetPluginTop40Consumption({
-  data = {
-    chartData: [],
-    topLeft: [],
-    topRight: [],
-  },
-  formData,
-}: SupersetPluginTop40ConsumptionProps) {
+                                                         data = {
+                                                           chartData: [],
+                                                           topLeft: [],
+                                                           topRight: [],
+                                                         },
+                                                         formData,
+                                                       }: SupersetPluginTop40ConsumptionProps) {
   const topLeft = data.topLeft ?? [];
   const topRight = data.topRight ?? [];
   const leftTop3 = topLeft.slice(0, 3);
   const leftRest = topLeft.slice(3, 15); // 12 more cards → 2 rows of 6
-  console.log('DATA: ');
+  console.log('DATA: test');
   console.log(leftTop3);
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
   const generateAvatar = (name: string, url?: string) => {
+    const raw = (url ?? '').toString()
+    const value = raw.trim().toLowerCase();
+
     const invalid =
       !url ||
-      url.trim() === '' ||
-      url.toLowerCase() === 'null' ||
-      url.toLowerCase() === 'undefined' ||
-      url === '-';
+      value === '' ||
+      value === 'null' ||
+      value === 'undefined' ||
+      value === '-';
 
-    if (!invalid) return url;
+    return invalid ? DefaultAvatar : raw;
 
-    const initials = (name || 'NA').substring(0, 2).toUpperCase();
+    // const initials = (name || 'NA').substring(0, 2).toUpperCase();
 
-    return `data:image/svg+xml;utf8,
-    <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-      <rect width='80' height='80' rx='8' ry='8' fill='%230b1220'/>
-      <text x='50%' y='50%' dy='.3em' fill='white'
-            font-family='Arial' font-size='22' text-anchor='middle'>
-        ${initials}
-      </text>
-    </svg>`;
+    // return `data:image/svg+xml;utf8,
+    // <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
+    //  <rect width='80' height='80' rx='8' ry='8' fill='%230b1220'/>
+    //  <text x='50%' y='50%' dy='.3em' fill='white'
+    //         font-family='Arial' font-size='22' text-anchor='middle'>
+    //     ${initials}
+    //   </text>
+    // </svg>`;
   };
 
   return (
@@ -262,7 +267,12 @@ export default function SupersetPluginTop40Consumption({
             {leftTop3.map((p: any, i: number) => (
               <div key={`top3-${i}`} className={`card top${i + 1}`}>
                 <div className="value">{p.value}</div>
-                <img src={generateAvatar(p.name, p.photo)} alt={p.name} />
+                <img src={generateAvatar(p.name, p.url)} alt={p.name || 'avatar'} loading="lazy" onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = DefaultAvatar;
+                }}
+                />
                 <div className="name">{p.name}</div>
                 <div className="index">{i + 1}</div>
               </div>
@@ -273,7 +283,12 @@ export default function SupersetPluginTop40Consumption({
             {leftRest.map((p: any, i: number) => (
               <div className="card good" key={`left-${i + 3}`}>
                 <div className="value">{p.value}</div>
-                <img src={generateAvatar(p.name, p.photo)} alt={p.name} />
+                <img src={generateAvatar(p.name, p.url)} alt={p.name || 'avatar'} loading="lazy" onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = DefaultAvatar;
+                }}
+                />
                 <div className="name">{p.name}</div>
                 <div className="index">{i + 4}</div>
               </div>
@@ -292,7 +307,12 @@ export default function SupersetPluginTop40Consumption({
               return (
                 <div className={cardClass} key={`right-${i}`}>
                   <div className="value">{p.value}</div>
-                  <img src={generateAvatar(p.name, p.photo)} alt={p.name} />
+                  <img src={generateAvatar(p.name, p.url)} alt={p.name || 'avatar'} loading="lazy" onError={(e) => {
+                    const img = e.currentTarget;
+                    img.onerror = null;
+                    img.src = DefaultAvatar;
+                  }}
+                  />
                   <div className="name">{p.name}</div>
                   <div className="index">{index}</div>
                 </div>
