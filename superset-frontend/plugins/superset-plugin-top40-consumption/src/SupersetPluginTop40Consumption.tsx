@@ -6,6 +6,7 @@ import { styled } from '@superset-ui/core';
 import React from 'react';
 import type { SupersetPluginTop40ConsumptionProps } from './types';
 
+// @ts-ignore
 import DefaultAvatar from './images/default_avatar.jpg';
 
 const Container = styled.div<{
@@ -52,8 +53,8 @@ const Container = styled.div<{
     min-width: 420px;
     container-type: inline-size;
     border: 1px solid
-    ${({ $themeMode }) =>
-      $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
+      ${({ $themeMode }) =>
+        $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
   }
 
   h3 {
@@ -208,6 +209,7 @@ const Container = styled.div<{
     .panel.good {
       flex: 1 1 100%;
     }
+
     .panel.bad {
       flex: 1 1 100%;
     }
@@ -215,13 +217,13 @@ const Container = styled.div<{
 `;
 
 export default function SupersetPluginTop40Consumption({
-                                                         data = {
-                                                           chartData: [],
-                                                           topLeft: [],
-                                                           topRight: [],
-                                                         },
-                                                         formData,
-                                                       }: SupersetPluginTop40ConsumptionProps) {
+  data = {
+    chartData: [],
+    topLeft: [],
+    topRight: [],
+  },
+  formData,
+}: SupersetPluginTop40ConsumptionProps) {
   const topLeft = data.topLeft ?? [];
   const topRight = data.topRight ?? [];
   const leftTop3 = topLeft.slice(0, 3);
@@ -232,7 +234,7 @@ export default function SupersetPluginTop40Consumption({
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
   const generateAvatar = (name: string, url?: string) => {
-    const raw = (url ?? '').toString()
+    const raw = (url ?? '').toString();
     const value = raw.trim().toLowerCase();
 
     const invalid =
@@ -267,11 +269,15 @@ export default function SupersetPluginTop40Consumption({
             {leftTop3.map((p: any, i: number) => (
               <div key={`top3-${i}`} className={`card top${i + 1}`}>
                 <div className="value">{p.value}</div>
-                <img src={generateAvatar(p.name, p.url)} alt={p.name || 'avatar'} loading="lazy" onError={(e) => {
-                  const img = e.currentTarget;
-                  img.onerror = null;
-                  img.src = DefaultAvatar;
-                }}
+                <img
+                  src={generateAvatar(p.name, p.url)}
+                  alt={p.name || 'avatar'}
+                  loading="lazy"
+                  onError={e => {
+                    const img = e.currentTarget;
+                    img.onerror = null;
+                    img.src = DefaultAvatar;
+                  }}
                 />
                 <div className="name">{p.name}</div>
                 <div className="index">{i + 1}</div>
@@ -283,11 +289,15 @@ export default function SupersetPluginTop40Consumption({
             {leftRest.map((p: any, i: number) => (
               <div className="card good" key={`left-${i + 3}`}>
                 <div className="value">{p.value}</div>
-                <img src={generateAvatar(p.name, p.url)} alt={p.name || 'avatar'} loading="lazy" onError={(e) => {
-                  const img = e.currentTarget;
-                  img.onerror = null;
-                  img.src = DefaultAvatar;
-                }}
+                <img
+                  src={generateAvatar(p.name, p.url)}
+                  alt={p.name || 'avatar'}
+                  loading="lazy"
+                  onError={e => {
+                    const img = e.currentTarget;
+                    img.onerror = null;
+                    img.src = DefaultAvatar;
+                  }}
                 />
                 <div className="name">{p.name}</div>
                 <div className="index">{i + 4}</div>
@@ -307,11 +317,15 @@ export default function SupersetPluginTop40Consumption({
               return (
                 <div className={cardClass} key={`right-${i}`}>
                   <div className="value">{p.value}</div>
-                  <img src={generateAvatar(p.name, p.url)} alt={p.name || 'avatar'} loading="lazy" onError={(e) => {
-                    const img = e.currentTarget;
-                    img.onerror = null;
-                    img.src = DefaultAvatar;
-                  }}
+                  <img
+                    src={generateAvatar(p.name, p.url)}
+                    alt={p.name || 'avatar'}
+                    loading="lazy"
+                    onError={e => {
+                      const img = e.currentTarget;
+                      img.onerror = null;
+                      img.src = DefaultAvatar;
+                    }}
                   />
                   <div className="name">{p.name}</div>
                   <div className="index">{index}</div>
