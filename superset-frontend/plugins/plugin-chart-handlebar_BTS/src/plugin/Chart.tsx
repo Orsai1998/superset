@@ -62,11 +62,11 @@ function extractDashIdFromHref(href: string): string | null {
 // --- helpers -------------------------------
 
 // DROP-IN: replace your current function with this one (same name/signature)
-function tryHideEmpty(iframe: any, slot: any) {
-  const maxMs = +slot.dataset.hidePollMaxMs || 15000; // total window to watch
-  const stepMs = +slot.dataset.hidePollStepMs || 250; // poll interval
-  const graceMs = +slot.dataset.hidePollGraceMs || 1200; // don't hide before this
-  const needHits = +slot.dataset.hidePollHits || 2; // consecutive empty detections
+function tryHideEmpty(iframe: HTMLIFrameElement, slot: HTMLElement) {
+  const maxMs = +slot.dataset.hidePollMaxMs! || 15000; // total window to watch
+  const stepMs = +slot.dataset.hidePollStepMs! || 250; // poll interval
+  const graceMs = +slot.dataset.hidePollGraceMs! || 1200; // don't hide before this
+  const needHits = +slot.dataset.hidePollHits! || 2; // consecutive empty detections
   const debug = slot.dataset.hideDebug === '1';
 
   const started = performance.now();
@@ -85,7 +85,7 @@ function tryHideEmpty(iframe: any, slot: any) {
   }
 
   // Look for empty state **inside chart containers only**
-  function isEmptyScoped(doc: { querySelectorAll: (arg0: string) => any }) {
+  function isEmptyScoped(doc: Document) {
     // typical containers around charts on Superset dashboards
     const containers = doc.querySelectorAll(
       '.dashboard-component-chart, .slice_container, [data-test="chart"], .chart-container',
@@ -93,7 +93,7 @@ function tryHideEmpty(iframe: any, slot: any) {
     if (!containers.length) return false;
 
     // ant empty & explicit empty markers inside containers
-    for (const c of containers) {
+    for (const c of Array.from(containers)) {
       if (
         c.querySelector(
           '.ant-empty, .ant-empty-normal, [data-test="empty-state"], .chart-empty, .slice-empty',
@@ -103,7 +103,7 @@ function tryHideEmpty(iframe: any, slot: any) {
         return true;
       }
       // textual message inside the container
-      const t = (c.innerText || '').trim();
+      const t = ((c as HTMLElement).innerText || '').trim();
       if (
         /No results were returned for this query|No data|Нет данных|Данные не найдены/i.test(
           t,
@@ -670,7 +670,6 @@ export default function HandlebarsChart(props: HandlebarsProps) {
             return;
           }
 
-          // Prefer clicking the actual button so existing UI logic runs
           const btn = root.querySelector<HTMLElement>(
             `.kpi-toggle-btn[data-type="${period}"]`,
           );
@@ -684,8 +683,8 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           replyOk({ ready: true, activePeriod: cur });
           return;
         }
+
         if (msg.action === 'CLICK_TAB') {
-          // EDITED2026
           const raw = (msg.payload?.label ?? '').toString();
           const label = raw.replace(/\s+/g, ' ').trim();
           if (!label) {
@@ -695,8 +694,6 @@ export default function HandlebarsChart(props: HandlebarsProps) {
 
           const norm = (s: string) =>
             s.replace(/\s+/g, ' ').trim().toLowerCase();
-
-          // NOTE: root = контейнер вашего чарта. Если вкладки вне root — используйте document вместо root.
           const tabs = Array.from(
             document.querySelectorAll<HTMLElement>('[role="tab"]'),
           );
@@ -713,29 +710,35 @@ export default function HandlebarsChart(props: HandlebarsProps) {
           replyOk({ clicked: true, label, tabId: target.id || '' });
           return;
         }
+
         if (msg.action === 'CLICK_LINK') {
-          // EDITED2026
           const linkId = (msg.payload?.linkId || '').toString().trim();
           if (!linkId) {
             replyErr('BAD_PAYLOAD', 'linkId is required');
             return;
           }
 
-          // Find by DOM id: <a id="...">
           const sel = `a#${cssEscape(linkId)}`;
           const a = root.querySelector<HTMLAnchorElement>(sel);
-          if (!a) {
-            replyErr('NOT_FOUND', `link not found by id: ${linkId}`);
+          if (a) {
+            a.click();
+            replyOk({
+              clicked: true,
+              linkId,
+              href: a.getAttribute('href') || '',
+            });
             return;
           }
 
-          // Use native click() so default actions (navigation) work if not prevented
-          a.click();
-          replyOk({
-            clicked: true,
-            linkId,
-            href: a.getAttribute('href') || '',
-          });
+          const bSel = `button#${cssEscape(linkId)}`;
+          const b = document.querySelector<HTMLButtonElement>(bSel);
+          if (!b) {
+            replyErr('NOT_FOUND', `a/button not found by id: ${linkId}`);
+            return;
+          }
+
+          b.click();
+          replyOk({ clicked: true, linkId, tag: 'BUTTON' });
           return;
         }
 
@@ -752,12 +755,12 @@ export default function HandlebarsChart(props: HandlebarsProps) {
     realizeAutoIframes();
 
     root.addEventListener('click', onClick);
-    window.addEventListener('message', onMessage); // EDITED2026
+    window.addEventListener('message', onMessage);
 
     // eslint-disable-next-line consistent-return
     return () => {
       root.removeEventListener('click', onClick);
-      window.removeEventListener('message', onMessage); // EDITED2026
+      window.removeEventListener('message', onMessage);
     };
   }, [html, props.formData.styles, template]);
 
@@ -804,6 +807,7 @@ export default function HandlebarsChart(props: HandlebarsProps) {
             />
             {/* eslint-disable-next-line react/button-has-type */}
             <button
+              id="closeframe"
               onClick={() => setModalUrl(null)}
               style={{
                 position: 'absolute',
