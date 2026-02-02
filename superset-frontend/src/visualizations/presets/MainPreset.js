@@ -91,6 +91,7 @@ import SupersetPluginChartErgPlanFact from '../../../plugins/superset-plugin-cha
 import SupersetPluginTop40Consumption from '../../../plugins/superset-plugin-top40-consumption/src/plugin/index';
 import SupersetPluginDieselConsumption from '../../../plugins/superset-plugin-diesel-consumption/src/plugin/index';
 import SupersetPluginMetallCut from '../../../plugins/superset-plugin-metall-cut/src/plugin/index';
+
 export default class MainPreset extends Preset {
   constructor() {
     const experimentalPlugins = isFeatureEnabled(
