@@ -16,18 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 
-export default function transformProps(chartProps: ChartProps) {
-  const { width, height, formData, queriesData } = chartProps;
-  const data = queriesData[0].data as TimeseriesDataRecord[];
-  const isKPI = Number(formData.fact) === 1;
+import { t, ChartMetadata, ChartPlugin } from '@superset-ui/core';
+import transformProps from './transformProps';
+import controlPanel from './controlPanel';
+import thumbnail from '../images/thumbnail.png';
 
-  return {
-    width,
-    height,
-    data,
-    formData,
-    isKPI,
-  };
+export default class SupersetPluginMetallCut extends ChartPlugin {
+  constructor() {
+    super({
+      metadata: new ChartMetadata({
+        name: t('Metall Cut'),
+        description: t('Metall cutting KPI'),
+        category: t('Other'),
+        thumbnail,
+      }),
+      transformProps,
+      controlPanel,
+      loadChart: () => import('../SupersetPluginMetallCut'),
+    });
+  }
 }
