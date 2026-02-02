@@ -29,6 +29,7 @@ import {
 export interface SupersetPluginTop40ConsumptionStylesProps {
   height: number;
   width: number;
+  headerText?: string;
   headerFontSize: keyof typeof supersetTheme.typography.sizes;
   boldText: boolean;
   theme: 'light' | 'dark';
@@ -38,7 +39,7 @@ export interface SupersetPluginTop40ConsumptionStylesProps {
  * Custom control-panel props
  */
 interface SupersetPluginTop40ConsumptionCustomizeProps {
-  headerText: string;
+  headerText?: string;
 }
 
 /**

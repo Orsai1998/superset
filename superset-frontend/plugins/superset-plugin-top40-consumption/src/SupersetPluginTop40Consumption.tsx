@@ -228,8 +228,7 @@ export default function SupersetPluginTop40Consumption({
   const topRight = data.topRight ?? [];
   const leftTop3 = topLeft.slice(0, 3);
   const leftRest = topLeft.slice(3, 15); // 12 more cards → 2 rows of 6
-  console.log('DATA: test');
-  console.log(leftTop3);
+  const headerText = formData?.headerText;
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
@@ -263,7 +262,10 @@ export default function SupersetPluginTop40Consumption({
       <div className="top40-panels">
         {/* LEFT PANEL */}
         <div className="panel good">
-          <h3>Топ 40 по удельному расходу дизельного топлива (г/тнкм)</h3>
+          <h3>
+            {headerText ||
+              'Топ 40 по удельному расходу дизельного топлива (г/тнкм)'}
+          </h3>
 
           <div className="top-cards">
             {leftTop3.map((p: any, i: number) => (
@@ -308,11 +310,14 @@ export default function SupersetPluginTop40Consumption({
 
         {/* RIGHT PANEL */}
         <div className="panel bad">
-          <h3>Топ 40 по удельному расходу дизельного топлива (г/тнкм)</h3>
+          <h3>
+            {headerText ||
+              'Топ 40 по удельному расходу дизельного топлива (г/тнкм)'}
+          </h3>
           <div className="cards">
             {rightTop40.map((p: any, i: number) => {
               const index = i + leftRest.length + 4;
-              const cardClass = index > 21 ? 'card bad' : 'card good';
+              const cardClass = index > 21 ? 'card good' : 'card good';
 
               return (
                 <div className={cardClass} key={`right-${i}`}>

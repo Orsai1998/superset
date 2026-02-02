@@ -16,18 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 
-export default function transformProps(chartProps: ChartProps) {
-  const { width, height, formData, queriesData } = chartProps;
-  const data = queriesData[0].data as TimeseriesDataRecord[];
-  const isKPI = Number(formData.fact) === 1;
+import { buildQueryContext, QueryFormData } from '@superset-ui/core';
 
-  return {
-    width,
-    height,
-    data,
-    formData,
-    isKPI,
-  };
+export default function buildQuery(formData: QueryFormData) {
+  return buildQueryContext(formData);
 }

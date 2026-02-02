@@ -36,8 +36,10 @@ export default function transformProps(chartProps: ChartProps): {
   rawData: TimeseriesDataRecord[];
 } {
   const { width, height, formData, queriesData } = chartProps;
-  const { boldText, headerFontSize, headerText, theme } = formData;
+  const { boldText, headerFontSize, theme } = formData;
   const rawData = (queriesData?.[0]?.data || []) as TimeseriesDataRecord[];
+  const headerText =
+    typeof formData?.headerText === 'string' ? formData.headerText : '';
 
   /**
    * Example expected dataset shape:
