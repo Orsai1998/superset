@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import {t, validateNonEmpty} from '@superset-ui/core';
+import { t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
   sharedControls,
@@ -70,7 +70,7 @@ const config: ControlPanelConfig = {
               description: t(
                 'Select the column representing planned fuel consumption.',
               ),
-              mapStateToProps: ({datasource}) => ({
+              mapStateToProps: ({ datasource }) => ({
                 choices:
                   datasource?.columns?.map((c: any) => [
                     c.column_name,

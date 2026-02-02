@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import {ChartProps, TimeseriesDataRecord} from '@superset-ui/core';
-import {Top40Person, DailyBar} from '../types';
+import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
+import { Top40Person, DailyBar } from '../types';
 
 export default function transformProps(chartProps: ChartProps): {
   width: number;
@@ -35,8 +35,8 @@ export default function transformProps(chartProps: ChartProps): {
   };
   rawData: TimeseriesDataRecord[];
 } {
-  const {width, height, formData, queriesData} = chartProps;
-  const {boldText, headerFontSize, theme} = formData;
+  const { width, height, formData, queriesData } = chartProps;
+  const { boldText, headerFontSize, theme } = formData;
   const rawData = (queriesData?.[0]?.data || []) as TimeseriesDataRecord[];
   const headerText =
     typeof formData?.headerText === 'string' ? formData.headerText : '';
@@ -49,12 +49,12 @@ export default function transformProps(chartProps: ChartProps): {
    * ]
    */
 
-    // --- Daily bar data ---
+  // --- Daily bar data ---
   const chartData: DailyBar[] = rawData.map((row: any) => ({
-      day: String(row.day ?? ''),
-      value: Number(row.value ?? 0),
-      plan: Number(row.plan ?? 0),
-    }));
+    day: String(row.day ?? ''),
+    value: Number(row.value ?? 0),
+    plan: Number(row.plan ?? 0),
+  }));
 
   // --- Drivers sorted by efficiency ---
   const persons: Top40Person[] = rawData
