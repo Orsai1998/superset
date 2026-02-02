@@ -1,10 +1,10 @@
 /**
  * Top-40 Diesel Consumption Plugin — Final balanced layout
  */
-import { styled } from '@superset-ui/core';
+import {styled} from '@superset-ui/core';
 // eslint-disable-next-line no-restricted-syntax
 import React from 'react';
-import type { SupersetPluginTop40ConsumptionProps } from './types';
+import type {SupersetPluginTop40ConsumptionProps} from './types';
 
 // @ts-ignore
 import DefaultAvatar from './images/default_avatar.jpg';
@@ -21,9 +21,9 @@ const Container = styled.div<{
   box-sizing: border-box;
   overflow: visible !important; /* allow content to expand */
   border-radius: 16px;
-  color: ${({ $themeMode }) =>
+  color: ${({$themeMode}) =>
     $themeMode === 'light' ? 'rgba(50, 50, 50, 1)' : '#fff'};
-  background-color: ${({ $themeMode }) =>
+  background-color: ${({$themeMode}) =>
     $themeMode === 'light' ? '#fff' : 'rgba(9, 21, 44, 1)'};
   font-family: 'Inter', sans-serif;
 
@@ -34,14 +34,14 @@ const Container = styled.div<{
     width: 100%;
     max-width: 100%;
     gap: 30px;
-    background-color: ${({ $themeMode }) =>
+    background-color: ${({$themeMode}) =>
       $themeMode === 'light' ? '#fff' : 'rgba(9, 21, 44, 1)'};
   }
 
   /* ==== Panel layout fix ==== */
 
   .panel {
-    background: ${({ $themeMode }) =>
+    background: ${({$themeMode}) =>
       $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
     border-radius: 12px;
     padding: 20px;
@@ -52,17 +52,16 @@ const Container = styled.div<{
     flex: 1 1 48%;
     min-width: 420px;
     container-type: inline-size;
-    border: 1px solid
-      ${({ $themeMode }) =>
-        $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
+    border: 1px solid ${({$themeMode}) =>
+      $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
   }
 
   h3 {
     margin: 0;
     font-weight: 700 !important;
     text-align: left;
-    font-size: ${({ $headerFontSize }) => `${$headerFontSize}px`} !important;
-    color: ${({ $themeMode }) =>
+    font-size: ${({$headerFontSize}) => `${$headerFontSize}px`} !important;
+    color: ${({$themeMode}) =>
       $themeMode === 'light' ? 'rgba(50, 50, 50, 1)' : '#fff'} !important;
   }
 
@@ -115,7 +114,7 @@ const Container = styled.div<{
   .card.top1,
   .card.top2,
   .card.top3 {
-    background: ${({ $themeMode }) =>
+    background: ${({$themeMode}) =>
       $themeMode === 'light'
         ? 'rgba(34, 197, 94, 0.4)'
         : 'rgba(23, 46, 22, 1)'};
@@ -124,7 +123,7 @@ const Container = styled.div<{
   /* остальные */
 
   .card.good {
-    background: ${({ $themeMode }) =>
+    background: ${({$themeMode}) =>
       $themeMode === 'light'
         ? 'rgba(226, 226, 226, 1)'
         : 'rgba(53, 63, 82, 1)'};
@@ -141,11 +140,11 @@ const Container = styled.div<{
   }
 
   .card.bad {
-    background: ${({ $themeMode }) =>
+    background: ${({$themeMode}) =>
       $themeMode === 'light'
         ? 'rgba(254, 38, 38, 0.4)'
         : 'rgba(77, 37, 37, 1)'};
-    border: ${({ $themeMode }) =>
+    border: ${({$themeMode}) =>
       $themeMode === 'light' ? '1px solid rgba(254, 38, 38, 1)' : 'none'};
     width: 100%;
     aspect-ratio: 1 / 1.2;
@@ -217,19 +216,18 @@ const Container = styled.div<{
 `;
 
 export default function SupersetPluginTop40Consumption({
-  data = {
-    chartData: [],
-    topLeft: [],
-    topRight: [],
-  },
-  formData,
-}: SupersetPluginTop40ConsumptionProps) {
+                                                         data = {
+                                                           chartData: [],
+                                                           topLeft: [],
+                                                           topRight: [],
+                                                         },
+                                                         formData,
+                                                       }: SupersetPluginTop40ConsumptionProps) {
   const topLeft = data.topLeft ?? [];
   const topRight = data.topRight ?? [];
   const leftTop3 = topLeft.slice(0, 3);
   const leftRest = topLeft.slice(3, 15); // 12 more cards → 2 rows of 6
-  console.log('DATA: test');
-  console.log(leftTop3);
+  const headerText = formData?.headerText;
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
@@ -263,7 +261,10 @@ export default function SupersetPluginTop40Consumption({
       <div className="top40-panels">
         {/* LEFT PANEL */}
         <div className="panel good">
-          <h3>Топ 40 по удельному расходу дизельного топлива (г/тнкм)</h3>
+          <h3>
+            {headerText ||
+              'Топ 40 по удельному расходу дизельного топлива (г/тнкм)'}
+          </h3>
 
           <div className="top-cards">
             {leftTop3.map((p: any, i: number) => (
@@ -308,11 +309,14 @@ export default function SupersetPluginTop40Consumption({
 
         {/* RIGHT PANEL */}
         <div className="panel bad">
-          <h3>Топ 40 по удельному расходу дизельного топлива (г/тнкм)</h3>
+          <h3>
+            {headerText ||
+              'Топ 40 по удельному расходу дизельного топлива (г/тнкм)'}
+          </h3>
           <div className="cards">
             {rightTop40.map((p: any, i: number) => {
               const index = i + leftRest.length + 4;
-              const cardClass = index > 21 ? 'card bad' : 'card good';
+              const cardClass = index > 21 ? 'card good' : 'card good';
 
               return (
                 <div className={cardClass} key={`right-${i}`}>
