@@ -16,18 +16,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 
-export default function transformProps(chartProps: ChartProps) {
-  const { width, height, formData, queriesData } = chartProps;
-  const data = queriesData[0].data as TimeseriesDataRecord[];
-  const isKPI = Number(formData.fact) === 1;
+import { SupersetPluginMetallCutProps, MetallCutItem } from '../types';
+
+export default function transformProps(
+  chartProps: any,
+): SupersetPluginMetallCutProps {
+  const { formData, queriesData } = chartProps;
+
+  const rows = queriesData?.[0]?.data ?? [];
+
+  console.log(rows);
+
+  const data: MetallCutItem[] = (rows as any[]).map((r, i) => ({
+    id: String(r.title ?? i),
+    title: String(r.title ?? '-'),
+    deviationPerDay: Number(r.deviationPerDay ?? 0),
+    monthDone: Number(r.monthDone ?? 0),
+    monthPlan: Number(r.monthPlan ?? 1),
+  }));
 
   return {
-    width,
-    height,
     data,
     formData,
-    isKPI,
+    theme: formData.theme ?? 'dark',
+    titleFontSize: formData.titleFontSize ?? 16,
+    deviationFontSize: formData.deviationFontSize ?? 30,
+    barNumberFontSize: formData.barNumberFontSize ?? 16,
+    barHeight: formData.barHeight ?? 40,
   };
 }

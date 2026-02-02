@@ -110,6 +110,25 @@ const config: ControlPanelConfig = {
       ],
     },
 
+    {
+      label: t('Customize'),
+      expanded: true,
+      controlSetRows: [
+        [
+          {
+            name: 'headerText',
+            config: {
+              type: 'TextControl',
+              label: t('Заголовок'),
+              description: t('Текс над карточками'),
+              default: t('Топ 40 по удельному расходу дизельного топлива'),
+              renderTrigger: true,
+            },
+          },
+        ],
+      ],
+    },
+
     // ─── Chart Options Section ─────────────────────────────────────
     {
       label: t('Chart Options'),

@@ -16,18 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
+import { SupersetPluginTop40Consumption } from '../src';
 
-export default function transformProps(chartProps: ChartProps) {
-  const { width, height, formData, queriesData } = chartProps;
-  const data = queriesData[0].data as TimeseriesDataRecord[];
-  const isKPI = Number(formData.fact) === 1;
-
-  return {
-    width,
-    height,
-    data,
-    formData,
-    isKPI,
-  };
-}
+/**
+ * The example tests in this file act as a starting point, and
+ * we encourage you to build more. These tests check that the
+ * plugin loads properly, and focus on `transformProps`
+ * to ake sure that data, controls, and props are all
+ * treated correctly (e.g. formData from plugin controls
+ * properly transform the data and/or any resulting props).
+ */
+describe('superset-plugin-top-40-consumption', () => {
+  it('exists', () => {
+    expect(SupersetPluginTop40Consumption).toBeDefined();
+  });
+});
