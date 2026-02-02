@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-syntax
 import React, { useEffect } from 'react';
 import './metallCut.css';
 
