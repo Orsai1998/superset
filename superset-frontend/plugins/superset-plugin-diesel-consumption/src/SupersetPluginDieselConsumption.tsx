@@ -88,8 +88,8 @@ const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   display: flex;
   flex-direction: column;
   border: 1px solid
-    ${({ $themeMode }) =>
-      $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
+  ${({ $themeMode }) =>
+    $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
@@ -100,7 +100,7 @@ const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
 // eslint-disable-next-line theme-colors/no-literal-colors
 const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   border: 1px solid
-    ${({ $themeMode }) => ($themeMode === 'light' ? '#E2E2E2' : '#1A336F')};
+  ${({ $themeMode }) => ($themeMode === 'light' ? '#E2E2E2' : '#1A336F')};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
     $themeMode === 'light' ? '#F5F5F5' : '#142140'};
@@ -174,10 +174,10 @@ const RightPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   align-items: center;
   justify-content: center;
   border: 1px solid
-    ${({ $themeMode }) =>
-      $themeMode === 'light'
-        ? 'rgba(226, 226, 226, 1)'
-        : 'rgba(26, 51, 111, 1)'};
+  ${({ $themeMode }) =>
+    $themeMode === 'light'
+      ? 'rgba(226, 226, 226, 1)'
+      : 'rgba(26, 51, 111, 1)'};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
@@ -258,6 +258,10 @@ type Props = {
   averages: { plan: number; fact: number };
   fmt: (n: number) => string;
   title?: string;
+  planLabel?: string;
+  factLabel?: string;
+  barWidth: number;
+  barGap: number;
   formData?: {
     titleFontSize: number;
     chartType: 'default' | 'plan_fact_daily';
@@ -274,17 +278,21 @@ type Props = {
 
 // === Component ===
 const SupersetPluginDieselConsumption: React.FC<Props> = ({
-  width,
-  height,
-  data,
+                                                            width,
+                                                            height,
+                                                            data,
 
-  showMonthTotals,
-  totals,
-  averages,
-  fmt,
-  title,
-  formData,
-}) => {
+                                                            showMonthTotals,
+                                                            totals,
+                                                            averages,
+                                                            fmt,
+                                                            title,
+                                                            formData,
+                                                            planLabel = 'План',
+                                                            factLabel = 'Факт',
+                                                            barWidth,
+                                                            barGap = 5,
+                                                          }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const miniRef = useRef<HTMLDivElement>(null);
   const [maxHeight, setMaxHeight] = useState(0);
@@ -363,8 +371,13 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           textStyle: { color: '#fff', fontSize: 12 },
           formatter: (params: any[]) => {
             const day = params[0].axisValue;
-            const fact = params.find(p => p.seriesName === 'Факт')?.value ?? 0;
-            const plan = params.find(p => p.seriesName === 'План')?.value ?? 0;
+            const takeNumber = (v: any) => (Array.isArray(v) ? v[1] : v);
+            const factRaw =
+              params.find((p: any) => p.seriesName === 'Факт')?.value ?? 0;
+            const planRaw =
+              params.find(p => p.seriesName === 'План')?.value ?? 0;
+            const fact = fmt(Number(takeNumber(factRaw)));
+            const plan = fmt(Number(takeNumber(planRaw)));
 
             return `
             <div style="padding:4px 0 2px; font-size:13px;">
@@ -378,11 +391,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
 
         series: [
           {
-            name: 'Факт',
+            name: factLabel,
             type: 'bar',
             data: prepared.map(d => d.fact),
-            barWidth: 14,
-            barGap: '5%',
+            barWidth,
+            barGap: `${barGap}%`,
             barCategoryGap: '40%',
             itemStyle: {
               color: (params: { dataIndex: string | number }) => {
@@ -394,11 +407,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             },
           },
           {
-            name: 'План',
+            name: planLabel,
             type: 'bar',
             data: prepared.map(d => d.plan),
-            barWidth: 14,
-            barGap: '5%',
+            barWidth,
+            barGap: `${barGap}%`,
             barCategoryGap: '40%',
             itemStyle: {
               color: planColor,
@@ -433,9 +446,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         ],
       };
     }
-
-    // ==========================================================
-    // === NEW APPEARANCE (daily plan/fact like screenshot)
+      // ==========================================================
+      // === NEW APPEARANCE (daily plan/fact like screenshot)
     // ==========================================================
     else if (chartType === 'plan_fact_daily') {
       const planColorDefault = theme === 'light' ? '#D9D9D9' : '#09152B';
@@ -449,7 +461,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           left: '0%',
           right: '45px',
           top: 50,
-          bottom: 0,
+          bottom: 20,
           containLabel: true,
         },
 
@@ -464,10 +476,18 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           axisLine: { show: false },
           axisTick: { show: false },
           min: 0,
-          boundaryGap: false,
+          boundaryGap: true,
         },
 
         yAxis: { show: false },
+
+        dataZoom: [
+          {
+            type: 'inside',
+            xAxisIndex: 0,
+          },
+          { type: 'slider', xAxisIndex: 0, height: 14, bottom: 0 },
+        ],
 
         tooltip: {
           trigger: 'axis',
@@ -482,8 +502,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           {
             name: 'План',
             type: 'bar',
-            data: prepared.map(d => d.plan),
-            barWidth: 10,
+            data: prepared.map(d => ({
+              value: d.plan,
+            })),
+            barWidth,
+            barGap: `${barGap}%`,
             itemStyle: {
               color: planColorDefault,
               borderRadius: [6, 6, 0, 0],
@@ -497,7 +520,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               // eslint-disable-next-line theme-colors/no-literal-colors
               color: labelColor,
               rotate: 90,
-              offset: [15, 5],
+              offset: [17, 10],
               formatter: (p: { value: number }) => fmt(p.value),
             },
             emphasis: { disabled: true },
@@ -512,15 +535,16 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               itemStyle: { color: d.color },
               label: { color: d.labelColor },
             })),
-            barWidth: 10,
+            barWidth,
+            barGap: `${barGap}%`,
             label: {
               show: true,
               position: 'top',
               fontSize: metricFontSize,
               fontWeight: 700,
-              distance: 3,
+              distance: 10,
               rotate: 90,
-              offset: [15, 10],
+              offset: [17, 10],
               formatter: (p: { value: number }) => fmt(p.value),
             },
             itemStyle: {
@@ -642,11 +666,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         <div className="custom-legend">
           <div className="item">
             <div className="dot plan" />
-            <span className="legend">План</span>
+            <span className="legend">{planLabel}</span>
           </div>
           <div className="item">
             <div className="dot fact" />
-            <span className="legend">Факт</span>
+            <span className="legend">{factLabel}</span>
           </div>
         </div>
         <div className="spacer" />
