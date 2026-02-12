@@ -1,10 +1,10 @@
 /**
  * Top-40 Diesel Consumption Plugin — Final balanced layout
  */
-import {styled} from '@superset-ui/core';
+import { styled } from '@superset-ui/core';
 // eslint-disable-next-line no-restricted-syntax
 import React from 'react';
-import type {SupersetPluginTop40ConsumptionProps} from './types';
+import type { SupersetPluginTop40ConsumptionProps } from './types';
 
 // @ts-ignore
 import DefaultAvatar from './images/default_avatar.jpg';
@@ -21,9 +21,9 @@ const Container = styled.div<{
   box-sizing: border-box;
   overflow: visible !important; /* allow content to expand */
   border-radius: 16px;
-  color: ${({$themeMode}) =>
+  color: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(50, 50, 50, 1)' : '#fff'};
-  background-color: ${({$themeMode}) =>
+  background-color: ${({ $themeMode }) =>
     $themeMode === 'light' ? '#fff' : 'rgba(9, 21, 44, 1)'};
   font-family: 'Inter', sans-serif;
 
@@ -34,14 +34,14 @@ const Container = styled.div<{
     width: 100%;
     max-width: 100%;
     gap: 30px;
-    background-color: ${({$themeMode}) =>
+    background-color: ${({ $themeMode }) =>
       $themeMode === 'light' ? '#fff' : 'rgba(9, 21, 44, 1)'};
   }
 
   /* ==== Panel layout fix ==== */
 
   .panel {
-    background: ${({$themeMode}) =>
+    background: ${({ $themeMode }) =>
       $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
     border-radius: 12px;
     padding: 20px;
@@ -52,7 +52,8 @@ const Container = styled.div<{
     flex: 1 1 48%;
     min-width: 420px;
     container-type: inline-size;
-    border: 1px solid ${({$themeMode}) =>
+    border: 1px solid
+    ${({ $themeMode }) =>
       $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
   }
 
@@ -60,8 +61,8 @@ const Container = styled.div<{
     margin: 0;
     font-weight: 700 !important;
     text-align: left;
-    font-size: ${({$headerFontSize}) => `${$headerFontSize}px`} !important;
-    color: ${({$themeMode}) =>
+    font-size: ${({ $headerFontSize }) => `${$headerFontSize}px`} !important;
+    color: ${({ $themeMode }) =>
       $themeMode === 'light' ? 'rgba(50, 50, 50, 1)' : '#fff'} !important;
   }
 
@@ -114,7 +115,7 @@ const Container = styled.div<{
   .card.top1,
   .card.top2,
   .card.top3 {
-    background: ${({$themeMode}) =>
+    background: ${({ $themeMode }) =>
       $themeMode === 'light'
         ? 'rgba(34, 197, 94, 0.4)'
         : 'rgba(23, 46, 22, 1)'};
@@ -123,7 +124,7 @@ const Container = styled.div<{
   /* остальные */
 
   .card.good {
-    background: ${({$themeMode}) =>
+    background: ${({ $themeMode }) =>
       $themeMode === 'light'
         ? 'rgba(226, 226, 226, 1)'
         : 'rgba(53, 63, 82, 1)'};
@@ -140,11 +141,11 @@ const Container = styled.div<{
   }
 
   .card.bad {
-    background: ${({$themeMode}) =>
+    background: ${({ $themeMode }) =>
       $themeMode === 'light'
         ? 'rgba(254, 38, 38, 0.4)'
         : 'rgba(77, 37, 37, 1)'};
-    border: ${({$themeMode}) =>
+    border: ${({ $themeMode }) =>
       $themeMode === 'light' ? '1px solid rgba(254, 38, 38, 1)' : 'none'};
     width: 100%;
     aspect-ratio: 1 / 1.2;
@@ -231,29 +232,28 @@ export default function SupersetPluginTop40Consumption({
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
-  const generateAvatar = (name: string, url?: string) => {
-    const raw = (url ?? '').toString();
-    const value = raw.trim().toLowerCase();
+  const generateAvatar = (name: string, input: any) => {
+    let raw = '';
+
+    if (!input) raw = '';
+    else if (typeof input === 'string') raw = input;
+    else if (typeof input === 'object')
+      raw = input.photo || input.url || input.src || input.value || '';
+    else raw = String(input);
+
+    raw = raw.trim();
+    const lower = raw.toLowerCase();
 
     const invalid =
-      !url ||
-      value === '' ||
-      value === 'null' ||
-      value === 'undefined' ||
-      value === '-';
+      !raw || lower === 'null' || lower === 'undefined' || lower === '-';
 
-    return invalid ? DefaultAvatar : raw;
+    if (invalid) return DefaultAvatar;
 
-    // const initials = (name || 'NA').substring(0, 2).toUpperCase();
+    if (raw.startsWith('/')) {
+      return `${window.location.origin}${raw}`;
+    }
 
-    // return `data:image/svg+xml;utf8,
-    // <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'>
-    //  <rect width='80' height='80' rx='8' ry='8' fill='%230b1220'/>
-    //  <text x='50%' y='50%' dy='.3em' fill='white'
-    //         font-family='Arial' font-size='22' text-anchor='middle'>
-    //     ${initials}
-    //   </text>
-    // </svg>`;
+    return raw;
   };
 
   return (
@@ -271,7 +271,7 @@ export default function SupersetPluginTop40Consumption({
               <div key={`top3-${i}`} className={`card top${i + 1}`}>
                 <div className="value">{p.value}</div>
                 <img
-                  src={generateAvatar(p.name, p.url)}
+                  src={generateAvatar(p.name, p.photo)}
                   alt={p.name || 'avatar'}
                   loading="lazy"
                   onError={e => {
@@ -291,7 +291,7 @@ export default function SupersetPluginTop40Consumption({
               <div className="card good" key={`left-${i + 3}`}>
                 <div className="value">{p.value}</div>
                 <img
-                  src={generateAvatar(p.name, p.url)}
+                  src={generateAvatar(p.name, p.photo)}
                   alt={p.name || 'avatar'}
                   loading="lazy"
                   onError={e => {
@@ -322,7 +322,7 @@ export default function SupersetPluginTop40Consumption({
                 <div className={cardClass} key={`right-${i}`}>
                   <div className="value">{p.value}</div>
                   <img
-                    src={generateAvatar(p.name, p.url)}
+                    src={generateAvatar(p.name, p.photo)}
                     alt={p.name || 'avatar'}
                     loading="lazy"
                     onError={e => {
