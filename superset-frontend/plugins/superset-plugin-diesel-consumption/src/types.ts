@@ -33,13 +33,13 @@ export type DieselDatum = {
 
 export type SupersetPluginDieselConsumptionProps =
   SupersetPluginDieselConsumptionStylesProps &
-  SupersetPluginDieselConsumptionCustomizeProps & {
-  data: TimeseriesDataRecord[];
-  planColor: string; // Цвет для плана
-  factColor: string; // Цвет для факта
-  showMonthTotals: boolean; // Показать итоговые значения по месяцу
-  totals: { plan: number; fact: number }; // Итоги для плана и факта
-  fmt: (n: number) => string; // Функция для форматирования чисел
-  title?: string; // Заголовок графика
-  formData: SupersetPluginDieselConsumptionQueryFormData;
-};
+    SupersetPluginDieselConsumptionCustomizeProps & {
+      data: TimeseriesDataRecord[];
+      planColor: string; // Цвет для плана
+      factColor: string; // Цвет для факта
+      showMonthTotals: boolean; // Показать итоговые значения по месяцу
+      totals: { plan: number; fact: number }; // Итоги для плана и факта
+      fmt: (n: number) => string; // Функция для форматирования чисел
+      title?: string; // Заголовок графика
+      formData: SupersetPluginDieselConsumptionQueryFormData;
+    };
