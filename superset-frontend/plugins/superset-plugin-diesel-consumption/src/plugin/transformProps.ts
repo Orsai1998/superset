@@ -154,7 +154,9 @@ export default function transformProps(chartProps: ChartProps) {
   const factMetricName = factMetric?.label ?? factMetric;
 
   // === FORMATTING ===
-  const fmt = getNumberFormatter(formData.value_format ?? ',.0f');
+  const valueFormat =
+    (formData as any).valueFormat ?? (formData as any).value_format ?? ',.2f';
+  const fmt = getNumberFormatter(valueFormat);
 
   // === TRANSFORM WITHOUT SORTING (Superset already sorts!) ===
   const rawData: DieselDatum[] = records.map((rec: Record<any, any>) => ({
@@ -184,6 +186,17 @@ export default function transformProps(chartProps: ChartProps) {
     fact: totals.fact / count,
   };
 
+  const planLabel =
+    typeof formData?.planLabel === 'string' ? formData.planLabel : 'План';
+
+  const factLabel =
+    typeof formData?.factLabel === 'string' ? formData.factLabel : 'Факт';
+
+  const barWidth = Number.isFinite(formData?.barWidth)
+    ? formData?.barWidth
+    : 12;
+  const barGap = Number.isFinite(formData?.barGap) ? formData?.barGap : 20;
+
   return {
     width,
     height,
@@ -197,5 +210,9 @@ export default function transformProps(chartProps: ChartProps) {
     fmt,
     title: formData.slice_name ?? '',
     formData,
+    planLabel,
+    factLabel,
+    barWidth,
+    barGap,
   };
 }
