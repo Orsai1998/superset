@@ -163,7 +163,10 @@ export default function transformProps(chartProps: ChartProps) {
     plan: Number(rec[planMetricName] ?? 0),
     fact: Number(rec[factMetricName] ?? 0),
   }));
-  const data = normalizeByTimeGrain(rawData, timeGrainSqla);
+  const fillTimeGaps = formData.fill_time_gaps ?? true;
+  const data = fillTimeGaps
+    ? normalizeByTimeGrain(rawData, timeGrainSqla)
+    : rawData;
   // === TOTALS (based on filtered dataset) ===
   const totals = data.reduce(
     (acc, d) => {
