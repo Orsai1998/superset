@@ -149,6 +149,16 @@ const config: ControlPanelConfig = {
             },
           },
           {
+            name: 'fill_time_gaps',
+            config: {
+              type: 'CheckboxControl',
+              label: 'Fill missing time buckets (0 values)',
+              default: true,
+              description:
+                'Adds missing days/months with plan=0, fact=0 so the axis is continuous.',
+            },
+          },
+          {
             name: 'enable_fact_plan_coloring',
             config: {
               type: 'CheckboxControl',
