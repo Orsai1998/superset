@@ -83,14 +83,14 @@ export type SupersetPluginTop40ConsumptionQueryFormData = QueryFormData &
  */
 export type SupersetPluginTop40ConsumptionProps =
   SupersetPluginTop40ConsumptionStylesProps &
-  SupersetPluginTop40ConsumptionCustomizeProps & {
-  /**
-   * The transformed data used by the React component.
-   */
-  data: Top40ChartData;
-  /**
-   * Original query rows if needed for debugging or future use.
-   */
-  rawData?: TimeseriesDataRecord[];
-  formData: SupersetPluginTop40ConsumptionQueryFormData;
-};
+    SupersetPluginTop40ConsumptionCustomizeProps & {
+      /**
+       * The transformed data used by the React component.
+       */
+      data: Top40ChartData;
+      /**
+       * Original query rows if needed for debugging or future use.
+       */
+      rawData?: TimeseriesDataRecord[];
+      formData: SupersetPluginTop40ConsumptionQueryFormData;
+    };
