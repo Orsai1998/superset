@@ -232,16 +232,20 @@ export default function SupersetPluginTop40Consumption({
   const rightTop40 = [...topLeft.slice(15), ...topRight]; // rest go to right panel
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
-  const generateAvatar = (name: string, url?: string) => {
-    const raw = (url ?? '').toString();
-    const value = raw.trim().toLowerCase();
+  const generateAvatar = (name: string, input: any) => {
+    let raw = '';
+
+    if (!input) raw = '';
+    else if (typeof input === 'string') raw = input;
+    else if (typeof input === 'object')
+      raw = input.photo || input.url || input.src || input.value || '';
+    else raw = String(input);
+
+    raw = raw.trim();
+    const lower = raw.toLowerCase();
 
     const invalid =
-      !url ||
-      value === '' ||
-      value === 'null' ||
-      value === 'undefined' ||
-      value === '-';
+      !raw || lower === 'null' || lower === 'undefined' || lower === '-';
 
     return invalid ? DefaultAvatar : raw;
 
@@ -272,7 +276,7 @@ export default function SupersetPluginTop40Consumption({
               <div key={`top3-${i}`} className={`card top${i + 1}`}>
                 <div className="value">{p.value}</div>
                 <img
-                  src={generateAvatar(p.name, p.url)}
+                  src={generateAvatar(p.name, p.photo)}
                   alt={p.name || 'avatar'}
                   loading="lazy"
                   onError={e => {
@@ -292,7 +296,7 @@ export default function SupersetPluginTop40Consumption({
               <div className="card good" key={`left-${i + 3}`}>
                 <div className="value">{p.value}</div>
                 <img
-                  src={generateAvatar(p.name, p.url)}
+                  src={generateAvatar(p.name, p.photo)}
                   alt={p.name || 'avatar'}
                   loading="lazy"
                   onError={e => {
@@ -323,7 +327,7 @@ export default function SupersetPluginTop40Consumption({
                 <div className={cardClass} key={`right-${i}`}>
                   <div className="value">{p.value}</div>
                   <img
-                    src={generateAvatar(p.name, p.url)}
+                    src={generateAvatar(p.name, p.photo)}
                     alt={p.name || 'avatar'}
                     loading="lazy"
                     onError={e => {

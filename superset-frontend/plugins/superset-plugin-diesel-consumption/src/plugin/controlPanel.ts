@@ -5,7 +5,7 @@ const config: ControlPanelConfig = {
   controlPanelSections: [
     sections.echartsTimeSeriesQueryWithXAxisSort,
     {
-      label: t('Appearance'),
+      label: 'Customize',
       expanded: true,
       controlSetRows: [
         // ─── Theme Selector ───────────────────────────────────────
@@ -57,6 +57,28 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'planLabel',
+            config: {
+              type: 'TextControl',
+              label: 'Наименование плана',
+              default: 'План',
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'factLabel',
+            config: {
+              type: 'TextControl',
+              label: 'Наименование факта',
+              default: 'Факт',
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
             name: 'metric_title',
             config: {
               type: 'TextControl',
@@ -67,6 +89,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+
         // ─── Font Size Control ──────────────────────────
         [
           {
@@ -134,6 +157,32 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'barWidth',
+            config: {
+              type: 'SliderControl',
+              label: 'Ширина столбцов',
+              default: 12,
+              min: 2,
+              max: 60,
+              step: 1,
+              renderTrigger: true,
+            },
+          },
+          {
+            name: 'barGap',
+            config: {
+              type: 'SliderControl',
+              label: 'Отступ между столбцами',
+              default: 20,
+              min: 0,
+              max: 60,
+              step: 5,
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
             name: 'metric_title_font_size',
             config: {
               type: 'SliderControl',
@@ -149,6 +198,16 @@ const config: ControlPanelConfig = {
             },
           },
           {
+            name: 'fill_time_gaps',
+            config: {
+              type: 'CheckboxControl',
+              label: 'Fill missing time buckets (0 values)',
+              default: true,
+              description:
+                'Adds missing days/months with plan=0, fact=0 so the axis is continuous.',
+            },
+          },
+          {
             name: 'enable_fact_plan_coloring',
             config: {
               type: 'CheckboxControl',
@@ -157,6 +216,24 @@ const config: ControlPanelConfig = {
                 'If enabled, metrics will be colored based on fact > plan.',
               ),
               default: true,
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'valueFormat',
+            config: {
+              type: 'SelectControl',
+              label: 'Формат числа',
+              default: ',.2f',
+              choices: [
+                [',.0f', 'Без дробных'],
+                [',.1f', '1 знак'],
+                [',.2f', '2 знака'],
+                [',.3f', '3 знака'],
+                [',.5f', '5 знаков'],
+              ],
               renderTrigger: true,
             },
           },
