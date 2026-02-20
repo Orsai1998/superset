@@ -4,7 +4,7 @@ import { styled } from '@superset-ui/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as echarts from 'echarts/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { BarChart } from 'echarts/charts';
+import { BarChart, LineChart } from 'echarts/charts';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { GridComponent, TooltipComponent } from 'echarts/components';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -14,6 +14,7 @@ import { LabelLayout } from 'echarts/features';
 
 echarts.use([
   BarChart,
+  LineChart,
   GridComponent,
   TooltipComponent,
   CanvasRenderer,
@@ -164,6 +165,7 @@ const Header = styled.div<{ $themeMode: 'light' | 'dark' }>`
 const ChartContainer = styled.div`
   flex: 1;
   width: 100%;
+  height: 100%;
   min-height: 0;
 `;
 
@@ -251,6 +253,9 @@ type Props = {
   width: number;
   height: number;
   data: { day: any; plan: number; fact: number }[];
+  x: string;
+  planLine: number[];
+  factLine: number[];
   planColor: string;
   factColor: string;
   showMonthTotals: boolean;
@@ -264,7 +269,7 @@ type Props = {
   barGap: number;
   formData?: {
     titleFontSize: number;
-    chartType: 'default' | 'plan_fact_daily';
+    chartType: 'default' | 'plan_fact_daily' | 'plan_fact_line';
     chartTitle: string;
     metricTitle: string;
     currentMonthFontSize: number;
@@ -281,7 +286,6 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
                                                             width,
                                                             height,
                                                             data,
-
                                                             showMonthTotals,
                                                             totals,
                                                             averages,
@@ -298,7 +302,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   const [maxHeight, setMaxHeight] = useState(0);
   const theme = formData?.theme || 'dark';
   const titleFontSize = formData?.titleFontSize || 16;
-  const chartType = formData?.chartType;
+  const chartType =
+    (formData as any)?.chart_type ?? (formData as any)?.chartType ?? 'default';
   const chartTitle = formData?.chartTitle;
   const metricTitle = formData?.metricTitle;
   const metricTitleFontSize = formData?.metricTitleFontSize || 20;
@@ -337,19 +342,120 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
       };
     });
 
-    let option;
+    let option: echarts.EChartsCoreOption = {};
+
+    const xData = prepared.map(d => d.day);
+
+    const factLine = prepared.map(d => d.fact);
+    const planLine = prepared.map(d => d.plan);
 
     // ==========================================================
-    // === DEFAULT APPEARANCE
+    // === PLAN FACT LINE AND DEFAULT APPEARANCE
     // ==========================================================
-    if (chartType === 'default') {
+    if (chartType === 'plan_fact_line') {
       option = {
         backgroundColor: 'transparent',
-        grid: { left: 30, right: 10, top: 50, bottom: 40, containLabel: true },
+
+        grid: {
+          left: 10,
+          right: '45px',
+          top: 20,
+          bottom: 25,
+          containLabel: true,
+        },
 
         xAxis: {
           type: 'category',
-          data: prepared.map(d => d.day),
+          data: xData,
+          boundaryGap: false,
+        },
+
+        yAxis: {
+          type: 'value',
+        },
+
+        series: [
+          // ПОЛОСА ПЛАНА (толстая “лента”)
+          {
+            name: planLabel,
+            type: 'line',
+            data: planLine,
+            symbol: 'none',
+            smooth: false,
+            step: false,
+            lineStyle: {
+              width: 2,
+              opacity: 1,
+              color: theme === 'light' ? 'rgba(0,0,0)' : 'rgba(255,255,255)',
+            },
+            emphasis: { disabled: true },
+          },
+
+          // КРИВАЯ ФАКТА + кружочки + заливка
+          {
+            name: factLabel,
+            type: 'line',
+            data: factLine,
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 10,
+            lineStyle: {
+              width: 3,
+              // eslint-disable-next-line theme-colors/no-literal-colors
+              color: '#ff8c00',
+            },
+            itemStyle: {
+              color: (params: any) => {
+                // покраска кружочков в красный или зеленый в зависимости от галочки
+                const i = params.dataIndex;
+                const fact = factLine[i];
+                const plan = planLine[i];
+
+                const higher = fact > plan;
+
+                if (enable_fact_plan_coloring) {
+                  return higher
+                    ? 'rgba(74, 149, 70, 1)'
+                    : 'rgba(255, 123, 123, 1)';
+                }
+
+                return higher
+                  ? 'rgba(255, 123, 123, 1)'
+                  : 'rgba(74, 149, 70, 1)';
+              },
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                {
+                  offset: 0,
+                  // eslint-disable-next-line theme-colors/no-literal-colors
+                  color: 'rgba(255, 140, 0, 0.6)', // вверх оранжевый
+                },
+                {
+                  offset: 1,
+                  // eslint-disable-next-line theme-colors/no-literal-colors
+                  color: 'rgba(255, 140, 0, 0)', // низ прозрачный
+                },
+              ]),
+            },
+            emphasis: { disabled: true },
+          },
+        ],
+      };
+    } else if (chartType === 'default') {
+      option = {
+        backgroundColor: 'transparent',
+        grid: {
+          left: 30,
+          right: 10,
+          top: 50,
+          bottom: 40,
+          containLabel: true,
+        },
+
+        xAxis: {
+          type: 'category',
+          data: xData,
           // eslint-disable-next-line theme-colors/no-literal-colors
           axisLabel: { color: '#9CB0C5', fontSize: 11 },
           axisLine: { show: false },
@@ -419,37 +525,12 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             },
           },
         ],
-
-        graphic: [
-          {
-            type: 'text',
-            left: 15,
-            top: 10,
-            style: {
-              text: '1685',
-              // eslint-disable-next-line theme-colors/no-literal-colors
-              fill: '#ffffff',
-              font: '700 20px "Russo One", sans-serif',
-            },
-          },
-          {
-            type: 'text',
-            left: 70,
-            top: 14,
-            style: {
-              text: title || '',
-              // eslint-disable-next-line theme-colors/no-literal-colors
-              fill: '#ffffff',
-              font: '600 13px "Inter", sans-serif',
-            },
-          },
-        ],
       };
     }
       // ==========================================================
       // === NEW APPEARANCE (daily plan/fact like screenshot)
     // ==========================================================
-    else if (chartType === 'plan_fact_daily') {
+    else {
       const planColorDefault = theme === 'light' ? '#D9D9D9' : '#09152B';
       const labelColor = theme === 'light' ? '#6C6B6B' : '#6C6B6B';
       const xAxisLabelColor = theme === 'light' ? '#323232' : '#FFFFFF';
@@ -557,17 +638,29 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     }
 
     // === APPLY OPTION AND RESIZE
+    chart.clear();
+
     // @ts-ignore
-    chart.setOption(option);
+    chart.setOption(option, true);
     if (chartType === 'default') {
       chart.resize({ width: width - 260, height });
+    } else if (chartType === 'plan_fact_line') {
+      chart.resize({ width, height });
     } else {
       chart.resize({ width, height: height - 100 });
     }
 
     // eslint-disable-next-line consistent-return
     return () => chart.dispose();
-  }, [data, width, height, chartType, planColor, factColor]);
+  }, [
+    data,
+    width,
+    height,
+    chartType,
+    planColor,
+    factColor,
+    enable_fact_plan_coloring,
+  ]);
 
   // === Dynamic height for right bars ===
   useEffect(() => {
@@ -580,6 +673,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   const maxVal = Math.max(totals.plan, totals.fact);
   const planH = maxVal ? (totals.plan / maxVal) * maxHeight : 0;
   const factH = maxVal ? (totals.fact / maxVal) * maxHeight : 0;
+  const isPlanFactLine = chartType === 'plan_fact_line';
 
   const formatValue = (v: number) => fmt(v);
   const renderDefaultAppearance = () => (
@@ -597,11 +691,14 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         {/* Left chart */}
         <LeftPanel $themeMode={theme}>
           {title && <Header $themeMode={theme}>{title}</Header>}
-          <ChartContainer ref={chartRef} />
+          <ChartContainer
+            ref={chartRef}
+            style={{ width: `${width}px`, height: `${height}px` }}
+          />
         </LeftPanel>
 
         {/* Right chart built from divs */}
-        {showMonthTotals && (
+        {showMonthTotals && !isPlanFactLine && (
           <RightPanel ref={miniRef} $themeMode={theme}>
             <MiniChartContainer>
               <Title $themeMode={theme} $fontSize={currentMonthFontSize}>
