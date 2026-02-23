@@ -50,7 +50,7 @@ function resolveXAxisColumn(formData) {
   const pick = (col: { label: any }) => {
     if (!col) return null;
 
-    // Case 1: string = physical column name
+    // Case s41: string = physical column name
     if (typeof col === 'string') return col;
 
     // Case 2: SQL expression / adhoc column
@@ -141,6 +141,7 @@ export default function transformProps(chartProps: ChartProps) {
   const { width, height, theme, queriesData, formData } = chartProps;
   const { timeGrainSqla } = formData;
   const records = queriesData?.[0]?.data ?? [];
+
   // === STANDARD Superset time column ===
   const timeCol = resolveXAxisColumn(formData);
   if (!timeCol) {
@@ -179,6 +180,13 @@ export default function transformProps(chartProps: ChartProps) {
     { plan: 0, fact: 0 },
   );
 
+  const planConst =
+    data.find(d => d.plan !== null && d.plan !== undefined)?.plan ?? 0;
+
+  const x = data.map(d => d.day);
+  const factLine = data.map(d => d.fact);
+  const planLine = data.map(() => planConst);
+
   const count = data.length || 1;
 
   const averages = {
@@ -201,6 +209,9 @@ export default function transformProps(chartProps: ChartProps) {
     width,
     height,
     theme,
+    x,
+    factLine,
+    planLine,
     data,
     planColor: formData.plan_color ?? '#E77E83',
     factColor: formData.fact_color ?? '#7DBE82',
