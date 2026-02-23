@@ -35,6 +35,7 @@ const config: ControlPanelConfig = {
               choices: [
                 ['default', t('Default view')],
                 ['plan_fact_daily', t('Daily Plan/Fact (bars)')],
+                ['plan_fact_line', t('Daily Plan/Fact (line)')],
               ],
               description: t(
                 'Choose how the data should be displayed: default layout or the daily Plan/Fact style.',
@@ -89,7 +90,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-
         // ─── Font Size Control ──────────────────────────
         [
           {
@@ -220,6 +220,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        // ─── Формат числа ──────────────────────────
         [
           {
             name: 'valueFormat',
