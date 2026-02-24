@@ -268,7 +268,7 @@ supersetNode:
   # -- Startup command
   # @default -- See `values.yaml`
   command:
-    - "/bin/sh"
+    - "/bin/bash"
     - "-c"
     - ". {{ .Values.configMountPath }}/superset_bootstrap.sh; /usr/bin/run-server.sh"
   connections:
@@ -386,7 +386,7 @@ supersetWorker:
   # -- Worker startup command
   # @default -- a `celery worker` command
   command:
-    - "/bin/sh"
+    - "/bin/bash"
     - "-c"
     - ". {{ .Values.configMountPath }}/superset_bootstrap.sh; celery --app=superset.tasks.celery_app:app worker"
   # -- If true, forces deployment to reload on each upgrade
@@ -468,7 +468,7 @@ supersetCeleryBeat:
   # -- Command
   # @default -- a `celery beat` command
   command:
-    - "/bin/sh"
+    - "/bin/bash"
     - "-c"
     - ". {{ .Values.configMountPath }}/superset_bootstrap.sh; celery --app=superset.tasks.celery_app:app beat --pidfile /tmp/celerybeat.pid --schedule /tmp/celerybeat-schedule"
   # -- If true, forces deployment to reload on each upgrade
@@ -715,7 +715,7 @@ init:
   # -- Command
   # @default -- a `superset_init.sh` command
   command:
-    - "/bin/sh"
+    - "/bin/bash"
     - "-c"
     - ". {{ .Values.configMountPath }}/superset_bootstrap.sh; . {{ .Values.configMountPath }}/superset_init.sh"
   enabled: true
