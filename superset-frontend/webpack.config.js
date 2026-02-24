@@ -552,9 +552,9 @@ if (isDevMode) {
       },
       logging: 'error',
       webSocketURL: {
-        hostname: '0.0.0.0',
+        hostname: 'localhost',
         pathname: '/ws',
-        port: 0,
+        port: devserverPort,
       },
     },
     static: {

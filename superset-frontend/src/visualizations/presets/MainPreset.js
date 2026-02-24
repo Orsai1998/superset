@@ -81,6 +81,11 @@ import { PivotTableChartPlugin as PivotTableChartPluginV2 } from '@superset-ui/p
 import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
 import { FilterPlugins } from 'src/constants';
 import AgGridTableChartPlugin from '@superset-ui/plugin-chart-ag-grid-table';
+import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS/src/plugin';
+import SupersetPluginChartErgPlanFact from '../../../plugins/superset-plugin-chart-erg-bars/src/plugin';
+import SupersetPluginChartTop5Bars from '../../../plugins/superset-plugin-chart-top5bars/src/plugin';
+import SupersetPluginDieselConsumption from '../../../plugins/superset-plugin-diesel-consumption/src/plugin';
+import SupersetPluginTop40Consumption from '../../../plugins/superset-plugin-top40-consumption/src/plugin';
 import TimeTableChartPlugin from '../TimeTable';
 
 export default class MainPreset extends Preset {
@@ -177,6 +182,15 @@ export default class MainPreset extends Preset {
         new EchartsTreeChartPlugin().configure({ key: VizType.Tree }),
         new EchartsSunburstChartPlugin().configure({ key: VizType.Sunburst }),
         new HandlebarsChartPlugin().configure({ key: VizType.Handlebars }),
+        new HandlebarBTSChartPlugin().configure({ key: 'handlebar_BTS' }),
+        new SupersetPluginTop40Consumption().configure({ key: 'top-40' }),
+        new SupersetPluginDieselConsumption().configure({
+          key: 'diesel-consumption',
+        }),
+        new SupersetPluginChartTop5Bars().configure({ key: 'top5-bars' }),
+        new SupersetPluginChartErgPlanFact().configure({
+          key: 'plan-fact-bars',
+        }),
         new EchartsBubbleChartPlugin().configure({ key: VizType.Bubble }),
         new CartodiagramPlugin({
           defaultLayers: [
