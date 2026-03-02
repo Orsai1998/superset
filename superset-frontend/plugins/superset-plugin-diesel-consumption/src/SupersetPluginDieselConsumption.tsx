@@ -267,6 +267,7 @@ type Props = {
   factLabel?: string;
   barWidth: number;
   barGap: number;
+  show_fact_labels?: boolean;
   formData?: {
     titleFontSize: number;
     chartType: 'default' | 'plan_fact_daily' | 'plan_fact_line';
@@ -296,6 +297,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
                                                             factLabel = 'Факт',
                                                             barWidth,
                                                             barGap = 5,
+                                                            show_fact_labels,
                                                           }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const miniRef = useRef<HTMLDivElement>(null);
@@ -315,6 +317,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     theme === 'light' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(74, 149, 70, 1)';
   const factColor =
     theme === 'light' ? 'rgba(254, 38, 38, 0.5)' : 'rgba(255, 123, 123, 1)';
+  const showFactLabels = !!show_fact_labels;
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -386,7 +389,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             lineStyle: {
               width: 2,
               opacity: 1,
-              color: theme === 'light' ? 'rgba(0,0,0)' : 'rgba(255,255,255)',
+              color: theme === 'light' ? '#323232' : 'rgba(255,255,255)',
             },
             emphasis: { disabled: true },
           },
@@ -403,6 +406,12 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               width: 3,
               // eslint-disable-next-line theme-colors/no-literal-colors
               color: '#ff8c00',
+            },
+            label: {
+              show: showFactLabels,
+              position: 'top',
+              distance: 6,
+              formatter: (p: any) => (p.value == null ? '' : String(p.value)),
             },
             itemStyle: {
               color: (params: any) => {
@@ -468,6 +477,14 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
           show: true,
         },
 
+        label: {
+          show: showFactLabels,
+          position: 'top',
+          distance: 6,
+          rotate: 90,
+          formatter: (p: any) => (p.value == null ? '' : String(p.value)),
+        },
+
         tooltip: {
           trigger: 'axis',
           // eslint-disable-next-line theme-colors/no-literal-colors
@@ -523,6 +540,20 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               color: planColor,
               borderRadius: [12, 12, 12, 12],
             },
+          },
+          {
+            name: `${planLabel}_line`,
+            type: 'line',
+            data: prepared.map(d => d.plan),
+            symbol: 'none',
+            smooth: false,
+            z: 10,
+            lineStyle: {
+              width: 2,
+              // eslint-disable-next-line theme-colors/no-literal-colors
+              color: '#323232',
+            },
+            emphasis: { disabled: true },
           },
         ],
       };
@@ -640,12 +671,14 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     // === APPLY OPTION AND RESIZE
     chart.clear();
 
+    const chartHeight = 260;
+
     // @ts-ignore
     chart.setOption(option, true);
     if (chartType === 'default') {
       chart.resize({ width: width - 260, height });
     } else if (chartType === 'plan_fact_line') {
-      chart.resize({ width, height });
+      chart.resize({ width, height: chartHeight });
     } else {
       chart.resize({ width, height: height - 100 });
     }
@@ -777,7 +810,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     </Wrapper>
   );
 
-  if (chartType === 'plan_fact_daily') {
+  if (chartType === 'plan_fact_daily' || chartType === 'plan_fact_line') {
     return renderPlanFactDailyAppearance();
   }
 

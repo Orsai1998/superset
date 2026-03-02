@@ -201,6 +201,7 @@ export default function transformProps(chartProps: ChartProps) {
     ? formData?.barWidth
     : 12;
   const barGap = Number.isFinite(formData?.barGap) ? formData?.barGap : 20;
+  const show_fact_labels = !!(formData as any)?.showFactLabels;
 
   return {
     width,
@@ -222,5 +223,6 @@ export default function transformProps(chartProps: ChartProps) {
     factLabel,
     barWidth,
     barGap,
+    show_fact_labels,
   };
 }
