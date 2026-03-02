@@ -70,7 +70,7 @@ export default function transformProps(chartProps: ChartProps): {
 
   // Split top 40 into left (best 1–20) and right (worse 21–40)
   const topLeft = persons.slice(0, 20);
-  const topRight = persons.slice(20, 40);
+  const topRight = persons.slice(20, 39);
 
   return {
     width,
