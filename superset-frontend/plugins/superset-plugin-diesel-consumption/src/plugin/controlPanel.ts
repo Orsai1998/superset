@@ -90,6 +90,25 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        // ─── Формат числа ──────────────────────────
+        [
+          {
+            name: 'valueFormat',
+            config: {
+              type: 'SelectControl',
+              label: 'Формат числа',
+              default: ',.2f',
+              choices: [
+                [',.0f', 'Без дробных'],
+                [',.1f', '1 знак'],
+                [',.2f', '2 знака'],
+                [',.3f', '3 знака'],
+                [',.5f', '5 знаков'],
+              ],
+              renderTrigger: true,
+            },
+          },
+        ],
         // ─── Font Size Control ──────────────────────────
         [
           {
@@ -220,21 +239,14 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        // ─── Формат числа ──────────────────────────
+        // ─── Галочка для отображения чисел для нового типа графика ──────────────────────────
         [
           {
-            name: 'valueFormat',
+            name: 'show_fact_labels',
             config: {
-              type: 'SelectControl',
-              label: 'Формат числа',
-              default: ',.2f',
-              choices: [
-                [',.0f', 'Без дробных'],
-                [',.1f', '1 знак'],
-                [',.2f', '2 знака'],
-                [',.3f', '3 знака'],
-                [',.5f', '5 знаков'],
-              ],
+              type: 'CheckboxControl',
+              label: 'Показывать значение факта для линейного графика',
+              default: false,
               renderTrigger: true,
             },
           },
