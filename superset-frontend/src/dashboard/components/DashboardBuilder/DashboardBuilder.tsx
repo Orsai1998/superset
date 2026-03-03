@@ -73,6 +73,8 @@ import {
   OPEN_FILTER_BAR_WIDTH,
   EMPTY_CONTAINER_Z_INDEX,
 } from 'src/dashboard/constants';
+import CommentsDrawer from 'src/dashboard/components/Comments/CommentsDrawer';
+import { PinOverlay } from 'src/dashboard/components/Comments/PinOverlay';
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
@@ -366,6 +368,9 @@ const DashboardBuilder = () => {
   const uiConfig = useUiConfig();
   const theme = useTheme();
 
+  const dashboardNumericId = useSelector<RootState, number>(
+    ({ dashboardInfo }) => dashboardInfo.id,
+  );
   const dashboardId = useSelector<RootState, string>(
     ({ dashboardInfo }) => `${dashboardInfo.id}`,
   );
@@ -702,7 +707,25 @@ const DashboardBuilder = () => {
                   />
                 </div>
               ) : (
-                <DashboardContainer topLevelTabs={topLevelTabs} />
+                <div
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    flex: 1,
+                    minHeight: 0,
+                  }}
+                >
+                  <DashboardContainer topLevelTabs={topLevelTabs} />
+                  {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
+                    isFeatureEnabled(FeatureFlag.CommentingPinMode) &&
+                    !editMode &&
+                    dashboardNumericId > 0 && (
+                      <PinOverlay
+                        scopeType="dashboard"
+                        dashboardId={dashboardNumericId}
+                      />
+                    )}
+                </div>
               )
             ) : (
               <Loading />
@@ -720,6 +743,10 @@ const DashboardBuilder = () => {
           `}
         />
       )}
+      {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
+        dashboardNumericId > 0 && (
+          <CommentsDrawer dashboardId={dashboardNumericId} />
+        )}
     </DashboardWrapper>
   );
 };

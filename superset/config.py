@@ -591,6 +591,12 @@ DEFAULT_FEATURE_FLAGS: dict[str, bool] = {
     "PLAYWRIGHT_REPORTS_AND_THUMBNAILS": False,
     # Set to True to enable experimental chart plugins
     "CHART_PLUGINS_EXPERIMENTAL": False,
+    # Enable dashboard/chart comments in-app.
+    "COMMENTING_ENABLED": False,
+    # Enable Figma-style pin comments anchored to chart coordinates.
+    "COMMENTING_PIN_MODE": False,
+    # Show unresolved-comment badge on chart header comment button.
+    "COMMENTING_BADGE_ENABLED": False,
     # Regardless of database configuration settings, force SQLLAB to run async
     # using Celery
     "SQLLAB_FORCE_RUN_ASYNC": False,

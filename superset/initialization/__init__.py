@@ -191,6 +191,8 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.views.annotations import AnnotationLayerView
         from superset.views.api import Api
         from superset.views.chart.views import SliceModelView
+        from superset.views.comments.api import CommentRestApi
+        from superset.views.chart.views import SliceModelView
         from superset.views.core import Superset
         from superset.views.css_templates import CssTemplateModelView
         from superset.views.dashboard.views import (
@@ -242,6 +244,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_api(CacheRestApi)
         appbuilder.add_api(ChartRestApi)
         appbuilder.add_api(ChartDataRestApi)
+        appbuilder.add_api(CommentRestApi)
         appbuilder.add_api(CssTemplateRestApi)
         appbuilder.add_api(ThemeRestApi)
         appbuilder.add_api(CurrentUserRestApi)

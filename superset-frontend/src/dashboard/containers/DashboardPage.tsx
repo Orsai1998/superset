@@ -47,6 +47,7 @@ import {
 } from 'src/dashboard/components/nativeFilters/FilterBar/keyValue';
 import DashboardContainer from 'src/dashboard/containers/Dashboard';
 import CrudThemeProvider from 'src/components/CrudThemeProvider';
+import { CommentModeProvider } from 'src/dashboard/components/Comments/CommentModeContext';
 
 import { nanoid } from 'nanoid';
 import { RootState } from '../types';
@@ -259,22 +260,24 @@ export const DashboardPage: FC<PageProps> = ({ idOrSlug }: PageProps) => {
       {readyToRender && hasDashboardInfoInitiated ? (
         <>
           <SyncDashboardState dashboardPageId={dashboardPageId} />
-          <DashboardPageIdContext.Provider value={dashboardPageId}>
-            <CrudThemeProvider
-              themeId={
-                dashboardTheme !== undefined
-                  ? dashboardTheme?.id
-                  : dashboard?.theme?.id
-              }
-            >
-              <DashboardContainer
-                activeFilters={activeFilters}
-                ownDataCharts={relevantDataMask}
+          <CommentModeProvider>
+            <DashboardPageIdContext.Provider value={dashboardPageId}>
+              <CrudThemeProvider
+                themeId={
+                  dashboardTheme !== undefined
+                    ? dashboardTheme?.id
+                    : dashboard?.theme?.id
+                }
               >
-                {DashboardBuilderComponent}
-              </DashboardContainer>
-            </CrudThemeProvider>
-          </DashboardPageIdContext.Provider>
+                <DashboardContainer
+                  activeFilters={activeFilters}
+                  ownDataCharts={relevantDataMask}
+                >
+                  {DashboardBuilderComponent}
+                </DashboardContainer>
+              </CrudThemeProvider>
+            </DashboardPageIdContext.Provider>
+          </CommentModeProvider>
         </>
       ) : (
         <Loading />

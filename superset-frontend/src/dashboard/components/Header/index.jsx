@@ -61,8 +61,14 @@ import ReportModal from 'src/features/reports/ReportModal';
 import { deleteActiveReport } from 'src/features/reports/ReportModal/actions';
 import { PageHeaderWithActions } from '@superset-ui/core/components/PageHeaderWithActions';
 import { useUnsavedChangesPrompt } from 'src/hooks/useUnsavedChangesPrompt';
+import { MessageCircle, X as XIcon } from 'lucide-react';
 import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
+import {
+  dispatchEnterCommentMode,
+  dispatchExitCommentMode,
+} from '../Comments/events';
+import { useCommentMode } from '../Comments/CommentModeContext';
 import {
   addDangerToast,
   addSuccessToast,
@@ -99,6 +105,41 @@ import { useHeaderActionsMenu } from './useHeaderActionsDropdownMenu';
 
 const extensionsRegistry = getExtensionsRegistry();
 
+/**
+ * Functional component for the comment mode toggle in the dashboard header.
+ * Reads CommentModeContext so it re-renders when mode changes.
+ */
+const CommentModeToggleButton = ({ dashboardId }) => {
+  const { activeScope } = useCommentMode();
+  const isActive =
+    activeScope?.scopeType === 'dashboard' &&
+    activeScope?.dashboardId === dashboardId;
+
+  const handleClick = () => {
+    if (isActive) {
+      dispatchExitCommentMode();
+    } else {
+      dispatchEnterCommentMode({ scopeType: 'dashboard', dashboardId });
+    }
+  };
+
+  return (
+    <Button
+      buttonStyle={isActive ? 'primary' : 'secondary'}
+      onClick={handleClick}
+      className="action-button"
+      aria-label={isActive ? t('Exit comment mode') : t('Enter comment mode')}
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      `}
+    >
+      {isActive ? <XIcon size={14} /> : <MessageCircle size={14} />}
+      {isActive ? t('Commenting…') : t('Comment')}
+    </Button>
+  );
+};
 const headerContainerStyle = theme => css`
   border-bottom: 1px solid ${theme.colorBorder};
 `;
@@ -529,6 +570,10 @@ const Header = () => {
     dashboardInfo.common?.conf
       ?.SUPERSET_DASHBOARD_PERIODICAL_REFRESH_WARNING_MESSAGE;
   const isEmbedded = !dashboardInfo?.userId;
+  const canComment =
+    isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
+    findPermission('can_read', 'Comment', user?.roles) &&
+    findPermission('can_comment', 'Comment', user?.roles);
 
   const handleOnPropertiesChange = useCallback(
     updates => {
@@ -704,6 +749,9 @@ const Header = () => {
           <UndoRedoKeyListeners onUndo={handleCtrlZ} onRedo={handleCtrlY} />
         ) : (
           <div css={actionButtonsStyle}>
+            {canComment && (
+              <CommentModeToggleButton dashboardId={dashboardInfo.id} />
+            )}
             {NavExtension && <NavExtension />}
             {userCanEdit && (
               <Button
@@ -735,8 +783,9 @@ const Header = () => {
       hasUnsavedChanges,
       overwriteDashboard,
       redoLength,
-      toggleEditMode,
       undoLength,
+      canComment,
+      dashboardInfo.id,
       userCanEdit,
       userCanSaveAs,
     ],
