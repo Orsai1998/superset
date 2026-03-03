@@ -15,6 +15,17 @@ ENV http_proxy=""
 ENV https_proxy=""
 
 
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list ]; then \
+      sed -ri 's|http://|https://|g' /etc/apt/sources.list; \
+    fi; \
+    if [ -d /etc/apt/sources.list.d ]; then \
+      find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) \
+        -exec sed -ri 's|http://|https://|g' {} +; \
+    fi; \
+    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+      > /etc/apt/apt.conf.d/99network-resilience
+
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     build-essential \
     python3
@@ -63,6 +74,17 @@ ENV LANG=C.UTF-8 \
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
 ENV http_proxy=""
 ENV https_proxy=""
+
+RUN set -eux; \
+    if [ -f /etc/apt/sources.list ]; then \
+      sed -ri 's|http://|https://|g' /etc/apt/sources.list; \
+    fi; \
+    if [ -d /etc/apt/sources.list.d ]; then \
+      find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) \
+        -exec sed -ri 's|http://|https://|g' {} +; \
+    fi; \
+    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
+      > /etc/apt/apt.conf.d/99network-resilience
 
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info \
     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
