@@ -16,10 +16,12 @@ const Container = styled.div<{
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow: hidden;
+  height: auto;
   padding: 16px;
   max-width: 100%;
+  min-height: 0;
   box-sizing: border-box;
-  overflow: visible !important; /* allow content to expand */
   border-radius: 16px;
   color: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(50, 50, 50, 1)' : '#fff'};
@@ -28,14 +30,24 @@ const Container = styled.div<{
   font-family: 'Inter', sans-serif;
 
   .top40-panels {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    width: 100%;
+    //display: flex;
+    //flex-wrap: wrap;
+    //justify-content: flex-start;
+    //width: 100%;
     max-width: 100%;
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
     gap: 30px;
     background-color: ${({ $themeMode }) =>
       $themeMode === 'light' ? '#fff' : 'rgba(9, 21, 44, 1)'};
+  }
+
+  .top40-panel .panel {
+    flex: 1 1 calc(50% - 15px);
+    min-width: 420px;
+    box-sizing: border-box;
   }
 
   /* ==== Panel layout fix ==== */
@@ -47,10 +59,11 @@ const Container = styled.div<{
     padding: 20px;
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
     gap: 16px;
-    overflow: hidden;
-    flex: 1 1 48%;
-    min-width: 420px;
+    overflow: visible;
+    min-width: 0;
+    max-width: 100%;
     container-type: inline-size;
     border: 1px solid
       ${({ $themeMode }) =>
@@ -128,7 +141,7 @@ const Container = styled.div<{
       $themeMode === 'light'
         ? 'rgba(226, 226, 226, 1)'
         : 'rgba(53, 63, 82, 1)'};
-    aspect-ratio: 1 / 1.2;
+    aspect-ratio: 1 / 1;
     width: 100%;
   }
 
@@ -190,6 +203,10 @@ const Container = styled.div<{
   @container (max-width: 1100px) {
     .cards {
       grid-template-columns: repeat(3, 1fr);
+    }
+
+    .top40-panels {
+      grid-template-columns: 1fr;
     }
   }
   @container (max-width: 800px) {
@@ -275,6 +292,7 @@ export default function SupersetPluginTop40Consumption({
             {leftTop3.map((p: any, i: number) => (
               <div key={`top3-${i}`} className={`card top${i + 1}`}>
                 <div className="value">{p.value}</div>
+
                 <img
                   src={generateAvatar(p.name, p.photo)}
                   alt={p.name || 'avatar'}
