@@ -101,7 +101,7 @@ const config: ControlPanelConfig = {
             name: 'row_limit',
             config: {
               ...sharedControls.row_limit,
-              default: 40,
+              default: 39,
               label: t('Row limit (Top N)'),
             },
           },

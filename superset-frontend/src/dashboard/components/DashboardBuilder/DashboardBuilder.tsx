@@ -77,6 +77,8 @@ import {
   EMPTY_CONTAINER_Z_INDEX,
 } from 'src/dashboard/constants';
 import BasicErrorAlert from 'src/components/ErrorMessage/BasicErrorAlert';
+import CommentsDrawer from 'src/dashboard/components/Comments/CommentsDrawer';
+import { PinOverlay } from 'src/dashboard/components/Comments/PinOverlay';
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
@@ -375,6 +377,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const uiConfig = useUiConfig();
   const theme = useTheme();
 
+  const dashboardNumericId = useSelector<RootState, number>(
+    ({ dashboardInfo }) => dashboardInfo.id,
+  );
   const dashboardId = useSelector<RootState, string>(
     ({ dashboardInfo }) => `${dashboardInfo.id}`,
   );
@@ -700,7 +705,25 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
                   />
                 </div>
               ) : (
-                <DashboardContainer topLevelTabs={topLevelTabs} />
+                <div
+                  style={{
+                    position: 'relative',
+                    display: 'flex',
+                    flex: 1,
+                    minHeight: 0,
+                  }}
+                >
+                  <DashboardContainer topLevelTabs={topLevelTabs} />
+                  {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
+                    isFeatureEnabled(FeatureFlag.CommentingPinMode) &&
+                    !editMode &&
+                    dashboardNumericId > 0 && (
+                      <PinOverlay
+                        scopeType="dashboard"
+                        dashboardId={dashboardNumericId}
+                      />
+                    )}
+                </div>
               )
             ) : (
               <Loading />
@@ -718,6 +741,10 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
           `}
         />
       )}
+      {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
+        dashboardNumericId > 0 && (
+          <CommentsDrawer dashboardId={dashboardNumericId} />
+        )}
     </DashboardWrapper>
   );
 };
