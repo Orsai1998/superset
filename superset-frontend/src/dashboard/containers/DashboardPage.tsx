@@ -41,6 +41,7 @@ import {
   getPermalinkValue,
 } from 'src/dashboard/components/nativeFilters/FilterBar/keyValue';
 import DashboardContainer from 'src/dashboard/containers/Dashboard';
+import { CommentModeProvider } from 'src/dashboard/components/Comments/CommentModeContext';
 
 import { nanoid } from 'nanoid';
 import { RootState } from '../types';
@@ -206,11 +207,13 @@ export const DashboardPage: FC<PageProps> = ({ idOrSlug }: PageProps) => {
         ]}
       />
       <SyncDashboardState dashboardPageId={dashboardPageId} />
-      <DashboardPageIdContext.Provider value={dashboardPageId}>
-        <DashboardContainer>
-          <DashboardBuilder />
-        </DashboardContainer>
-      </DashboardPageIdContext.Provider>
+      <CommentModeProvider>
+        <DashboardPageIdContext.Provider value={dashboardPageId}>
+          <DashboardContainer>
+            <DashboardBuilder />
+          </DashboardContainer>
+        </DashboardPageIdContext.Provider>
+      </CommentModeProvider>
     </>
   );
 };

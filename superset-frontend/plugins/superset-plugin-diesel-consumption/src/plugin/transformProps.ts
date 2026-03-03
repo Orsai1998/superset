@@ -163,10 +163,10 @@ export default function transformProps(chartProps: ChartProps) {
   const rawData: DieselDatum[] = records.map((rec: Record<any, any>) => ({
     day: resolveDay(rec[timeCol], timeGrainSqla),
 
-    plan: Number(rec[planMetricName] ?? 0),
-    fact: Number(rec[factMetricName] ?? 0),
+    plan: Number(rec[planMetricName]),
+    fact: Number(rec[factMetricName]),
   }));
-  const fillTimeGaps = formData.fill_time_gaps ?? true;
+  const fillTimeGaps = formData.fill_time_gaps ?? false;
   const data = fillTimeGaps
     ? normalizeByTimeGrain(rawData, timeGrainSqla)
     : rawData;
@@ -204,6 +204,7 @@ export default function transformProps(chartProps: ChartProps) {
     ? formData?.barWidth
     : 12;
   const barGap = Number.isFinite(formData?.barGap) ? formData?.barGap : 20;
+  const show_fact_labels = !!(formData as any)?.showFactLabels;
 
   return {
     width,
@@ -225,5 +226,6 @@ export default function transformProps(chartProps: ChartProps) {
     factLabel,
     barWidth,
     barGap,
+    show_fact_labels,
   };
 }

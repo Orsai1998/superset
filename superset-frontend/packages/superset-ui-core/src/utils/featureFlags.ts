@@ -29,6 +29,9 @@ export enum FeatureFlag {
   AllowFullCsvExport = 'ALLOW_FULL_CSV_EXPORT',
   AvoidColorsCollision = 'AVOID_COLORS_COLLISION',
   ChartPluginsExperimental = 'CHART_PLUGINS_EXPERIMENTAL',
+  CommentingEnabled = 'COMMENTING_ENABLED',
+  CommentingPinMode = 'COMMENTING_PIN_MODE',
+  CommentingBadgeEnabled = 'COMMENTING_BADGE_ENABLED',
   ConfirmDashboardDiff = 'CONFIRM_DASHBOARD_DIFF',
   /** @deprecated */
   DashboardCrossFilters = 'DASHBOARD_CROSS_FILTERS',
