@@ -163,10 +163,10 @@ export default function transformProps(chartProps: ChartProps) {
   const rawData: DieselDatum[] = records.map((rec: Record<any, any>) => ({
     day: resolveDay(rec[timeCol], timeGrainSqla),
 
-    plan: Number(rec[planMetricName] ?? 0),
-    fact: Number(rec[factMetricName] ?? 0),
+    plan: Number(rec[planMetricName]),
+    fact: Number(rec[factMetricName]),
   }));
-  const fillTimeGaps = formData.fill_time_gaps ?? true;
+  const fillTimeGaps = formData.fill_time_gaps ?? false;
   const data = fillTimeGaps
     ? normalizeByTimeGrain(rawData, timeGrainSqla)
     : rawData;

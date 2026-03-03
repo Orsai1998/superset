@@ -54,12 +54,55 @@ import {
 import setPeriodicRunner, {
   stopPeriodicRender,
 } from 'src/dashboard/util/setPeriodicRunner';
+import { MessageCircle, X as XIcon } from 'lucide-react';
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
 import MetadataBar, { MetadataType } from 'src/components/MetadataBar';
 import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
+import {
+  dispatchEnterCommentMode,
+  dispatchExitCommentMode,
+  dispatchOpenComments,
+} from '../Comments/events';
+import { useCommentMode } from '../Comments/CommentModeContext';
 
 const extensionsRegistry = getExtensionsRegistry();
+
+/**
+ * Functional component for the comment mode toggle in the dashboard header.
+ * Reads CommentModeContext so it re-renders when mode changes.
+ */
+const CommentModeToggleButton = ({ dashboardId }) => {
+  const { activeScope } = useCommentMode();
+  const isActive =
+    activeScope?.scopeType === 'dashboard' &&
+    activeScope?.dashboardId === dashboardId;
+
+  const handleClick = () => {
+    if (isActive) {
+      dispatchExitCommentMode();
+    } else {
+      dispatchEnterCommentMode({ scopeType: 'dashboard', dashboardId });
+    }
+  };
+
+  return (
+    <Button
+      buttonStyle={isActive ? 'primary' : 'secondary'}
+      onClick={handleClick}
+      className="action-button"
+      aria-label={isActive ? t('Exit comment mode') : t('Enter comment mode')}
+      css={css`
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      `}
+    >
+      {isActive ? <XIcon size={14} /> : <MessageCircle size={14} />}
+      {isActive ? t('Commenting…') : t('Comment')}
+    </Button>
+  );
+};
 
 const propTypes = {
   addSuccessToast: PropTypes.func.isRequired,
@@ -432,6 +475,16 @@ class Header extends PureComponent {
     this.setState({ showingEmbedModal: false });
   };
 
+  openDashboardComments = () => {
+    const {
+      dashboardInfo: { id: dashboardId },
+    } = this.props;
+    dispatchOpenComments({
+      scopeType: 'dashboard',
+      dashboardId,
+    });
+  };
+
   getMetadataItems = () => {
     const { dashboardInfo } = this.props;
     return [
@@ -642,6 +695,20 @@ class Header extends PureComponent {
                 />
               ) : (
                 <div css={actionButtonsStyle}>
+                  {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
+                    (isFeatureEnabled(FeatureFlag.CommentingPinMode) ? (
+                      <CommentModeToggleButton dashboardId={dashboardInfo.id} />
+                    ) : (
+                      <Button
+                        buttonStyle="secondary"
+                        onClick={this.openDashboardComments}
+                        data-test="open-dashboard-comments"
+                        className="action-button"
+                        aria-label={t('Open comments')}
+                      >
+                        {t('💬 Comments')}
+                      </Button>
+                    ))}
                   {NavExtension && <NavExtension />}
                   {userCanEdit && (
                     <Button
