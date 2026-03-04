@@ -15,17 +15,6 @@ ENV  http_proxy=http://10.5.8.5:8080
 ENV  https_proxy=http://10.5.8.5:8080
 
 
-RUN set -eux; \
-    if [ -f /etc/apt/sources.list ]; then \
-      sed -ri 's|http://|https://|g' /etc/apt/sources.list; \
-    fi; \
-    if [ -d /etc/apt/sources.list.d ]; then \
-      find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) \
-        -exec sed -ri 's|http://|https://|g' {} +; \
-    fi; \
-    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\nAcquire::http::Proxy "http://10.5.8.5:8080";\nAcquire::https::Proxy "http://10.5.8.5:8080";\n' \
-      > /etc/apt/apt.conf.d/99network-resilience
-
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     build-essential \
     python3
@@ -68,17 +57,6 @@ ENV LANG=C.UTF-8 \
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
 ENV  http_proxy=http://10.5.8.5:8080
 ENV  https_proxy=http://10.5.8.5:8080
-
-RUN set -eux; \
-    if [ -f /etc/apt/sources.list ]; then \
-      sed -ri 's|http://|https://|g' /etc/apt/sources.list; \
-    fi; \
-    if [ -d /etc/apt/sources.list.d ]; then \
-      find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) \
-        -exec sed -ri 's|http://|https://|g' {} +; \
-    fi; \
-    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\nAcquire::http::Proxy "http://10.5.8.5:8080";\nAcquire::https::Proxy "http://10.5.8.5:8080";\n' \
-      > /etc/apt/apt.conf.d/99network-resilience
 
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info \
     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
@@ -171,6 +149,7 @@ RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     libx11-xcb1 \
     libasound2 \
     libxtst6 \
+    libaio1 \
     git \
     wget \
     bzip2 \
@@ -188,7 +167,9 @@ RUN pip install \
     flask_cors \
     mysqlclient \
     clickhouse-connect \
-    prometheus-flask-exporter
+    prometheus-flask-exporter \
+    oracledb \
+    sqlalchemy-oracledb
 
 RUN pip install playwright
 RUN python -m playwright install-deps && python -m playwright install chromium
