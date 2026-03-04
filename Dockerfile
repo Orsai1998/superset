@@ -11,20 +11,9 @@ ENV BUILD_CMD=${NPM_BUILD_CMD} \
     PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=""
-ENV https_proxy=""
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
 
-
-RUN set -eux; \
-    if [ -f /etc/apt/sources.list ]; then \
-      sed -ri 's|http://|https://|g' /etc/apt/sources.list; \
-    fi; \
-    if [ -d /etc/apt/sources.list.d ]; then \
-      find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) \
-        -exec sed -ri 's|http://|https://|g' {} +; \
-    fi; \
-    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
-      > /etc/apt/apt.conf.d/99network-resilience
 
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     build-essential \
@@ -39,13 +28,7 @@ RUN --mount=type=bind,target=./package.json,src=./superset-frontend/package.json
     npm ci
 
 COPY superset-frontend /app/superset-frontend
-COPY superset_text.yml /app/superset_text.yml
-COPY superset/static /app/superset/static
-RUN if [ -f /app/superset/static/assets/manifest.json ]; then \
-      echo "Using prebuilt frontend assets from local build"; \
-    else \
-      npm run ${BUILD_CMD}; \
-    fi
+RUN npm run ${BUILD_CMD}
 
 RUN mkdir -p /app/superset/translations
 COPY superset/translations /app/superset/translations
@@ -72,19 +55,8 @@ ENV LANG=C.UTF-8 \
     SUPERSET_PORT=8088
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=""
-ENV https_proxy=""
-
-RUN set -eux; \
-    if [ -f /etc/apt/sources.list ]; then \
-      sed -ri 's|http://|https://|g' /etc/apt/sources.list; \
-    fi; \
-    if [ -d /etc/apt/sources.list.d ]; then \
-      find /etc/apt/sources.list.d -type f \( -name '*.list' -o -name '*.sources' \) \
-        -exec sed -ri 's|http://|https://|g' {} +; \
-    fi; \
-    printf 'Acquire::Retries "5";\nAcquire::http::Timeout "30";\nAcquire::https::Timeout "30";\n' \
-      > /etc/apt/apt.conf.d/99network-resilience
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
 
 RUN mkdir -p ${PYTHONPATH} superset/static requirements superset-frontend apache_superset.egg-info \
     && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
@@ -140,21 +112,17 @@ FROM lean AS custom
 USER root
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=""
-ENV https_proxy=""
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
 
-# Add Microsoft repo and install MSSQL drivers (prefer v18, fallback to v17)
-RUN set -eux; \
-    . /etc/os-release; \
-    curl -sSL -O "https://packages.microsoft.com/config/debian/${VERSION_ID}/packages-microsoft-prod.deb"; \
-    dpkg -i packages-microsoft-prod.deb; \
-    rm packages-microsoft-prod.deb; \
-    apt-get update; \
-    mssql_driver_pkg="$(apt-cache show msodbcsql18 >/dev/null 2>&1 && echo msodbcsql18 || echo msodbcsql17)"; \
-    mssql_tools_pkg="$(apt-cache show mssql-tools18 >/dev/null 2>&1 && echo mssql-tools18 || echo mssql-tools)"; \
+# Add Microsoft repo and install MSSQL drivers
+RUN curl -sSL -O https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb && \
+    dpkg -i packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb && \
+    apt-get update && \
     ACCEPT_EULA=Y apt-get install -y \
-      "${mssql_driver_pkg}" \
-      "${mssql_tools_pkg}" \
+      msodbcsql17 \
+      mssql-tools \
       unixodbc-dev \
       libgssapi-krb5-2 \
       libpq-dev \
@@ -163,16 +131,16 @@ RUN set -eux; \
       libmariadb-dev \
       python3-dev \
       build-essential \
-      sudo; \
+      sudo && \
     rm -rf /var/lib/apt/lists/*
 
-ENV PATH="${PATH}:/opt/mssql-tools/bin:/opt/mssql-tools18/bin" \
+ENV PATH="${PATH}:/opt/mssql-tools/bin" \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
     http_proxy="" \
     https_proxy=""
 
-ENV http_proxy=""
-ENV https_proxy=""
+ENV  http_proxy=http://10.5.8.5:8080
+ENV  https_proxy=http://10.5.8.5:8080
 
 RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     libnss3 \
@@ -185,7 +153,7 @@ RUN apt-get update -qq && apt-get install -yqq --no-install-recommends \
     git \
     wget \
     bzip2 \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
 
 RUN pip install \
     python-ldap==3.4.4 \
@@ -200,7 +168,8 @@ RUN pip install \
     mysqlclient \
     clickhouse-connect \
     prometheus-flask-exporter \
-    oracledb
+    oracledb \
+    sqlalchemy-oracledb
 
 RUN pip install playwright
 RUN python -m playwright install-deps && python -m playwright install chromium
@@ -220,8 +189,8 @@ FROM custom AS dev
 USER root
 
 # Установка прокси, чтобы использовать его для всех последующих операций c установкой пакетов
-ENV http_proxy=""
-ENV https_proxy=""
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
 
 
 
