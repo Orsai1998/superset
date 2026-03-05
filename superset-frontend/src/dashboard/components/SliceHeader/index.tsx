@@ -173,9 +173,10 @@ const SliceHeader: FC<SliceHeaderProps> = ({
   );
 
   const canExplore = !editMode && supersetCanExplore;
-  const canComment = useSelector((state: RootState) =>
-    findPermission('can_get', 'Comment', state.user?.roles) &&
-    findPermission('can_post', 'Comment', state.user?.roles),
+  const canComment = useSelector(
+    (state: RootState) =>
+      findPermission('can_get', 'Comment', state.user?.roles) &&
+      findPermission('can_post', 'Comment', state.user?.roles),
   );
 
   useEffect(() => {
