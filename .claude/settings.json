@@ -12,7 +12,9 @@
       "Bash(docker exec superset_app grep -r \"MessageCircle\\\\|lucide\" /app/superset/static/assets/*.js)",
       "Bash(docker exec superset_app sh -c 'grep -rl \"\"MessageCircle\\\\|lucide\"\" /app/superset/static/assets/ 2>/dev/null | wc -l')",
       "Bash(docker restart superset_app)",
-      "Bash(docker ps --filter name=superset_app --format \"{{.Names}}: {{.Status}}\")"
+      "Bash(docker ps --filter name=superset_app --format \"{{.Names}}: {{.Status}}\")",
+      "Bash(kill -CONT 50010 50027 50039)",
+      "Read(//Users/kuanysorsayev/PycharmProjects/superset/**)"
     ]
   }
 }

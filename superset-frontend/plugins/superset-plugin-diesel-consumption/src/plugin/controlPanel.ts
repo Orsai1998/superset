@@ -216,12 +216,14 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
             },
           },
+
           {
             name: 'fill_time_gaps',
             config: {
               type: 'CheckboxControl',
               label: 'Fill missing time buckets (0 values)',
               default: true,
+              renderTrigger: true,
               description:
                 'Adds missing days/months with plan=0, fact=0 so the axis is continuous.',
             },

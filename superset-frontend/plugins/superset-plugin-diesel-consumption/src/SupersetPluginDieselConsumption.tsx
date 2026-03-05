@@ -812,6 +812,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   );
 
   if (chartType === 'plan_fact_daily' || chartType === 'plan_fact_line') {
+    console.log('Hello 12');
     return renderPlanFactDailyAppearance();
   }
 
