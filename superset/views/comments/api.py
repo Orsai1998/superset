@@ -29,7 +29,7 @@ from marshmallow import fields, Schema, validate, ValidationError
 from sqlalchemy import func, or_
 from sqlalchemy.orm import joinedload
 
-from superset import db, is_feature_enabled, security_manager
+from superset import db, security_manager
 from superset.commands.dashboard.exceptions import (
     DashboardAccessDeniedError,
     DashboardNotFoundError,
@@ -100,8 +100,6 @@ class CommentRestApi(BaseSupersetApi):
 
     @before_request
     def ensure_comments_enabled(self) -> Response | None:
-        if not is_feature_enabled("COMMENTING_ENABLED"):
-            return self.response_404()
         return None
 
     @staticmethod
