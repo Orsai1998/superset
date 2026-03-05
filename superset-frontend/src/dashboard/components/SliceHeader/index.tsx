@@ -40,12 +40,8 @@ import { useSelector } from 'react-redux';
 import SliceHeaderControls from 'src/dashboard/components/SliceHeaderControls';
 import { SliceHeaderControlsProps } from 'src/dashboard/components/SliceHeaderControls/types';
 import FiltersBadge from 'src/dashboard/components/FiltersBadge';
-<<<<<<< HEAD
-=======
-import Icons from 'src/components/Icons';
 import { CommentToggleWithBadge } from 'src/dashboard/components/Comments/CommentToggleWithBadge';
 import { findPermission } from 'src/utils/findPermission';
->>>>>>> e34247756a (Added)
 import { RootState } from 'src/dashboard/types';
 import { getSliceHeaderTooltip } from 'src/dashboard/util/getSliceHeaderTooltip';
 import { DashboardPageIdContext } from 'src/dashboard/containers/DashboardPage';
@@ -263,7 +259,6 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
                   canExplore && exploreUrl ? renderExploreLink : undefined
                 }
               />
-<<<<<<< HEAD
             </div>
           </Tooltip>
           {!!Object.values(annotationQuery).length && (
@@ -275,58 +270,6 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
               <Icons.ReloadOutlined
                 className="warning"
                 aria-label={annotationsLoading}
-=======
-            )}
-            {crossFilterValue && (
-              <Tooltip
-                placement="top"
-                title={t(
-                  'This chart applies cross-filters to charts whose datasets contain columns with the same name.',
-                )}
-              >
-                <CrossFilterIcon iconSize="m" />
-              </Tooltip>
-            )}
-            {canComment && (
-              <CommentToggleWithBadge
-                sliceId={slice.slice_id}
-                dashboardId={dashboardId}
-              />
-            )}
-            {!uiConfig.hideChartControls && (
-              <FiltersBadge chartId={slice.slice_id} />
-            )}
-            {!uiConfig.hideChartControls && (
-              <SliceHeaderControls
-                slice={slice}
-                isCached={isCached}
-                isExpanded={isExpanded}
-                cachedDttm={cachedDttm}
-                updatedDttm={updatedDttm}
-                toggleExpandSlice={toggleExpandSlice}
-                forceRefresh={forceRefresh}
-                logExploreChart={logExploreChart}
-                logEvent={logEvent}
-                exportCSV={exportCSV}
-                exportPivotCSV={exportPivotCSV}
-                exportFullCSV={exportFullCSV}
-                exportXLSX={exportXLSX}
-                exportFullXLSX={exportFullXLSX}
-                supersetCanExplore={supersetCanExplore}
-                supersetCanShare={supersetCanShare}
-                supersetCanCSV={supersetCanCSV}
-                componentId={componentId}
-                dashboardId={dashboardId}
-                addSuccessToast={addSuccessToast}
-                addDangerToast={addDangerToast}
-                handleToggleFullSize={handleToggleFullSize}
-                isFullSize={isFullSize}
-                isDescriptionExpanded={isExpanded}
-                chartStatus={chartStatus}
-                formData={formData}
-                exploreUrl={exploreUrl}
-                crossFiltersEnabled={isCrossFiltersEnabled}
->>>>>>> e34247756a (Added)
               />
             </Tooltip>
           )}
@@ -361,6 +304,12 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
                 >
                   <CrossFilterIcon iconSize="m" />
                 </Tooltip>
+              )}
+              {canComment && (
+                <CommentToggleWithBadge
+                  sliceId={slice.slice_id}
+                  dashboardId={dashboardId}
+                />
               )}
 
               {!uiConfig.hideChartControls && (
