@@ -27,6 +27,8 @@ import SliceHeaderControls, {
 } from 'src/dashboard/components/SliceHeaderControls';
 import FiltersBadge from 'src/dashboard/components/FiltersBadge';
 import Icons from 'src/components/Icons';
+import { CommentToggleWithBadge } from 'src/dashboard/components/Comments/CommentToggleWithBadge';
+import { findPermission } from 'src/utils/findPermission';
 import { RootState } from 'src/dashboard/types';
 import { getSliceHeaderTooltip } from 'src/dashboard/util/getSliceHeaderTooltip';
 import { DashboardPageIdContext } from 'src/dashboard/containers/DashboardPage';
@@ -171,6 +173,10 @@ const SliceHeader: FC<SliceHeaderProps> = ({
   );
 
   const canExplore = !editMode && supersetCanExplore;
+  const canComment = useSelector((state: RootState) =>
+    findPermission('can_get', 'Comment', state.user?.roles) &&
+    findPermission('can_post', 'Comment', state.user?.roles),
+  );
 
   useEffect(() => {
     const headerElement = headerRef.current;
@@ -251,6 +257,12 @@ const SliceHeader: FC<SliceHeaderProps> = ({
               >
                 <CrossFilterIcon iconSize="m" />
               </Tooltip>
+            )}
+            {canComment && (
+              <CommentToggleWithBadge
+                sliceId={slice.slice_id}
+                dashboardId={dashboardId}
+              />
             )}
             {!uiConfig.hideChartControls && (
               <FiltersBadge chartId={slice.slice_id} />
