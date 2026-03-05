@@ -50,7 +50,7 @@ function resolveXAxisColumn(formData) {
   const pick = (col: { label: any }) => {
     if (!col) return null;
 
-    // Case s41: string = physical column name
+    // Case 1: string = physical column name
     if (typeof col === 'string') return col;
 
     // Case 2: SQL expression / adhoc column
@@ -141,7 +141,6 @@ export default function transformProps(chartProps: ChartProps) {
   const { width, height, theme, queriesData, formData } = chartProps;
   const { timeGrainSqla } = formData;
   const records = queriesData?.[0]?.data ?? [];
-
   // === STANDARD Superset time column ===
   const timeCol = resolveXAxisColumn(formData);
   if (!timeCol) {
@@ -158,15 +157,16 @@ export default function transformProps(chartProps: ChartProps) {
   const valueFormat =
     (formData as any).valueFormat ?? (formData as any).value_format ?? ',.2f';
   const fmt = getNumberFormatter(valueFormat);
-
+  console.log('asddsadsa');
   // === TRANSFORM WITHOUT SORTING (Superset already sorts!) ===
   const rawData: DieselDatum[] = records.map((rec: Record<any, any>) => ({
     day: resolveDay(rec[timeCol], timeGrainSqla),
 
-    plan: Number(rec[planMetricName]),
-    fact: Number(rec[factMetricName]),
+    plan: Number(rec[planMetricName] ?? 0),
+    fact: Number(rec[factMetricName] ?? 0),
   }));
-  const fillTimeGaps = formData.fill_time_gaps ?? false;
+  const fillTimeGaps =
+    (formData as any).fill_time_gaps ?? (formData as any).fillTimeGaps ?? true;
   const data = fillTimeGaps
     ? normalizeByTimeGrain(rawData, timeGrainSqla)
     : rawData;
@@ -179,13 +179,6 @@ export default function transformProps(chartProps: ChartProps) {
     },
     { plan: 0, fact: 0 },
   );
-
-  const planConst =
-    data.find(d => d.plan !== null && d.plan !== undefined)?.plan ?? 0;
-
-  const x = data.map(d => d.day);
-  const factLine = data.map(d => d.fact);
-  const planLine = data.map(() => planConst);
 
   const count = data.length || 1;
 
@@ -204,15 +197,11 @@ export default function transformProps(chartProps: ChartProps) {
     ? formData?.barWidth
     : 12;
   const barGap = Number.isFinite(formData?.barGap) ? formData?.barGap : 20;
-  const show_fact_labels = !!(formData as any)?.showFactLabels;
 
   return {
     width,
     height,
     theme,
-    x,
-    factLine,
-    planLine,
     data,
     planColor: formData.plan_color ?? '#E77E83',
     factColor: formData.fact_color ?? '#7DBE82',
@@ -226,6 +215,5 @@ export default function transformProps(chartProps: ChartProps) {
     factLabel,
     barWidth,
     barGap,
-    show_fact_labels,
   };
 }
