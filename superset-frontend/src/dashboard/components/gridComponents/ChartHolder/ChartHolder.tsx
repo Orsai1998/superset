@@ -21,12 +21,7 @@ import { useState, useMemo, useCallback, useEffect, memo } from 'react';
 import { ResizeCallback, ResizeStartCallback } from 're-resizable';
 import cx from 'classnames';
 import { useSelector } from 'react-redux';
-import {
-  css,
-  FeatureFlag,
-  isFeatureEnabled,
-  useTheme,
-} from '@superset-ui/core';
+import { css, useTheme } from '@superset-ui/core';
 import { PinOverlay } from 'src/dashboard/components/Comments/PinOverlay';
 import { LayoutItem, RootState } from 'src/dashboard/types';
 import AnchorLink from 'src/dashboard/components/AnchorLink';
@@ -306,9 +301,7 @@ const ChartHolder = ({
             extraControls={extraControls}
             isInView={isInView}
           />
-          {!editMode &&
-            isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
-            isFeatureEnabled(FeatureFlag.CommentingPinMode) && (
+          {!editMode && (
             <PinOverlay
               scopeType="chart"
               dashboardId={dashboardId}

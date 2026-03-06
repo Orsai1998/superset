@@ -716,15 +716,12 @@ const DashboardBuilder = () => {
                   }}
                 >
                   <DashboardContainer topLevelTabs={topLevelTabs} />
-                  {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
-                    isFeatureEnabled(FeatureFlag.CommentingPinMode) &&
-                    !editMode &&
-                    dashboardNumericId > 0 && (
-                      <PinOverlay
-                        scopeType="dashboard"
-                        dashboardId={dashboardNumericId}
-                      />
-                    )}
+                  {!editMode && dashboardNumericId > 0 && (
+                    <PinOverlay
+                      scopeType="dashboard"
+                      dashboardId={dashboardNumericId}
+                    />
+                  )}
                 </div>
               )
             ) : (
@@ -743,10 +740,9 @@ const DashboardBuilder = () => {
           `}
         />
       )}
-      {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
-        dashboardNumericId > 0 && (
-          <CommentsDrawer dashboardId={dashboardNumericId} />
-        )}
+      {dashboardNumericId > 0 && (
+        <CommentsDrawer dashboardId={dashboardNumericId} />
+      )}
     </DashboardWrapper>
   );
 };

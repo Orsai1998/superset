@@ -571,7 +571,6 @@ const Header = () => {
       ?.SUPERSET_DASHBOARD_PERIODICAL_REFRESH_WARNING_MESSAGE;
   const isEmbedded = !dashboardInfo?.userId;
   const canComment =
-    isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
     findPermission('can_read', 'Comment', user?.roles) &&
     findPermission('can_comment', 'Comment', user?.roles);
 
