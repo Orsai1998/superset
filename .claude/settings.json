@@ -14,7 +14,9 @@
       "Bash(docker restart superset_app)",
       "Bash(docker ps --filter name=superset_app --format \"{{.Names}}: {{.Status}}\")",
       "Bash(kill -CONT 50010 50027 50039)",
-      "Read(//Users/kuanysorsayev/PycharmProjects/superset/**)"
+      "Read(//Users/kuanysorsayev/PycharmProjects/superset/**)",
+      "Bash(grep \"\\\\.entry\\\\.js$\")",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

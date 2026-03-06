@@ -695,20 +695,10 @@ class Header extends PureComponent {
                 />
               ) : (
                 <div css={actionButtonsStyle}>
-                  {isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
-                    (isFeatureEnabled(FeatureFlag.CommentingPinMode) ? (
+                  {findPermission('can_read', 'Comment', user?.roles) &&
+                    findPermission('can_comment', 'Comment', user?.roles) && (
                       <CommentModeToggleButton dashboardId={dashboardInfo.id} />
-                    ) : (
-                      <Button
-                        buttonStyle="secondary"
-                        onClick={this.openDashboardComments}
-                        data-test="open-dashboard-comments"
-                        className="action-button"
-                        aria-label={t('Open comments')}
-                      >
-                        {t('💬 Comments')}
-                      </Button>
-                    ))}
+                    )}
                   {NavExtension && <NavExtension />}
                   {userCanEdit && (
                     <Button
