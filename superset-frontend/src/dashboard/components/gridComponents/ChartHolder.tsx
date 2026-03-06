@@ -21,12 +21,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { ResizeCallback, ResizeStartCallback } from 're-resizable';
 import cx from 'classnames';
 import { useSelector } from 'react-redux';
-import {
-  css,
-  FeatureFlag,
-  isFeatureEnabled,
-  useTheme,
-} from '@superset-ui/core';
+import { css, useTheme } from '@superset-ui/core';
 import { PinOverlay } from 'src/dashboard/components/Comments/PinOverlay';
 import { LayoutItem, RootState } from 'src/dashboard/types';
 import AnchorLink from 'src/dashboard/components/AnchorLink';
@@ -324,15 +319,13 @@ const ChartHolder: React.FC<ChartHolderProps> = ({
               extraControls={extraControls}
               isInView={isInView}
             />
-            {!editMode &&
-              isFeatureEnabled(FeatureFlag.CommentingEnabled) &&
-              isFeatureEnabled(FeatureFlag.CommentingPinMode) && (
-                <PinOverlay
-                  scopeType="chart"
-                  dashboardId={dashboardId}
-                  sliceId={chartId}
-                />
-              )}
+            {!editMode && (
+              <PinOverlay
+                scopeType="chart"
+                dashboardId={dashboardId}
+                sliceId={chartId}
+              />
+            )}
             {editMode && (
               <HoverMenu position="top">
                 <div data-test="dashboard-delete-component-button">

@@ -42,6 +42,7 @@ import {
   CommentScopeType,
   COMMENTS_CHANGED_EVENT,
   OpenCommentsEventDetail,
+  dispatchCommentsChanged,
   dispatchOpenComments,
 } from './events';
 import { Pin } from './Pin';
@@ -123,9 +124,10 @@ const PinOverlay: FC<PinOverlayProps> = ({
 
   const isCommentModeActive = Boolean(
     activeScope &&
-      activeScope.scopeType === scopeType &&
       activeScope.dashboardId === dashboardId &&
-      activeScope.sliceId === sliceId,
+      ((activeScope.scopeType === scopeType &&
+        (scopeType === 'dashboard' || activeScope.sliceId === sliceId)) ||
+        (activeScope.scopeType === 'dashboard' && scopeType === 'chart')),
   );
 
   const handleApiError = useCallback(
@@ -239,6 +241,7 @@ const PinOverlay: FC<PinOverlayProps> = ({
       setDraftPin(null);
       setDraftBody('');
       exitCommentMode();
+      dispatchCommentsChanged({ scopeType, dashboardId, sliceId });
       await fetchPins();
     } catch (err) {
       await handleApiError(err as Response);
@@ -301,6 +304,9 @@ const PinOverlay: FC<PinOverlayProps> = ({
     <Overlay
       ref={containerRef}
       active={isCommentModeActive}
+      // Chart overlays must sit above the dashboard overlay (z-index 10) so
+      // they intercept clicks on chart areas when dashboard comment mode is on.
+      style={scopeType === 'chart' ? { zIndex: 12 } : undefined}
       data-test={
         scopeType === 'dashboard' ? 'dashboard-pin-overlay' : undefined
       }
