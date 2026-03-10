@@ -89,8 +89,8 @@ const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   display: flex;
   flex-direction: column;
   border: 1px solid
-    ${({ $themeMode }) =>
-      $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
+  ${({ $themeMode }) =>
+    $themeMode === 'light' ? '#ddd' : 'rgba(26, 51, 111, 1)'};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
@@ -101,7 +101,7 @@ const LeftPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
 // eslint-disable-next-line theme-colors/no-literal-colors
 const Panel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   border: 1px solid
-    ${({ $themeMode }) => ($themeMode === 'light' ? '#E2E2E2' : '#1A336F')};
+  ${({ $themeMode }) => ($themeMode === 'light' ? '#E2E2E2' : '#1A336F')};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
     $themeMode === 'light' ? '#F5F5F5' : '#142140'};
@@ -177,10 +177,10 @@ const RightPanel = styled.div<{ $themeMode: 'light' | 'dark' }>`
   align-items: center;
   justify-content: center;
   border: 1px solid
-    ${({ $themeMode }) =>
-      $themeMode === 'light'
-        ? 'rgba(226, 226, 226, 1)'
-        : 'rgba(26, 51, 111, 1)'};
+  ${({ $themeMode }) =>
+    $themeMode === 'light'
+      ? 'rgba(226, 226, 226, 1)'
+      : 'rgba(26, 51, 111, 1)'};
   border-radius: 12px;
   background: ${({ $themeMode }) =>
     $themeMode === 'light' ? 'rgba(245, 245, 245, 1)' : 'rgba(9, 21, 44, 1)'};
@@ -268,7 +268,7 @@ type Props = {
   factLabel?: string;
   barWidth: number;
   barGap: number;
-  show_fact_labels?: boolean;
+  showFactLabels?: boolean;
   formData?: {
     titleFontSize: number;
     chartType: 'default' | 'plan_fact_daily' | 'plan_fact_line';
@@ -285,21 +285,21 @@ type Props = {
 
 // === Component ===
 const SupersetPluginDieselConsumption: React.FC<Props> = ({
-  width,
-  height,
-  data,
-  showMonthTotals,
-  totals,
-  averages,
-  fmt,
-  title,
-  formData,
-  planLabel = 'План',
-  factLabel = 'Факт',
-  barWidth,
-  barGap = 5,
-  show_fact_labels,
-}) => {
+                                                            width,
+                                                            height,
+                                                            data,
+                                                            showMonthTotals,
+                                                            totals,
+                                                            averages,
+                                                            fmt,
+                                                            title,
+                                                            formData,
+                                                            planLabel = 'План',
+                                                            factLabel = 'Факт',
+                                                            barWidth,
+                                                            barGap = 5,
+                                                            showFactLabels,
+                                                          }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const miniRef = useRef<HTMLDivElement>(null);
   const [maxHeight, setMaxHeight] = useState(0);
@@ -318,7 +318,6 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     theme === 'light' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(74, 149, 70, 1)';
   const factColor =
     theme === 'light' ? 'rgba(254, 38, 38, 0.5)' : 'rgba(255, 123, 123, 1)';
-  const showFactLabels = !!show_fact_labels;
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -412,7 +411,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               show: showFactLabels,
               position: 'top',
               distance: 6,
-              formatter: (p: any) => (p.value == null ? '' : String(p.value)),
+              formatter: (p: any) => {
+                const v = Number(p.value);
+                if (!Number.isFinite(v)) return '';
+                return fmt(v);
+              },
             },
             itemStyle: {
               color: (params: any) => {
@@ -530,7 +533,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               borderRadius: [12, 12, 12, 12],
             },
           },
-          {
+          /* {
             name: planLabel,
             type: 'bar',
             data: prepared.map(d => d.plan),
@@ -541,7 +544,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               color: planColor,
               borderRadius: [12, 12, 12, 12],
             },
-          },
+          }, */
           {
             name: `${planLabel}_line`,
             type: 'line',
@@ -559,8 +562,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         ],
       };
     }
-    // ==========================================================
-    // === NEW APPEARANCE (daily plan/fact like screenshot)
+      // ==========================================================
+      // === NEW APPEARANCE (daily plan/fact like screenshot)
     // ==========================================================
     else {
       const planColorDefault = theme === 'light' ? '#D9D9D9' : '#09152B';
@@ -812,7 +815,6 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   );
 
   if (chartType === 'plan_fact_daily' || chartType === 'plan_fact_line') {
-    console.log('Hello 12');
     return renderPlanFactDailyAppearance();
   }
 
