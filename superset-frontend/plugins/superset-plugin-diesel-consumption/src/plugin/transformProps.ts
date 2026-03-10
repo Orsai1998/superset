@@ -157,7 +157,6 @@ export default function transformProps(chartProps: ChartProps) {
   const valueFormat =
     (formData as any).valueFormat ?? (formData as any).value_format ?? ',.2f';
   const fmt = getNumberFormatter(valueFormat);
-  console.log('asddsadsa');
   // === TRANSFORM WITHOUT SORTING (Superset already sorts!) ===
   const rawData: DieselDatum[] = records.map((rec: Record<any, any>) => ({
     day: resolveDay(rec[timeCol], timeGrainSqla),
@@ -197,6 +196,7 @@ export default function transformProps(chartProps: ChartProps) {
     ? formData?.barWidth
     : 12;
   const barGap = Number.isFinite(formData?.barGap) ? formData?.barGap : 20;
+  const showFactLabels = Boolean((formData as any).showFactLabels);
 
   return {
     width,
@@ -215,5 +215,6 @@ export default function transformProps(chartProps: ChartProps) {
     factLabel,
     barWidth,
     barGap,
+    showFactLabels,
   };
 }
