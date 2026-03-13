@@ -268,7 +268,7 @@ type Props = {
   factLabel?: string;
   barWidth: number;
   barGap: number;
-  show_fact_labels?: boolean;
+  showFactLabels?: boolean;
   formData?: {
     titleFontSize: number;
     chartType: 'default' | 'plan_fact_daily' | 'plan_fact_line';
@@ -298,7 +298,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   factLabel = 'Факт',
   barWidth,
   barGap = 5,
-  show_fact_labels,
+  showFactLabels,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const miniRef = useRef<HTMLDivElement>(null);
@@ -318,7 +318,6 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
     theme === 'light' ? 'rgba(34, 197, 94, 0.5)' : 'rgba(74, 149, 70, 1)';
   const factColor =
     theme === 'light' ? 'rgba(254, 38, 38, 0.5)' : 'rgba(255, 123, 123, 1)';
-  const showFactLabels = !!show_fact_labels;
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -412,7 +411,11 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               show: showFactLabels,
               position: 'top',
               distance: 6,
-              formatter: (p: any) => (p.value == null ? '' : String(p.value)),
+              formatter: (p: any) => {
+                const v = Number(p.value);
+                if (!Number.isFinite(v)) return '';
+                return fmt(v);
+              },
             },
             itemStyle: {
               color: (params: any) => {
@@ -530,7 +533,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               borderRadius: [12, 12, 12, 12],
             },
           },
-          {
+          /* {
             name: planLabel,
             type: 'bar',
             data: prepared.map(d => d.plan),
@@ -541,7 +544,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               color: planColor,
               borderRadius: [12, 12, 12, 12],
             },
-          },
+          }, */
           {
             name: `${planLabel}_line`,
             type: 'line',
@@ -812,7 +815,6 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   );
 
   if (chartType === 'plan_fact_daily' || chartType === 'plan_fact_line') {
-    console.log('Hello 12');
     return renderPlanFactDailyAppearance();
   }
 
