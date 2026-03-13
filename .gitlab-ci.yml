@@ -4,7 +4,21 @@ variables:
   GIT_SSL_NO_VERIFY: "1"
 
 stages:
+  - format
   - build_docker
+
+prettier_check:
+  image: docker.mirror.erg.kz/node:18
+  stage: format
+  tags:
+    - itdev-platform-data
+  script:
+    - cd superset-frontend
+    - npm ci
+    - npm run prettier-check
+  only:
+    - main
+    - merge_requests
 
 build_docker_superset:
   image: docker.mirror.erg.kz/docker:20-dind
