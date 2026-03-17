@@ -251,6 +251,7 @@ export enum MenuKeys {
   ExportFullCsv = 'export_full_csv',
   ExportXlsx = 'export_xlsx',
   ExportFullXlsx = 'export_full_xlsx',
+  ExportTableAsDisplayed = 'export_table_as_displayed',
   ForceRefresh = 'force_refresh',
   Fullscreen = 'fullscreen',
   ToggleChartDescription = 'toggle_chart_description',

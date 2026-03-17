@@ -45,6 +45,7 @@ export type Comment = {
   resolved_by: CommentUser | null;
   x_pct: number | null;
   y_pct: number | null;
+  filter_state: Record<string, unknown> | null;
   author: CommentUser | null;
   mentioned_users: (CommentUser | null)[];
   can_edit: boolean;
@@ -124,10 +125,12 @@ export async function createComment({
   body,
   xPct,
   yPct,
+  filterState,
 }: ScopeParams & {
   body: string;
   xPct?: number | null;
   yPct?: number | null;
+  filterState?: Record<string, unknown> | null;
 }): Promise<Comment> {
   const { json } = await SupersetClient.post({
     endpoint: `${COMMENTS_ENDPOINT}/`,
@@ -138,6 +141,7 @@ export async function createComment({
       body,
       x_pct: xPct ?? null,
       y_pct: yPct ?? null,
+      filter_state: filterState ? JSON.stringify(filterState) : null,
     },
   });
   return json.result;

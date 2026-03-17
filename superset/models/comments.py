@@ -20,7 +20,7 @@ import enum
 from datetime import datetime
 
 from flask_appbuilder import Model
-from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Boolean, Column, DateTime, Enum, Float, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 
 from superset import security_manager
@@ -72,6 +72,7 @@ class Comment(Model):
     resolved_on = Column(DateTime, nullable=True)
     x_pct = Column(Float, nullable=True)
     y_pct = Column(Float, nullable=True)
+    filter_state = Column(Text, nullable=True)
 
     created_by = relationship(security_manager.user_model, foreign_keys=[created_by_fk])
     resolved_by_user = relationship(security_manager.user_model, foreign_keys=[resolved_by])
