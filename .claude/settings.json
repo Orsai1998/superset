@@ -16,7 +16,9 @@
       "Bash(kill -CONT 50010 50027 50039)",
       "Read(//Users/kuanysorsayev/PycharmProjects/superset/**)",
       "Bash(grep \"\\\\.entry\\\\.js$\")",
-      "Bash(python3 -m json.tool)"
+      "Bash(python3 -m json.tool)",
+      "Bash(npx webpack:*)",
+      "Bash(npm install:*)"
     ]
   }
 }

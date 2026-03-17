@@ -55,6 +55,7 @@ import {
 import { NoAnimationDropdown } from 'src/components/Dropdown';
 import ShareMenuItems from 'src/dashboard/components/menu/ShareMenuItems';
 import downloadAsImage from 'src/utils/downloadAsImage';
+import exportTableToExcel from 'src/utils/exportTableToExcel';
 import { getSliceHeaderTooltip } from 'src/dashboard/util/getSliceHeaderTooltip';
 import { Tooltip } from 'src/components/Tooltip';
 import Icons from 'src/components/Icons';
@@ -628,6 +629,12 @@ const SliceHeaderControls = (props: SliceHeaderControlsPropsWithRouter) => {
         // eslint-disable-next-line no-unused-expressions
         props.exportXLSX?.(props.slice.slice_id);
         break;
+      case MenuKeys.ExportTableAsDisplayed:
+        exportTableToExcel(
+          props.slice.slice_id,
+          props.slice.slice_name || 'table_export',
+        );
+        break;
       case MenuKeys.DownloadAsImage: {
         // menu closes with a delay, we need to hide it manually,
         // so that we don't capture it on the screenshot
@@ -886,6 +893,14 @@ const SliceHeaderControls = (props: SliceHeaderControlsPropsWithRouter) => {
           >
             {t('Export to Excel')}
           </Menu.Item>
+          {isTable && (
+            <Menu.Item
+              key={MenuKeys.ExportTableAsDisplayed}
+              icon={<Icons.FileOutlined css={dropdownIconsStyles} />}
+            >
+              {t('Export table as displayed')}
+            </Menu.Item>
+          )}
 
           {isFeatureEnabled(FeatureFlag.AllowFullCsvExport) &&
             props.supersetCanCSV &&
