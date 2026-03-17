@@ -25,12 +25,21 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Mentions } from 'antd';
-import { css, getClientErrorObject, styled, t } from '@superset-ui/core';
+import {
+  css,
+  DataMask,
+  DataMaskStateWithId,
+  getClientErrorObject,
+  styled,
+  t,
+} from '@superset-ui/core';
 import { rgba } from 'emotion-rgba';
 import { Space } from 'src/components';
 import Button from 'src/components/Button';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
+import { updateDataMask } from 'src/dataMask/actions';
 import {
   Comment,
   CommentUser,
@@ -114,6 +123,11 @@ const PinOverlay: FC<PinOverlayProps> = ({
   sliceId,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
+  const dataMask = useSelector<
+    { dataMask: DataMaskStateWithId },
+    DataMaskStateWithId
+  >(state => state.dataMask);
   const { addDangerToast } = useToasts();
   const [pins, setPins] = useState<Comment[]>([]);
   const [draftPin, setDraftPin] = useState<DraftPin | null>(null);
@@ -237,6 +251,7 @@ const PinOverlay: FC<PinOverlayProps> = ({
         body,
         xPct: draftPin.xPct,
         yPct: draftPin.yPct,
+        filterState: dataMask as Record<string, unknown>,
       });
       setDraftPin(null);
       setDraftBody('');
@@ -326,6 +341,15 @@ const PinOverlay: FC<PinOverlayProps> = ({
           onClick={e => {
             e.stopPropagation();
             setDraftPin(null);
+            if (pin.filter_state) {
+              const savedDataMask = pin.filter_state as Record<
+                string,
+                DataMask
+              >;
+              Object.entries(savedDataMask).forEach(([filterId, mask]) => {
+                dispatch(updateDataMask(filterId, mask));
+              });
+            }
             dispatchOpenComments({
               scopeType,
               dashboardId,
