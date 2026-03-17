@@ -16,6 +16,7 @@
 # under the License.
 from __future__ import annotations
 
+import json
 import re
 from datetime import datetime
 from typing import Any
@@ -66,6 +67,7 @@ class CommentCreateSchema(Schema):
         load_default=None,
         validate=validate.Range(min=0.0, max=1.0),
     )
+    filter_state = fields.String(allow_none=True, load_default=None)
 
 
 class CommentReplySchema(Schema):
@@ -231,6 +233,11 @@ class CommentRestApi(BaseSupersetApi):
             ),
             "x_pct": comment.x_pct,
             "y_pct": comment.y_pct,
+            "filter_state": (
+                json.loads(comment.filter_state)
+                if comment.filter_state
+                else None
+            ),
             "author": self._serialize_user(comment.created_by),
             "mentioned_users": [
                 self._serialize_user(mention.user) for mention in comment.mentions
@@ -387,6 +394,21 @@ class CommentRestApi(BaseSupersetApi):
         if not body:
             return self.response_400(message="Comment body cannot be empty")
 
+        raw_filter_state = item.get("filter_state")
+        filter_state_str = None
+        if raw_filter_state:
+            # Validate it's valid JSON if it's a string; store as JSON string
+            if isinstance(raw_filter_state, str):
+                try:
+                    json.loads(raw_filter_state)
+                    filter_state_str = raw_filter_state
+                except json.JSONDecodeError:
+                    return self.response_400(
+                        message="filter_state must be valid JSON"
+                    )
+            else:
+                filter_state_str = json.dumps(raw_filter_state)
+
         comment = Comment(
             scope_type=scope_type,
             dashboard_id=dashboard_id,
@@ -396,6 +418,7 @@ class CommentRestApi(BaseSupersetApi):
             created_by_fk=g.user.id,
             x_pct=item.get("x_pct"),
             y_pct=item.get("y_pct"),
+            filter_state=filter_state_str,
         )
         self._sync_mentions(comment, body)
 

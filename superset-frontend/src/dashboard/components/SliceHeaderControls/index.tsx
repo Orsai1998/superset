@@ -50,6 +50,7 @@ import {
 } from '@superset-ui/core/components';
 import { useShareMenuItems } from 'src/dashboard/components/menu/ShareMenuItems';
 import downloadAsImage from 'src/utils/downloadAsImage';
+import exportTableToExcel from 'src/utils/exportTableToExcel';
 import { getSliceHeaderTooltip } from 'src/dashboard/util/getSliceHeaderTooltip';
 import { Icons } from '@superset-ui/core/components/Icons';
 import ViewQueryModal from 'src/explore/components/controls/ViewQueryModal';
@@ -246,6 +247,12 @@ const SliceHeaderControls = (
       case MenuKeys.ExportXlsx:
         // eslint-disable-next-line no-unused-expressions
         props.exportXLSX?.(props.slice.slice_id);
+        break;
+      case MenuKeys.ExportTableAsDisplayed:
+        exportTableToExcel(
+          props.slice.slice_id,
+          props.slice.slice_name || 'table_export',
+        );
         break;
       case MenuKeys.DownloadAsImage: {
         // menu closes with a delay, we need to hide it manually,
@@ -517,6 +524,15 @@ const SliceHeaderControls = (
           label: t('Export to Excel'),
           icon: <Icons.FileOutlined css={dropdownIconsStyles} />,
         },
+        ...(isTable
+          ? [
+              {
+                key: MenuKeys.ExportTableAsDisplayed,
+                label: t('Export table as displayed'),
+                icon: <Icons.FileOutlined css={dropdownIconsStyles} />,
+              },
+            ]
+          : []),
         ...(isFeatureEnabled(FeatureFlag.AllowFullCsvExport) &&
         props.supersetCanCSV &&
         isTable
