@@ -83,9 +83,9 @@ const config: ControlPanelConfig = {
             name: 'metric_title',
             config: {
               type: 'TextControl',
-              label: t('Metric title'),
+              label: t('Название метрики'),
               default: 'тыс. тонн',
-              description: t('Label displayed above the metrics.'),
+              description: t('Текст, отображаемый над значениями графика'),
               renderTrigger: true,
             },
           },
@@ -115,9 +115,9 @@ const config: ControlPanelConfig = {
             name: 'current_month_font_size',
             config: {
               type: 'SliderControl',
-              label: t('Current month font size'),
+              label: t('Размер шрифта текущего месяца'),
               description: t(
-                'Adjust the font size of charts current month font size',
+                'Изменяет размер шрифта подписи текущего месяца на графике',
               ),
               default: 13,
               min: 8,
@@ -132,10 +132,8 @@ const config: ControlPanelConfig = {
             name: 'title_font_size',
             config: {
               type: 'SliderControl',
-              label: t('Title font size'),
-              description: t(
-                'Adjust the font size of chart titles and labels.',
-              ),
+              label: t('Размер шрифта заголовка'),
+              description: t('Изменяет размер шрифта заголовка графика'),
               default: 16,
               min: 8,
               max: 48,
@@ -149,8 +147,8 @@ const config: ControlPanelConfig = {
             name: 'metric_font_size',
             config: {
               type: 'SliderControl',
-              label: t('Metric font size'),
-              description: t('Metric font size.'),
+              label: t('Размер шрифта метрики'),
+              description: t('Размер шрифта значения метрики'),
               default: 16,
               min: 8,
               max: 48,
@@ -164,8 +162,8 @@ const config: ControlPanelConfig = {
             name: 'x_axis_font_size',
             config: {
               type: 'SliderControl',
-              label: t('Axis font size'),
-              description: t('Axis font size.'),
+              label: t('Размер шрифта оси'),
+              description: t('Размер шрифта подписей оси'),
               default: 10,
               min: 8,
               max: 48,
@@ -205,9 +203,9 @@ const config: ControlPanelConfig = {
             name: 'metric_title_font_size',
             config: {
               type: 'SliderControl',
-              label: t('Metric title font size'),
+              label: t('Размер шрифта щаголовка метрики'),
               description: t(
-                'Adjust the font size of the metric title (e.g., units above chart).',
+                'Изменяет размер шрифта заголовка метрики (например, единицы измерения над графиком)',
               ),
               default: 12,
               min: 8,
@@ -221,20 +219,20 @@ const config: ControlPanelConfig = {
             name: 'fill_time_gaps',
             config: {
               type: 'CheckboxControl',
-              label: 'Fill missing time buckets (0 values)',
+              label: 'Заполянять пропуски во времени (0)',
               default: true,
               renderTrigger: true,
               description:
-                'Adds missing days/months with plan=0, fact=0 so the axis is continuous.',
+                'Добавляет пропущенные дни или месяяцы со значением 0, чтобы шкала времени была непрерывной',
             },
           },
           {
             name: 'enable_fact_plan_coloring',
             config: {
               type: 'CheckboxControl',
-              label: t('Enable fact/plan color logic'),
+              label: t('Цветная логика факт/план'),
               description: t(
-                'If enabled, metrics will be colored based on fact > plan.',
+                'Если включено, значения окрашиваются в зависимости от условий факт > план',
               ),
               default: true,
               renderTrigger: true,
@@ -250,6 +248,22 @@ const config: ControlPanelConfig = {
               label: 'Показывать значение факта для линейного графика',
               default: false,
               renderTrigger: true,
+            },
+          },
+        ],
+        // ─── Поворот значений в графике ──────────────────────────
+        [
+          {
+            name: 'fact_label_rotation',
+            config: {
+              type: 'SelectControl',
+              label: 'Поворот значений',
+              default: '0',
+              renderTrigger: true,
+              choices: [
+                ['0', 'Без поворота'],
+                ['45', '45'],
+              ],
             },
           },
         ],

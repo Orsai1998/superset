@@ -269,6 +269,7 @@ type Props = {
   barWidth: number;
   barGap: number;
   showFactLabels?: boolean;
+  factLabelRotation: number;
   formData?: {
     titleFontSize: number;
     chartType: 'default' | 'plan_fact_daily' | 'plan_fact_line';
@@ -299,6 +300,7 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
   barWidth,
   barGap = 5,
   showFactLabels,
+  factLabelRotation,
 }) => {
   const chartRef = useRef<HTMLDivElement>(null);
   const miniRef = useRef<HTMLDivElement>(null);
@@ -410,7 +412,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
             label: {
               show: showFactLabels,
               position: 'top',
-              distance: 6,
+              distance: factLabelRotation === 45 ? 12 : 6,
+              rotate: factLabelRotation,
               formatter: (p: any) => {
                 const v = Number(p.value);
                 if (!Number.isFinite(v)) return '';
@@ -484,8 +487,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
         label: {
           show: showFactLabels,
           position: 'top',
-          distance: 6,
-          rotate: 90,
+          distance: factLabelRotation === 45 ? 12 : 6,
+          rotate: factLabelRotation,
           formatter: (p: any) => (p.value == null ? '' : String(p.value)),
         },
 
@@ -632,10 +635,10 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               position: 'top',
               fontSize: metricFontSize,
               fontWeight: 700,
-              distance: 10,
               // eslint-disable-next-line theme-colors/no-literal-colors
               color: labelColor,
-              rotate: 90,
+              distance: factLabelRotation === 45 ? 12 : 6,
+              rotate: factLabelRotation,
               offset: [17, 10],
               formatter: (p: { value: number }) => fmt(p.value),
             },
@@ -658,8 +661,8 @@ const SupersetPluginDieselConsumption: React.FC<Props> = ({
               position: 'top',
               fontSize: metricFontSize,
               fontWeight: 700,
-              distance: 10,
-              rotate: 90,
+              distance: factLabelRotation === 45 ? 12 : 6,
+              rotate: factLabelRotation,
               offset: [17, 10],
               formatter: (p: { value: number }) => fmt(p.value),
             },
