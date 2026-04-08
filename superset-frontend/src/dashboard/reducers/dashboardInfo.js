@@ -22,6 +22,7 @@ import {
   SET_FILTER_BAR_ORIENTATION,
   SET_CROSS_FILTERS_ENABLED,
   DASHBOARD_INFO_FILTERS_CHANGED,
+  SET_COMMENTS_ENABLED,
   SET_DASHBOARD_THEME,
 } from '../actions/dashboardInfo';
 import { HYDRATE_DASHBOARD } from '../actions/hydrate';
@@ -60,6 +61,11 @@ export default function dashboardStateReducer(state = {}, action) {
       return {
         ...state,
         crossFiltersEnabled: action.crossFiltersEnabled,
+      };
+    case SET_COMMENTS_ENABLED:
+      return {
+        ...state,
+        commentsEnabled: action.commentsEnabled,
       };
     case SET_DASHBOARD_THEME:
       return {

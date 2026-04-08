@@ -195,6 +195,19 @@ export async function deleteComment(commentId: number): Promise<void> {
   });
 }
 
+export type PinCountsResponse = {
+  counts: Record<string, number>;
+};
+
+export async function fetchPinCounts(
+  dashboardId: number,
+): Promise<Record<string, number>> {
+  const { json } = await SupersetClient.get({
+    endpoint: `${COMMENTS_ENDPOINT}/pin-counts?dashboard_id=${dashboardId}`,
+  });
+  return (json as PinCountsResponse).counts;
+}
+
 export async function searchMentionUsers(
   query = '',
   pageSize = 8,

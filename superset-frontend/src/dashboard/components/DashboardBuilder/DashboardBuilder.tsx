@@ -75,6 +75,7 @@ import {
 } from 'src/dashboard/constants';
 import CommentsDrawer from 'src/dashboard/components/Comments/CommentsDrawer';
 import { PinOverlay } from 'src/dashboard/components/Comments/PinOverlay';
+import { CommentsPinCountProvider } from 'src/dashboard/components/Comments/CommentsPinCountContext';
 import { getRootLevelTabsComponent, shouldFocusTabs } from './utils';
 import DashboardContainer from './DashboardContainer';
 import { useNativeFilters } from './state';
@@ -389,6 +390,9 @@ const DashboardBuilder = () => {
   const fullSizeChartId = useSelector<RootState, number | null>(
     state => state.dashboardState.fullSizeChartId,
   );
+  const commentsEnabled = useSelector<RootState, boolean>(
+    ({ dashboardInfo }) => dashboardInfo.commentsEnabled,
+  );
   const filterBarOrientation = useSelector<RootState, FilterBarOrientation>(
     ({ dashboardInfo }) => dashboardInfo.filterBarOrientation,
   );
@@ -617,133 +621,138 @@ const DashboardBuilder = () => {
     : 0;
 
   return (
-    <DashboardWrapper>
-      {isVerticalFilterBarVisible && (
-        <ResizableSidebar
-          id={`dashboard:${dashboardId}`}
-          enable={dashboardFiltersOpen}
-          minWidth={OPEN_FILTER_BAR_WIDTH}
-          maxWidth={OPEN_FILTER_BAR_MAX_WIDTH}
-          initialWidth={OPEN_FILTER_BAR_WIDTH}
-        >
-          {renderChild}
-        </ResizableSidebar>
-      )}
-      <StyledHeader
-        data-test="dashboard-header-wrapper"
-        ref={headerRef}
-        filterBarWidth={headerFilterBarWidth}
-      >
-        {/* @ts-ignore */}
-        <Droppable
-          data-test="top-level-tabs"
-          className={cx(!topLevelTabs && editMode && 'empty-droptarget')}
-          component={dashboardRoot}
-          parentComponent={null}
-          depth={DASHBOARD_ROOT_DEPTH}
-          index={0}
-          orientation="column"
-          onDrop={handleDrop}
-          editMode={editMode}
-          // you cannot drop on/displace tabs if they already exist
-          disableDragDrop={!!topLevelTabs}
-          style={draggableStyle}
-        >
-          {renderDraggableContent}
-        </Droppable>
-      </StyledHeader>
-      <StyledContent fullSizeChartId={fullSizeChartId}>
-        {!editMode &&
-          !topLevelTabs &&
-          dashboardLayout[DASHBOARD_GRID_ID]?.children?.length === 0 && (
-            <EmptyState
-              title={t('There are no charts added to this dashboard')}
-              size="large"
-              description={
-                canEdit &&
-                t(
-                  'Go to the edit mode to configure the dashboard and add charts',
-                )
-              }
-              buttonText={canEdit && t('Edit the dashboard')}
-              buttonAction={() => {
-                dispatch(setEditMode(true));
-                dispatch(clearDashboardHistory());
-              }}
-              image="dashboard.svg"
-            />
-          )}
-        <DashboardContentWrapper
-          data-test="dashboard-content-wrapper"
-          className={cx('dashboard', editMode && 'dashboard--editing')}
-        >
-          <StyledDashboardContent
-            className="dashboard-content"
-            editMode={editMode}
-            marginLeft={dashboardContentMarginLeft}
+    <CommentsPinCountProvider
+      dashboardId={dashboardNumericId}
+      enabled={commentsEnabled}
+    >
+      <DashboardWrapper>
+        {isVerticalFilterBarVisible && (
+          <ResizableSidebar
+            id={`dashboard:${dashboardId}`}
+            enable={dashboardFiltersOpen}
+            minWidth={OPEN_FILTER_BAR_WIDTH}
+            maxWidth={OPEN_FILTER_BAR_MAX_WIDTH}
+            initialWidth={OPEN_FILTER_BAR_WIDTH}
           >
-            {showDashboard ? (
-              missingInitialFilters.length > 0 ? (
-                <div
-                  css={css`
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: center;
-                    flex: 1;
-                    & div {
-                      width: 500px;
-                    }
-                  `}
-                >
-                  <BasicErrorAlert
-                    title={t('Unable to load dashboard')}
-                    body={t(
-                      `The following filters have the 'Select first filter value by default'
+            {renderChild}
+          </ResizableSidebar>
+        )}
+        <StyledHeader
+          data-test="dashboard-header-wrapper"
+          ref={headerRef}
+          filterBarWidth={headerFilterBarWidth}
+        >
+          {/* @ts-ignore */}
+          <Droppable
+            data-test="top-level-tabs"
+            className={cx(!topLevelTabs && editMode && 'empty-droptarget')}
+            component={dashboardRoot}
+            parentComponent={null}
+            depth={DASHBOARD_ROOT_DEPTH}
+            index={0}
+            orientation="column"
+            onDrop={handleDrop}
+            editMode={editMode}
+            // you cannot drop on/displace tabs if they already exist
+            disableDragDrop={!!topLevelTabs}
+            style={draggableStyle}
+          >
+            {renderDraggableContent}
+          </Droppable>
+        </StyledHeader>
+        <StyledContent fullSizeChartId={fullSizeChartId}>
+          {!editMode &&
+            !topLevelTabs &&
+            dashboardLayout[DASHBOARD_GRID_ID]?.children?.length === 0 && (
+              <EmptyState
+                title={t('There are no charts added to this dashboard')}
+                size="large"
+                description={
+                  canEdit &&
+                  t(
+                    'Go to the edit mode to configure the dashboard and add charts',
+                  )
+                }
+                buttonText={canEdit && t('Edit the dashboard')}
+                buttonAction={() => {
+                  dispatch(setEditMode(true));
+                  dispatch(clearDashboardHistory());
+                }}
+                image="dashboard.svg"
+              />
+            )}
+          <DashboardContentWrapper
+            data-test="dashboard-content-wrapper"
+            className={cx('dashboard', editMode && 'dashboard--editing')}
+          >
+            <StyledDashboardContent
+              className="dashboard-content"
+              editMode={editMode}
+              marginLeft={dashboardContentMarginLeft}
+            >
+              {showDashboard ? (
+                missingInitialFilters.length > 0 ? (
+                  <div
+                    css={css`
+                      display: flex;
+                      flex-direction: row;
+                      align-items: center;
+                      justify-content: center;
+                      flex: 1;
+                      & div {
+                        width: 500px;
+                      }
+                    `}
+                  >
+                    <BasicErrorAlert
+                      title={t('Unable to load dashboard')}
+                      body={t(
+                        `The following filters have the 'Select first filter value by default'
                     option checked and could not be loaded, which is preventing the dashboard
                     from rendering: %s`,
-                      missingInitialFilters.join(', '),
-                    )}
-                  />
-                </div>
-              ) : (
-                <div
-                  style={{
-                    position: 'relative',
-                    display: 'flex',
-                    flex: 1,
-                    minHeight: 0,
-                  }}
-                >
-                  <DashboardContainer topLevelTabs={topLevelTabs} />
-                  {!editMode && dashboardNumericId > 0 && (
-                    <PinOverlay
-                      scopeType="dashboard"
-                      dashboardId={dashboardNumericId}
+                        missingInitialFilters.join(', '),
+                      )}
                     />
-                  )}
-                </div>
-              )
-            ) : (
-              <Loading />
-            )}
-            {editMode && <BuilderComponentPane topOffset={barTopOffset} />}
-          </StyledDashboardContent>
-        </DashboardContentWrapper>
-      </StyledContent>
-      {dashboardIsSaving && (
-        <Loading
-          css={css`
-            && {
-              position: fixed;
-            }
-          `}
-        />
-      )}
-      {dashboardNumericId > 0 && (
-        <CommentsDrawer dashboardId={dashboardNumericId} />
-      )}
-    </DashboardWrapper>
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      position: 'relative',
+                      display: 'flex',
+                      flex: 1,
+                      minHeight: 0,
+                    }}
+                  >
+                    <DashboardContainer topLevelTabs={topLevelTabs} />
+                    {!editMode && dashboardNumericId > 0 && commentsEnabled && (
+                      <PinOverlay
+                        scopeType="dashboard"
+                        dashboardId={dashboardNumericId}
+                      />
+                    )}
+                  </div>
+                )
+              ) : (
+                <Loading />
+              )}
+              {editMode && <BuilderComponentPane topOffset={barTopOffset} />}
+            </StyledDashboardContent>
+          </DashboardContentWrapper>
+        </StyledContent>
+        {dashboardIsSaving && (
+          <Loading
+            css={css`
+              && {
+                position: fixed;
+              }
+            `}
+          />
+        )}
+        {dashboardNumericId > 0 && commentsEnabled && (
+          <CommentsDrawer dashboardId={dashboardNumericId} />
+        )}
+      </DashboardWrapper>
+    </CommentsPinCountProvider>
   );
 };
 

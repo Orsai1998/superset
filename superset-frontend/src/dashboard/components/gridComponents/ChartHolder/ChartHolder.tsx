@@ -95,6 +95,9 @@ const ChartHolder = ({
   isInView,
 }: ChartHolderProps) => {
   const theme = useTheme();
+  const commentsEnabled = useSelector<RootState, boolean>(
+    ({ dashboardInfo }) => dashboardInfo.commentsEnabled,
+  );
   const fullSizeStyle = css`
     && {
       position: fixed !important;
@@ -301,7 +304,7 @@ const ChartHolder = ({
             extraControls={extraControls}
             isInView={isInView}
           />
-          {!editMode && (
+          {!editMode && commentsEnabled && (
             <PinOverlay
               scopeType="chart"
               dashboardId={dashboardId}
@@ -341,6 +344,7 @@ const ChartHolder = ({
       dashboardId,
       chartWidth,
       chartHeight,
+      commentsEnabled,
       handleUpdateSliceName,
       isComponentVisible,
       handleToggleFullSize,

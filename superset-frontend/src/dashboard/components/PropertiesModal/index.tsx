@@ -22,6 +22,7 @@ import jsonStringify from 'json-stringify-pretty-compact';
 import {
   AsyncSelect,
   Button,
+  Checkbox,
   Col,
   Form,
   FormItem,
@@ -69,6 +70,10 @@ import { ModalTitleWithIcon } from 'src/components/ModalTitleWithIcon';
 
 const StyledJsonEditor = styled(JsonEditor)`
   /* Border is already applied by AceEditor itself */
+`;
+
+const StyledFormItem = styled(FormItem)`
+  margin-bottom: 0;
 `;
 
 type PropertiesModalProps = {
@@ -129,6 +134,7 @@ const PropertiesModal = ({
   const [roles, setRoles] = useState<Roles>([]);
   const saveLabel = onlyApply ? t('Apply') : t('Save');
   const [tags, setTags] = useState<TagType[]>([]);
+  const [commentsEnabled, setCommentsEnabled] = useState(true);
   const categoricalSchemeRegistry = getCategoricalSchemeRegistry();
   const originalDashboardMetadata = useRef<Record<string, any>>({});
 
@@ -212,6 +218,7 @@ const PropertiesModal = ({
       setOwners(owners);
       setRoles(roles);
       setCurrentColorScheme(metadata.color_scheme);
+      setCommentsEnabled(metadata.comments_enabled !== false);
 
       const metaDataCopy = omit(metadata, [
         'positions',
@@ -346,6 +353,8 @@ const PropertiesModal = ({
       addDangerToast(t('JSON metadata is invalid!'));
       return;
     }
+
+    metadata.comments_enabled = commentsEnabled;
 
     const colorNamespace = getColorNamespace(metadata?.color_namespace);
     // color scheme in json metadata has precedence over selection
@@ -745,6 +754,24 @@ const PropertiesModal = ({
             </Col>
           </Row>
         ) : null}
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <h3 css={{ marginTop: '1em' }}>{t('Comments')}</h3>
+            <StyledFormItem>
+              <Checkbox
+                checked={commentsEnabled}
+                onChange={e => setCommentsEnabled(e.target.checked)}
+              >
+                {t('Enable comments for this dashboard')}
+              </Checkbox>
+            </StyledFormItem>
+            <p className="help-block">
+              {t(
+                'When disabled, the comments panel and comment indicators will be hidden for all users on this dashboard.',
+              )}
+            </p>
+          </Col>
+        </Row>
         <Row>
           <Col xs={24} md={24}>
             <Typography.Title level={4} style={{ marginTop: '1em' }}>

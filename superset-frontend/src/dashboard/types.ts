@@ -144,8 +144,10 @@ export type DashboardInfo = {
     shared_label_colors: string[];
     map_label_colors: JsonObject;
     cross_filters_enabled: boolean;
+    comments_enabled: boolean;
   };
   crossFiltersEnabled: boolean;
+  commentsEnabled: boolean;
   filterBarOrientation: FilterBarOrientation;
   created_on_delta_humanized: string;
   changed_on_delta_humanized: string;

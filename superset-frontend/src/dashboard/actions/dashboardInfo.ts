@@ -195,6 +195,46 @@ export function saveFilterBarOrientation(orientation: FilterBarOrientation) {
   };
 }
 
+export const SET_COMMENTS_ENABLED = 'SET_COMMENTS_ENABLED';
+
+export function setCommentsEnabled(commentsEnabled: boolean) {
+  return { type: SET_COMMENTS_ENABLED, commentsEnabled };
+}
+
+export function saveCommentsSetting(commentsEnabled: boolean) {
+  return async (dispatch: Dispatch, getState: () => RootState) => {
+    const { id, metadata } = getState().dashboardInfo;
+    const updateDashboard = makeApi<
+      Partial<DashboardInfo>,
+      { result: Partial<DashboardInfo>; last_modified_time: number }
+    >({
+      method: 'PUT',
+      endpoint: `/api/v1/dashboard/${id}`,
+    });
+    try {
+      const response = await updateDashboard({
+        json_metadata: JSON.stringify({
+          ...metadata,
+          comments_enabled: commentsEnabled,
+        }),
+      });
+      const updatedDashboard = response.result;
+      const lastModifiedTime = response.last_modified_time;
+      if (updatedDashboard.json_metadata) {
+        const metadata = JSON.parse(updatedDashboard.json_metadata);
+        dispatch(setCommentsEnabled(metadata.comments_enabled !== false));
+      }
+      if (lastModifiedTime) {
+        dispatch(onSave(lastModifiedTime));
+      }
+    } catch (errorObject) {
+      const errorText = await getErrorText(errorObject, 'dashboard');
+      dispatch(addDangerToast(errorText));
+      throw errorObject;
+    }
+  };
+}
+
 export function saveCrossFiltersSetting(crossFiltersEnabled: boolean) {
   return async (dispatch: Dispatch, getState: () => RootState) => {
     const { id, metadata } = getState().dashboardInfo;

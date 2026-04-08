@@ -56,6 +56,7 @@ import {
 } from './events';
 import { Pin } from './Pin';
 import { useCommentMode } from './CommentModeContext';
+import { usePinCount } from './CommentsPinCountContext';
 
 const { Option: MentionOption } = Mentions;
 
@@ -135,6 +136,7 @@ const PinOverlay: FC<PinOverlayProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [mentionUsers, setMentionUsers] = useState<CommentUser[]>([]);
   const { activeScope, exitCommentMode } = useCommentMode();
+  const contextPinCount = usePinCount(sliceId);
 
   const isCommentModeActive = Boolean(
     activeScope &&
@@ -183,9 +185,13 @@ const PinOverlay: FC<PinOverlayProps> = ({
     }
   }, [scopeType, dashboardId, sliceId]);
 
+  const shouldFetch = isCommentModeActive || contextPinCount > 0;
+
   useEffect(() => {
-    fetchPins();
-  }, [fetchPins]);
+    if (shouldFetch) {
+      fetchPins();
+    }
+  }, [fetchPins, shouldFetch]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {

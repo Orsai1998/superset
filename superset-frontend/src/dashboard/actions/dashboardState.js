@@ -304,6 +304,7 @@ export function saveDashboardRequest(data, id, saveType) {
 
     const hasId = item => item.id !== undefined;
     const metadataCrossFiltersEnabled = data.metadata?.cross_filters_enabled;
+    const metadataCommentsEnabled = data.metadata?.comments_enabled;
     const colorScheme = data.metadata?.color_scheme;
     const customLabelsColor = data.metadata?.label_colors || {};
     const sharedLabelsColor = enforceSharedLabelsColorsArray(
@@ -342,6 +343,7 @@ export function saveDashboardRequest(data, id, saveType) {
         cross_filters_enabled: isCrossFiltersEnabled(
           metadataCrossFiltersEnabled,
         ),
+        comments_enabled: metadataCommentsEnabled !== false,
       },
     };
 

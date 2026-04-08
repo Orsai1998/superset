@@ -190,6 +190,9 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
     const isCrossFiltersEnabled = useSelector<RootState, boolean>(
       ({ dashboardInfo }) => dashboardInfo.crossFiltersEnabled,
     );
+    const commentsEnabled = useSelector<RootState, boolean>(
+      ({ dashboardInfo }) => dashboardInfo.commentsEnabled,
+    );
 
     const firstQueryResponse = useSelector<RootState, QueryData | undefined>(
       state => state.charts[slice.slice_id].queriesResponse?.[0],
@@ -205,6 +208,7 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
       findPermission('can_read', 'Comment', state.user?.roles) &&
       findPermission('can_comment', 'Comment', state.user?.roles),
     );
+    const canCommentOnSlice = canComment && commentsEnabled;
 
     useEffect(() => {
       const headerElement = headerRef.current;
@@ -305,7 +309,7 @@ const SliceHeader = forwardRef<HTMLDivElement, SliceHeaderProps>(
                   <CrossFilterIcon iconSize="m" />
                 </Tooltip>
               )}
-              {canComment && (
+              {canCommentOnSlice && (
                 <CommentToggleWithBadge
                   sliceId={slice.slice_id}
                   dashboardId={dashboardId}

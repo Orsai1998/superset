@@ -243,6 +243,7 @@ export const hydrateDashboard =
     const crossFiltersEnabled = isCrossFiltersEnabled(
       metadata.cross_filters_enabled,
     );
+    const commentsEnabled = metadata.comments_enabled !== false;
 
     return dispatch({
       type: HYDRATE_DASHBOARD,
@@ -280,6 +281,7 @@ export const hydrateDashboard =
           filterBarOrientation:
             metadata.filter_bar_orientation || FilterBarOrientation.Vertical,
           crossFiltersEnabled,
+          commentsEnabled,
         },
         dataMask,
         dashboardFilters,
