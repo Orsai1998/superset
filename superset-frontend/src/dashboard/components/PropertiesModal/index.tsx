@@ -150,7 +150,8 @@ const PropertiesModal = ({
     const { error, statusText, message } = await getClientErrorObject(response);
     let errorText = error || statusText || t('An error has occurred');
     if (typeof message === 'object' && 'json_metadata' in message) {
-      errorText = (message as { json_metadata: string }).json_metadata;
+      const meta = (message as Record<string, unknown>).json_metadata;
+      errorText = typeof meta === 'string' ? meta : JSON.stringify(meta);
     } else if (typeof message === 'string') {
       errorText = message;
 

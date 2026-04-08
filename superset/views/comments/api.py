@@ -97,6 +97,7 @@ class CommentRestApi(BaseSupersetApi):
         "reopen": "comment",
         "mentions": "read",
         "users": "read",
+        "pin_counts": "read",
     }
     openapi_spec_tag = "Comments"
 
@@ -682,6 +683,51 @@ class CommentRestApi(BaseSupersetApi):
             db.session.commit()
 
         return self.response(200, result=self._serialize_comment(comment))
+
+    @expose("/pin-counts", methods=("GET",))
+    @protect()
+    @safe
+    @statsd_metrics
+    @permission_name("read")
+    @event_logger.log_this_with_context(
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.pin_counts",
+        log_to_statsd=False,
+    )
+    def pin_counts(self) -> Response:
+        """Return pin counts grouped by slice_id for all scopes within a dashboard."""
+        dashboard_id = request.args.get("dashboard_id", type=int)
+        if not dashboard_id:
+            return self.response_400(message="dashboard_id is required")
+
+        try:
+            DashboardDAO.get_by_id_or_slug(str(dashboard_id))
+        except DashboardNotFoundError:
+            return self.response_404(message="Dashboard not found")
+        except DashboardAccessDeniedError:
+            return self.response_403()
+
+        rows = (
+            db.session.query(
+                Comment.slice_id,
+                func.count(Comment.id),
+            )
+            .filter(
+                Comment.dashboard_id == dashboard_id,
+                Comment.parent_id.is_(None),
+                Comment.x_pct.isnot(None),
+                Comment.y_pct.isnot(None),
+                Comment.deleted_on.is_(None),
+            )
+            .group_by(Comment.slice_id)
+            .all()
+        )
+
+        counts = {}
+        for slice_id, count in rows:
+            key = str(slice_id) if slice_id is not None else "null"
+            counts[key] = count
+
+        return self.response(200, counts=counts)
 
     @expose("/mentions/", methods=("GET",))
     @protect()
