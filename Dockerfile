@@ -1,22 +1,5 @@
-#
-# Licensed to the Apache Software Foundation (ASF) under one or more
-# contributor license agreements.  See the NOTICE file distributed with
-# this work for additional information regarding copyright ownership.
-# The ASF licenses this file to You under the Apache License, Version 2.0
-# (the "License"); you may not use this file except in compliance with
-# the License.  You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-
 ######################################################################
-# Node stage to deal with static asset construction
+# Stage 1: Frontend (Node)
 ######################################################################
 ARG PY_VER=3.11.13-slim-bookworm
 
@@ -70,7 +53,6 @@ RUN --mount=type=bind,source=./superset-frontend/package.json,target=./package.j
         echo "Skipping 'npm ci' in dev mode"; \
     fi
 
-# Runs the webpack build process
 COPY superset-frontend /app/superset-frontend
 
 ######################################################################
@@ -212,8 +194,12 @@ HEALTHCHECK CMD /app/docker/docker-healthcheck.sh
 CMD ["/app/docker/entrypoints/run-server.sh"]
 EXPOSE ${SUPERSET_PORT}
 
+# Очистка переменных прокси
+ENV http_proxy=""
+ENV https_proxy=""
+
 ######################################################################
-# Final lean image...
+# Stage 2: Lean Python Superset base
 ######################################################################
 FROM python-common AS lean
 
@@ -229,7 +215,7 @@ RUN python -m compileall /app/superset
 USER superset
 
 ######################################################################
-# Dev image...
+# Stage 4: Dev
 ######################################################################
 FROM python-common AS dev
 

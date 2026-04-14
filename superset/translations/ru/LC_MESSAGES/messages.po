@@ -382,6 +382,21 @@ msgstr "(нет описания, нажмите для просмотра тр�
 msgid "), and they become available in your SQL (example:"
 msgstr "), и они станут доступны в ваших SQL-запросах (пример:"
 
+#, fuzzy, python-format
+msgid ""
+"*%(name)s*\n"
+"\n"
+"    %(description)s\n"
+"\n"
+"    Error: %(text)s\n"
+"    "
+msgstr ""
+"*%(name)s*\n"
+"\n"
+"%(description)s\n"
+"\n"
+"Ошибка: %(text)s\n"
+
 #, python-format
 msgid ""
 "*%(name)s*\n"
@@ -874,6 +889,14 @@ msgstr "Добавить BCC получателей"
 
 msgid "Add CC Recipients"
 msgstr "Добавить CC получателей"
+
+#, fuzzy
+msgid "Add BCC Recipients"
+msgstr "получатели"
+
+#, fuzzy
+msgid "Add CC Recipients"
+msgstr "получатели"
 
 msgid "Add CSS template"
 msgstr "Добавить шаблоны CSS"
@@ -12952,6 +12975,11 @@ msgid ""
 "This page is intended to be embedded in an iframe, but it looks like that is not "
 "the case."
 msgstr "Ошибка: страница должна отображаться внутри iframe."
+
+msgid ""
+"This page is intended to be embedded in an iframe, but it looks like that"
+" is not the case."
+msgstr ""
 
 msgid ""
 "This section allows you to configure how to use the slice\n"

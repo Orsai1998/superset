@@ -243,6 +243,11 @@ const buildQuery: BuildQuery<TableChartFormData> = (
       sortByFromOwnState = [[sortByItem?.key, !sortByItem?.desc]];
     }
 
+    if (!temporalColumn) {
+      // This query is not using temporal column, so it doesn't need time grain
+      extras.time_grain_sqla = undefined;
+    }
+
     let queryObject = {
       ...baseQueryObject,
       columns,

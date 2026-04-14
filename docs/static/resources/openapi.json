@@ -635,6 +635,29 @@
         },
         "type": "object"
       },
+      "AppleHealthResponseSchema": {
+        "properties": {
+          "cache_message": {
+            "description": "Human readable status message for the cache connection",
+            "type": "string"
+          },
+          "cache_status": {
+            "description": "The status of the cache",
+            "enum": ["NA", "HEALTHY", "ERROR"],
+            "type": "string"
+          },
+          "metastore_message": {
+            "description": "Human readable status message for the metastore connection",
+            "type": "string"
+          },
+          "metastore_status": {
+            "description": "The status of the metastore",
+            "enum": ["NA", "HEALTHY", "ERROR"],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "AvailableDomainsSchema": {
         "properties": {
           "domains": {
@@ -644,6 +667,123 @@
             "type": "array"
           }
         },
+        "type": "object"
+      },
+      "CSVMetadataUploadFilePostSchema": {
+        "properties": {
+          "delimiter": {
+            "description": "The delimiter of the CSV file",
+            "type": "string"
+          },
+          "file": {
+            "description": "The file to upload",
+            "format": "binary",
+            "type": "string"
+          },
+          "header_row": {
+            "description": "Row containing the headers to use as column names(0 is first line of data). Leave empty if there is no header row.",
+            "type": "integer"
+          }
+        },
+        "required": ["file"],
+        "type": "object"
+      },
+      "CSVUploadPostSchema": {
+        "properties": {
+          "already_exists": {
+            "default": "fail",
+            "description": "What to do if the table already exists accepts: fail, replace, append",
+            "enum": ["fail", "replace", "append"],
+            "type": "string"
+          },
+          "column_data_types": {
+            "description": "A dictionary with column names and their data types if you need to change the defaults. Example: {'user_id':'int'}. Check Python Pandas library for supported data types",
+            "type": "string"
+          },
+          "column_dates": {
+            "description": "A list of column names that should be parsed as dates. Example: date,timestamp",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "columns_read": {
+            "description": "A List of the column names that should be read",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataframe_index": {
+            "description": "Write dataframe index as a column.",
+            "type": "boolean"
+          },
+          "day_first": {
+            "description": "DD/MM format dates, international and European format",
+            "type": "boolean"
+          },
+          "decimal_character": {
+            "description": "Character to recognize as decimal point. Default is '.'",
+            "type": "string"
+          },
+          "delimiter": {
+            "description": "The delimiter of the CSV file",
+            "type": "string"
+          },
+          "file": {
+            "description": "The CSV file to upload",
+            "format": "text/csv",
+            "type": "string"
+          },
+          "header_row": {
+            "description": "Row containing the headers to use as column names(0 is first line of data). Leave empty if there is no header row.",
+            "type": "integer"
+          },
+          "index_column": {
+            "description": "Column to use as the row labels of the dataframe. Leave empty if no index column",
+            "type": "string"
+          },
+          "index_label": {
+            "description": "Index label for index column.",
+            "type": "string"
+          },
+          "null_values": {
+            "description": "A list of strings that should be treated as null. Examples: '' for empty strings, 'None', 'N/A',Warning: Hive database supports only a single value",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rows_to_read": {
+            "description": "Number of rows to read from the file. If None, reads all rows.",
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "schema": {
+            "description": "The schema to upload the data file to.",
+            "type": "string"
+          },
+          "skip_blank_lines": {
+            "description": "Skip blank lines in the CSV file.",
+            "type": "boolean"
+          },
+          "skip_initial_space": {
+            "description": "Skip spaces after delimiter.",
+            "type": "boolean"
+          },
+          "skip_rows": {
+            "description": "Number of rows to skip at start of file.",
+            "type": "integer"
+          },
+          "table_name": {
+            "description": "The name of the table to be created/appended",
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": ["file", "table_name"],
         "type": "object"
       },
       "CacheInvalidationRequestSchema": {
@@ -1749,7 +1889,7 @@
             "type": "boolean"
           },
           "owners": {
-            "$ref": "#/components/schemas/ChartDataRestApi.get.User"
+            "$ref": "#/components/schemas/ChartDataRestApi.get.AppleUser"
           },
           "params": {
             "nullable": true,
@@ -1779,6 +1919,23 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ChartDataRestApi.get.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "ChartDataRestApi.get.Dashboard": {
@@ -1920,7 +2077,7 @@
             "type": "string"
           },
           "last_saved_by": {
-            "$ref": "#/components/schemas/ChartDataRestApi.get_list.User2"
+            "$ref": "#/components/schemas/ChartDataRestApi.get_list.AppleUser"
           },
           "owners": {
             "$ref": "#/components/schemas/ChartDataRestApi.get_list.User3"
@@ -1960,6 +2117,40 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ChartDataRestApi.get_list.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
+        "type": "object"
+      },
+      "ChartDataRestApi.get_list.AppleUser1": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "ChartDataRestApi.get_list.Dashboard": {
@@ -2574,7 +2765,7 @@
             "type": "boolean"
           },
           "owners": {
-            "$ref": "#/components/schemas/ChartRestApi.get.User"
+            "$ref": "#/components/schemas/ChartRestApi.get.AppleUser"
           },
           "params": {
             "nullable": true,
@@ -2604,6 +2795,23 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ChartRestApi.get.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "ChartRestApi.get.Dashboard": {
@@ -2745,7 +2953,7 @@
             "type": "string"
           },
           "last_saved_by": {
-            "$ref": "#/components/schemas/ChartRestApi.get_list.User2"
+            "$ref": "#/components/schemas/ChartRestApi.get_list.AppleUser"
           },
           "owners": {
             "$ref": "#/components/schemas/ChartRestApi.get_list.User3"
@@ -2785,6 +2993,40 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "ChartRestApi.get_list.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
+        "type": "object"
+      },
+      "ChartRestApi.get_list.AppleUser1": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "ChartRestApi.get_list.Dashboard": {
@@ -3126,6 +3368,59 @@
         },
         "type": "object"
       },
+      "ColumnarMetadataUploadFilePostSchema": {
+        "properties": {
+          "file": {
+            "description": "The file to upload",
+            "format": "binary",
+            "type": "string"
+          }
+        },
+        "required": ["file"],
+        "type": "object"
+      },
+      "ColumnarUploadPostSchema": {
+        "properties": {
+          "already_exists": {
+            "default": "fail",
+            "description": "What to do if the table already exists accepts: fail, replace, append",
+            "enum": ["fail", "replace", "append"],
+            "type": "string"
+          },
+          "columns_read": {
+            "description": "A List of the column names that should be read",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataframe_index": {
+            "description": "Write dataframe index as a column.",
+            "type": "boolean"
+          },
+          "file": {
+            "description": "The Columnar file to upload",
+            "format": "binary",
+            "type": "string"
+          },
+          "index_label": {
+            "description": "Index label for index column.",
+            "type": "string"
+          },
+          "schema": {
+            "description": "The schema to upload the data file to.",
+            "type": "string"
+          },
+          "table_name": {
+            "description": "The name of the table to be created/appended",
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": ["file", "table_name"],
+        "type": "object"
+      },
       "CssTemplateRestApi.get": {
         "properties": {
           "changed_by": {
@@ -3190,6 +3485,23 @@
           "first_name",
           "last_name"
         ],
+        "type": "object"
+      },
+      "CssTemplateRestApi.get.User1": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "CssTemplateRestApi.get_list": {
@@ -3694,6 +4006,23 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "DashboardRestApi.get_list.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "DashboardRestApi.get_list.Role": {
@@ -4386,6 +4715,20 @@
           "first_name",
           "last_name"
         ],
+        "type": "object"
+      },
+      "DatabaseRestApi.get_list.User1": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "DatabaseRestApi.post": {
@@ -5326,7 +5669,7 @@
             "type": "string"
           },
           "changed_by": {
-            "$ref": "#/components/schemas/DatasetRestApi.get.User2"
+            "$ref": "#/components/schemas/DatasetRestApi.get.User1"
           },
           "changed_on": {
             "format": "date-time",
@@ -5465,6 +5808,23 @@
           "metrics",
           "table_name"
         ],
+        "type": "object"
+      },
+      "DatasetRestApi.get.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "DatasetRestApi.get.Database": {
@@ -5758,6 +6118,23 @@
           "database",
           "table_name"
         ],
+        "type": "object"
+      },
+      "DatasetRestApi.get_list.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "DatasetRestApi.get_list.Database": {
@@ -6166,6 +6543,103 @@
           "database_id",
           "sql"
         ],
+        "type": "object"
+      },
+      "ExcelMetadataUploadFilePostSchema": {
+        "properties": {
+          "file": {
+            "description": "The file to upload",
+            "format": "binary",
+            "type": "string"
+          },
+          "header_row": {
+            "description": "Row containing the headers to use as column names(0 is first line of data). Leave empty if there is no header row.",
+            "type": "integer"
+          }
+        },
+        "required": ["file"],
+        "type": "object"
+      },
+      "ExcelUploadPostSchema": {
+        "properties": {
+          "already_exists": {
+            "default": "fail",
+            "description": "What to do if the table already exists accepts: fail, replace, append",
+            "enum": ["fail", "replace", "append"],
+            "type": "string"
+          },
+          "column_dates": {
+            "description": "A list of column names that should be parsed as dates. Example: date,timestamp",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "columns_read": {
+            "description": "A List of the column names that should be read",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "dataframe_index": {
+            "description": "Write dataframe index as a column.",
+            "type": "boolean"
+          },
+          "decimal_character": {
+            "description": "Character to recognize as decimal point. Default is '.'",
+            "type": "string"
+          },
+          "file": {
+            "description": "The Excel file to upload",
+            "format": "binary",
+            "type": "string"
+          },
+          "header_row": {
+            "description": "Row containing the headers to use as column names(0 is first line of data). Leave empty if there is no header row.",
+            "type": "integer"
+          },
+          "index_column": {
+            "description": "Column to use as the row labels of the dataframe. Leave empty if no index column",
+            "type": "string"
+          },
+          "index_label": {
+            "description": "Index label for index column.",
+            "type": "string"
+          },
+          "null_values": {
+            "description": "A list of strings that should be treated as null. Examples: '' for empty strings, 'None', 'N/A',Warning: Hive database supports only a single value",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "rows_to_read": {
+            "description": "Number of rows to read from the file. If None, reads all rows.",
+            "minimum": 1,
+            "nullable": true,
+            "type": "integer"
+          },
+          "schema": {
+            "description": "The schema to upload the data file to.",
+            "type": "string"
+          },
+          "sheet_name": {
+            "description": "Strings used for sheet names (default is the first sheet).",
+            "type": "string"
+          },
+          "skip_rows": {
+            "description": "Number of rows to skip at start of file.",
+            "type": "integer"
+          },
+          "table_name": {
+            "description": "The name of the table to be created/appended",
+            "maxLength": 10000,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": ["file", "table_name"],
         "type": "object"
       },
       "ExecutePayloadSchema": {
@@ -6585,6 +7059,524 @@
         },
         "type": "object"
       },
+      "IASLoginTokenRequestSchema": {
+        "properties": {
+          "access_token": {
+            "description": "IAS Access token. Can be requested by adding `token` to the `responseTypes`.",
+            "nullable": true,
+            "type": "string"
+          },
+          "client_id": {
+            "description": "IAS client id. Only needed if `refresh_token` is provided.",
+            "nullable": true,
+            "type": "string"
+          },
+          "client_secret": {
+            "description": "IAS client secret. Only needed if `refresh_token` and `client_id` is provided.",
+            "nullable": true,
+            "type": "string"
+          },
+          "id_token": {
+            "description": "IAS ID token. Can be requested by adding `id_token` to the `responseTypes`. The following scopes should be added:`iam:ds:groups`, `corpds:ds:username`, `corpds:ds:firstName`, `corpds:ds:lastName`, `corpds:ds:email`, `corpds:ds:uidNumber`, `iam:ds:explicitgroups`.",
+            "type": "string"
+          },
+          "refresh_token": {
+            "description": "IAS refresh token. This can be requested by adding `offline` to `scopes`. To be able to refresh the token, the IAS `client_id` and `client_secret` need to be added, as the same client needs to be used for refreshing as logging in.",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": ["id_token"],
+        "type": "object"
+      },
+      "IASLoginTokenResponseSchema": {
+        "properties": {
+          "access_token": {
+            "description": "Access that can be used access the Superset API",
+            "type": "string"
+          },
+          "refresh_token": {
+            "description": "Refresh token that can be used to refresh the `access_token`",
+            "type": "string"
+          }
+        },
+        "required": ["access_token"],
+        "type": "object"
+      },
+      "IASProfileResponse": {
+        "properties": {
+          "client_id": {
+            "description": "The client id",
+            "type": "string"
+          },
+          "profile": {
+            "description": "The IAS profile",
+            "type": "string"
+          },
+          "scope": {
+            "description": "The scope of the client",
+            "type": "string"
+          }
+        },
+        "required": ["client_id", "profile"],
+        "type": "object"
+      },
+      "IASProfilesResponseSchema": {
+        "properties": {
+          "result": {
+            "description": "A list of all available IAS profiles",
+            "items": {
+              "$ref": "#/components/schemas/IASProfileResponse"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "IASTokenResponse": {
+        "properties": {
+          "access_token": {
+            "description": "The access token",
+            "type": "string"
+          },
+          "has_client_credentials": {
+            "description": "Are the original client credentials available or not",
+            "type": "boolean"
+          },
+          "has_refresh_token": {
+            "description": "Is there a refresh token available or not",
+            "type": "boolean"
+          },
+          "ias_profile": {
+            "description": "The IAS profile",
+            "type": "string"
+          },
+          "id_token": {
+            "description": "The id token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "has_client_credentials",
+          "has_refresh_token",
+          "ias_profile",
+          "id_token"
+        ],
+        "type": "object"
+      },
+      "IASTokensResponseSchema": {
+        "properties": {
+          "result": {
+            "description": "A list of all requested tokens",
+            "items": {
+              "$ref": "#/components/schemas/IASTokenResponse"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ImportV1Database": {
+        "properties": {
+          "allow_csv_upload": {
+            "type": "boolean"
+          },
+          "allow_ctas": {
+            "type": "boolean"
+          },
+          "allow_cvas": {
+            "type": "boolean"
+          },
+          "allow_dml": {
+            "type": "boolean"
+          },
+          "allow_run_async": {
+            "type": "boolean"
+          },
+          "cache_timeout": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "database_name": {
+            "type": "string"
+          },
+          "expose_in_sqllab": {
+            "type": "boolean"
+          },
+          "external_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "extra": {
+            "$ref": "#/components/schemas/ImportV1DatabaseExtra"
+          },
+          "impersonate_user": {
+            "type": "boolean"
+          },
+          "is_managed_externally": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "password": {
+            "nullable": true,
+            "type": "string"
+          },
+          "sqlalchemy_uri": {
+            "type": "string"
+          },
+          "ssh_tunnel": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/DatabaseSSHTunnel"
+              }
+            ],
+            "nullable": true
+          },
+          "uuid": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": ["database_name", "sqlalchemy_uri", "uuid", "version"],
+        "type": "object"
+      },
+      "ImportV1DatabaseExtra": {
+        "properties": {
+          "allow_multi_catalog": {
+            "type": "boolean"
+          },
+          "allows_virtual_table_explore": {
+            "type": "boolean"
+          },
+          "cancel_query_on_windows_unload": {
+            "type": "boolean"
+          },
+          "cost_estimate_enabled": {
+            "type": "boolean"
+          },
+          "disable_data_preview": {
+            "type": "boolean"
+          },
+          "disable_drill_to_detail": {
+            "type": "boolean"
+          },
+          "engine_params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "metadata_cache_timeout": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "metadata_params": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "schemas_allowed_for_csv_upload": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LakehouseCatalog": {
+        "properties": {
+          "database_id": {
+            "description": "The numerical id of the database",
+            "type": "integer"
+          },
+          "database_name": {
+            "description": "The name of the database",
+            "type": "string"
+          },
+          "id": {
+            "description": "The numerical id of the catalog",
+            "type": "integer"
+          },
+          "name": {
+            "description": "The name of the catalog",
+            "type": "string"
+          },
+          "sqlalchemy_uri": {
+            "description": "The SQLAlchemy URI",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LakehouseConnectRequestSchema": {
+        "properties": {
+          "catalogs": {
+            "description": "A list of catalogs to connect to. If empty or undefined, connect all available catalogs.",
+            "example": ["my_catalog"],
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "database_names": {
+            "description": "Custom catalog-database name mappings. If undefined, the default naming convention will be used",
+            "example": {
+              "my_catalog": "my_database"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "dry_run": {
+            "description": "Should the task be executed in dry run mode. Useful for testing.",
+            "example": false,
+            "type": "boolean"
+          },
+          "engine_type": {
+            "description": "The type of the engine (only trino is currently supported)",
+            "enum": ["trino"],
+            "example": "trino",
+            "type": "string"
+          },
+          "engine_url": {
+            "description": "The URL to the engine",
+            "example": "https://myengine.corp.apple.com",
+            "type": "string"
+          },
+          "environment": {
+            "description": "Prod or Int",
+            "enum": ["int", "prod"],
+            "example": "int",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the Lakehouse (subject to change over time). If left undefined, use lakehouse id",
+            "example": "My Lakehouse",
+            "nullable": true,
+            "type": "string"
+          },
+          "superset_url": {
+            "description": "The URL of the Superset instance connecting to",
+            "example": "http://localhost:8088",
+            "type": "string"
+          }
+        },
+        "required": [
+          "engine_type",
+          "engine_url",
+          "environment",
+          "superset_url"
+        ],
+        "type": "object"
+      },
+      "LakehouseConnectResponseSchema": {
+        "properties": {
+          "task_id": {
+            "description": "The id of the connection task",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LakehouseConnectResultResponseSchema": {
+        "properties": {
+          "existing_catalogs": {
+            "description": "A list of connected catalogs before the connect operation",
+            "items": {
+              "description": "Catalogs",
+              "items": {
+                "$ref": "#/components/schemas/LakehouseCatalog"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "lakehouse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LakehouseGetResponseSchema"
+              }
+            ],
+            "description": "The connected Lakehouse",
+            "nullable": true
+          },
+          "message": {
+            "description": "A message to provide additional context on what has happened",
+            "type": "string"
+          },
+          "new_catalogs": {
+            "description": "A list of newly connected catalogs after the connect operation",
+            "items": {
+              "description": "Catalogs",
+              "items": {
+                "$ref": "#/components/schemas/LakehouseCatalog"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "The status of the task",
+            "enum": [
+              "scheduled",
+              "running",
+              "completed",
+              "failed",
+              "reconnect_failed",
+              "cancelled"
+            ],
+            "type": "string"
+          }
+        },
+        "required": ["lakehouse"],
+        "type": "object"
+      },
+      "LakehouseConnectStatusResponseSchema": {
+        "properties": {
+          "message": {
+            "description": "A message to provide additional context on what has happened",
+            "type": "string"
+          },
+          "status": {
+            "description": "The status of the task",
+            "enum": [
+              "scheduled",
+              "running",
+              "completed",
+              "failed",
+              "reconnect_failed",
+              "cancelled"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LakehouseDatasetListResponseSchema": {
+        "properties": {
+          "name": {
+            "description": "The name of the dataset",
+            "type": "string"
+          },
+          "schema": {
+            "description": "The schema",
+            "nullable": true,
+            "type": "string"
+          },
+          "sql": {
+            "description": "The virtual dataset query",
+            "type": "string"
+          }
+        },
+        "required": ["name", "sql"],
+        "type": "object"
+      },
+      "LakehouseDatasetRequestSchema": {
+        "properties": {
+          "catalog": {
+            "description": "The catalog. If left empty, uses an arbitrary connected catalog.",
+            "nullable": true,
+            "type": "string"
+          },
+          "lakehouse_id": {
+            "description": "Deprecated, not used for anything",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the dataset to be created",
+            "type": "string"
+          },
+          "overwrite": {
+            "default": false,
+            "description": "Should the virtual dataset be overwritten if it already exists",
+            "type": "boolean"
+          },
+          "schema": {
+            "description": "The schema",
+            "nullable": true,
+            "type": "string"
+          },
+          "sql": {
+            "description": "The virtual dataset query",
+            "type": "string"
+          }
+        },
+        "required": ["name", "sql"],
+        "type": "object"
+      },
+      "LakehouseDatasetResponseSchema": {
+        "properties": {
+          "url": {
+            "description": "The url for exploring the virtual dataset",
+            "type": "string"
+          }
+        },
+        "required": ["url"],
+        "type": "object"
+      },
+      "LakehouseDisconnectResponseSchema": {
+        "properties": {
+          "lakehouse": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/LakehouseGetResponseSchema"
+              }
+            ],
+            "description": "A list of disconnected lakehouses"
+          }
+        },
+        "type": "object"
+      },
+      "LakehouseGetListResponseSchema": {
+        "properties": {
+          "lakehouses": {
+            "description": "A list of connected lakehouses",
+            "items": {
+              "$ref": "#/components/schemas/LakehouseGetResponseSchema"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LakehouseGetResponseSchema": {
+        "properties": {
+          "catalogs": {
+            "description": "A list of connected catalogs",
+            "items": {
+              "description": "Catalogs",
+              "items": {
+                "$ref": "#/components/schemas/LakehouseCatalog"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          },
+          "engine_url": {
+            "description": "The URL uf the engine",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique id of the Lakehouse",
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "superset_url": {
+            "description": "The URL uf the Superset instance",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "LogRestApi.get": {
         "properties": {
           "action": {
@@ -6619,7 +7611,7 @@
             "type": "integer"
           },
           "user": {
-            "$ref": "#/components/schemas/LogRestApi.get.User"
+            "$ref": "#/components/schemas/LogRestApi.get.AppleUser"
           },
           "user_id": {
             "nullable": true,
@@ -6628,7 +7620,7 @@
         },
         "type": "object"
       },
-      "LogRestApi.get.User": {
+      "LogRestApi.get.AppleUser": {
         "properties": {
           "username": {
             "maxLength": 64,
@@ -6674,7 +7666,7 @@
             "type": "integer"
           },
           "user": {
-            "$ref": "#/components/schemas/LogRestApi.get_list.User"
+            "$ref": "#/components/schemas/LogRestApi.get_list.AppleUser"
           },
           "user_id": {
             "nullable": true,
@@ -6683,7 +7675,7 @@
         },
         "type": "object"
       },
-      "LogRestApi.get_list.User": {
+      "LogRestApi.get_list.AppleUser": {
         "properties": {
           "username": {
             "maxLength": 64,
@@ -7725,7 +8717,7 @@
             "type": "string"
           },
           "owners": {
-            "$ref": "#/components/schemas/ReportScheduleRestApi.get.User"
+            "$ref": "#/components/schemas/ReportScheduleRestApi.get.AppleUser"
           },
           "recipients": {
             "$ref": "#/components/schemas/ReportScheduleRestApi.get.ReportRecipients"
@@ -7767,6 +8759,23 @@
           "recipients",
           "type"
         ],
+        "type": "object"
+      },
+      "ReportScheduleRestApi.get.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "ReportScheduleRestApi.get.Dashboard": {
@@ -7944,6 +8953,23 @@
           "recipients",
           "type"
         ],
+        "type": "object"
+      },
+      "ReportScheduleRestApi.get_list.AppleUser": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "ReportScheduleRestApi.get_list.ReportRecipients": {
@@ -9777,6 +10803,23 @@
         ],
         "type": "object"
       },
+      "SavedQueryRestApi.get.User1": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
+        "type": "object"
+      },
       "SavedQueryRestApi.get_list": {
         "properties": {
           "catalog": {
@@ -9924,6 +10967,23 @@
           "first_name",
           "last_name"
         ],
+        "type": "object"
+      },
+      "SavedQueryRestApi.get_list.User1": {
+        "properties": {
+          "first_name": {
+            "maxLength": 64,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "last_name": {
+            "maxLength": 64,
+            "type": "string"
+          }
+        },
+        "required": ["first_name", "last_name"],
         "type": "object"
       },
       "SavedQueryRestApi.post": {
@@ -10775,8 +11835,11 @@
       },
       "Tag": {
         "properties": {
-          "id": {
-            "type": "integer"
+          "all_tabs": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
           },
           "name": {
             "type": "string"
@@ -11319,6 +12382,33 @@
         ],
         "type": "object"
       },
+      "UploadFileMetadata": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UploadFileMetadataItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "UploadFileMetadataItem": {
+        "properties": {
+          "column_names": {
+            "description": "A list of columns names in the sheet",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sheet_name": {
+            "description": "The name of the sheet",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "User": {
         "properties": {
           "first_name": {
@@ -11523,6 +12613,14 @@
           "type",
           "values"
         ],
+        "type": "object"
+      },
+      "database_catalogs_query_schema": {
+        "properties": {
+          "force": {
+            "type": "boolean"
+          }
+        },
         "type": "object"
       },
       "database_catalogs_query_schema": {
@@ -12946,6 +14044,37 @@
         "tags": [
           "Annotation Layers"
         ]
+      }
+    },
+    "/api/v1/apple/health": {
+      "get": {
+        "description": "Endpoint for checking the health status of the metastore and cache",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppleHealthResponseSchema"
+                }
+              }
+            },
+            "description": "The"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "summary": "Get the health status of the metastore and cache",
+        "tags": ["Apple"]
       }
     },
     "/api/v1/assets/export/": {
@@ -16175,6 +17304,61 @@
         ]
       }
     },
+    "/api/v1/dashboard/{id_or_slug}/tabs": {
+      "get": {
+        "description": "Returns a list of a dashboard's tabs and dashboard's nested tree structure for associated tabs.",
+        "parameters": [
+          {
+            "description": "Either the id of the dashboard, or its slug",
+            "in": "path",
+            "name": "id_or_slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "result": {
+                      "items": {
+                        "$ref": "#/components/schemas/TabsPayloadSchema"
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Dashboard tabs"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get dashboard's tabs",
+        "tags": ["Dashboards"]
+      }
+    },
     "/api/v1/dashboard/{pk}": {
       "delete": {
         "parameters": [
@@ -16978,6 +18162,73 @@
         ]
       }
     },
+    "/api/v1/dashboard/{pk}/filters": {
+      "put": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DashboardNativeFiltersConfigUpdateSchema"
+              }
+            }
+          },
+          "description": "Native filters configuration",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "result": {
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Dashboard native filters updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Update native filters configuration for a dashboard.",
+        "tags": ["Dashboards"]
+      }
+    },
     "/api/v1/dashboard/{pk}/permalink": {
       "post": {
         "parameters": [
@@ -17216,6 +18467,60 @@
         "tags": [
           "Dashboards"
         ]
+      }
+    },
+    "/api/v1/dashboard/{pk}/screenshot/{digest}/": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "digest",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "image/*": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "Dashboard thumbnail image"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get a computed screenshot from cache",
+        "tags": ["Dashboards"]
       }
     },
     "/api/v1/dashboard/{pk}/thumbnail/{digest}/": {
@@ -18306,6 +19611,132 @@
         ]
       }
     },
+    "/api/v1/database/{pk}/csv_upload/": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/CSVUploadPostSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "CSV upload response"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Upload a CSV file to a database table",
+        "tags": ["Database"]
+      }
+    },
+    "/api/v1/database/{pk}/excel_upload/": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcelUploadPostSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Excel upload response"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Upload an Excel file to a database table",
+        "tags": ["Database"]
+      }
+    },
     "/api/v1/database/{pk}/function_names/": {
       "get": {
         "parameters": [
@@ -19022,6 +20453,144 @@
         "tags": [
           "Database"
         ]
+      }
+    },
+    "/api/v1/database/{pk}/table_metadata/": {
+      "get": {
+        "description": "Metadata associated with the table (columns, indexes, etc.)",
+        "parameters": [
+          {
+            "description": "The database id",
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Table name",
+            "in": "query",
+            "name": "table",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional table schema, if not passed default schema will be used",
+            "in": "query",
+            "name": "schema",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional table catalog, if not passed default catalog will be used",
+            "in": "query",
+            "name": "catalog",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableExtraMetadataResponseSchema"
+                }
+              }
+            },
+            "description": "Table metadata information"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get table metadata",
+        "tags": ["Database"]
+      }
+    },
+    "/api/v1/database/{pk}/table_metadata/extra/": {
+      "get": {
+        "description": "Extra metadata associated with the table (partitions, description, etc.)",
+        "parameters": [
+          {
+            "description": "The database id",
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Table name",
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional table schema, if not passed the schema configured in the database will be used",
+            "in": "query",
+            "name": "schema",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional table catalog, if not passed the catalog configured in the database will be used",
+            "in": "query",
+            "name": "catalog",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableExtraMetadataResponseSchema"
+                }
+              }
+            },
+            "description": "Table extra metadata information"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get table extra metadata",
+        "tags": ["Database"]
       }
     },
     "/api/v1/database/{pk}/tables/": {
@@ -21016,6 +22585,637 @@
         "tags": [
           "Explore Permanent Link"
         ]
+      }
+    },
+    "/api/v1/ias/login_token": {
+      "post": {
+        "description": "Endpoint for exchanging IAS tokens for Superset API tokens. IAS Tokens should be requested from the `acssuperset` IAS application, typically using [client credential flow](https://docs.aci.apple.com/ias/tutorials/client_credentials/index.html). At a minimum, an `id_token` needs to be provided, but by providing a `refresh_token` Superset will be able to automatically refresh the token after the initial one expires. However, to be able to refresh the token, `client_id` and `client_secret` must be provided, as the token needs to be refreshed with the same client that was used for logging in. Unless `refresh_token`, `client_id` and `client_secret` are provided, a `refresh_token` will not be returned.\\nThe following scope should be requested in the token request: `offline openid iam:ds:groups corpds:ds:username corpds:ds:firstName corpds:ds:lastName corpds:ds:email iam:ds:explicitgroups`",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IASLoginTokenRequestSchema"
+              }
+            }
+          },
+          "description": "Payload containing IAS tokens.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IASLoginTokenResponseSchema"
+                }
+              }
+            },
+            "description": "Query result"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "tags": ["IAS"]
+      }
+    },
+    "/api/v1/ias/profiles": {
+      "get": {
+        "description": "Endpoint for retrieving available IAS profiles.",
+        "parameters": [
+          {
+            "description": "The name of the IAS profile",
+            "in": "query",
+            "name": "profile",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IASProfilesResponseSchema"
+                }
+              }
+            },
+            "description": "IAS Tokens"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": ["IAS"]
+      }
+    },
+    "/api/v1/ias/tokens": {
+      "get": {
+        "description": "Endpoint for retrieving IAS tokens for the logged in user. If no token is provided, all tokens are returned.",
+        "parameters": [
+          {
+            "description": "The name of the IAS profile",
+            "in": "query",
+            "name": "profile",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IASTokensResponseSchema"
+                }
+              }
+            },
+            "description": "IAS Tokens"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": ["IAS"]
+      }
+    },
+    "/api/v1/ias/tokens/{pk}": {
+      "get": {
+        "description": "Endpoint for retrieving IAS tokens for a specific user. If no token is provided, all tokens are returned. Only Admin users are able to view other users' tokens.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pk",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The name of the IAS profile",
+            "in": "query",
+            "name": "profile",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IASTokensResponseSchema"
+                }
+              }
+            },
+            "description": "IAS Tokens"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "tags": ["IAS"]
+      }
+    },
+    "/api/v1/lakehouse": {
+      "get": {
+        "description": "Disconnect a Lakehouse.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseGetListResponseSchema"
+                }
+              }
+            },
+            "description": "Lakehouse has been deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get a list of all connected Lakehouses",
+        "tags": ["Lakehouse"]
+      }
+    },
+    "/api/v1/lakehouse/{lakehouse_id}": {
+      "delete": {
+        "description": "Disconnect a Lakehouse.",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseDisconnectResponseSchema"
+                }
+              }
+            },
+            "description": "Lakehouse has been deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Disconnect a Lakehouse and all catalogs",
+        "tags": ["Lakehouse"]
+      },
+      "get": {
+        "description": "Get information regarding a connected Lakehouse",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseGetResponseSchema"
+                }
+              }
+            },
+            "description": "Lakehouses"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get information about a specific Lakehouse",
+        "tags": ["Lakehouse"]
+      },
+      "post": {
+        "description": "Endpoint for connecting a Lakehouse and associated catalogs to the ACS Superset instance.",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LakehouseConnectRequestSchema"
+              }
+            }
+          },
+          "description": "Payload containing connection parameters.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseConnectResponseSchema"
+                }
+              }
+            },
+            "description": "The connection task has been scheduled."
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Schedule a task to connect a Lakehouse and catalogs",
+        "tags": ["Lakehouse"]
+      }
+    },
+    "/api/v1/lakehouse/{lakehouse_id}/dataset": {
+      "get": {
+        "description": "Endpoint for listing all virtual datasets on a Lakehouse",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The catalog. Leave empty for all catalogs",
+            "in": "query",
+            "name": "catalog",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The schema. Leave empty for all schemas",
+            "in": "query",
+            "name": "schema",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseDatasetListResponseSchema"
+                }
+              }
+            },
+            "description": "All virtual datasets satisfying the query params."
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get a list of virtual datasets",
+        "tags": ["Lakehouse"]
+      },
+      "post": {
+        "description": "Endpoint for creating a virtual dataset from a query",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LakehouseDatasetRequestSchema"
+              }
+            }
+          },
+          "description": "Payload containing virtual dataset parameters.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseDatasetResponseSchema"
+                }
+              }
+            },
+            "description": "The virtual dataset has been created."
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "422": {
+            "$ref": "#/components/responses/422"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Create a virtual dataset out of a query",
+        "tags": ["Lakehouse"]
+      }
+    },
+    "/api/v1/lakehouse/{lakehouse_id}/task/{task_id}/cancel": {
+      "post": {
+        "description": "Endpoint for cancelling a scheduled connection request.",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The id of the connection task",
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseConnectStatusResponseSchema"
+                }
+              }
+            },
+            "description": "The status of the task."
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Cancel a running task",
+        "tags": ["Lakehouse"]
+      }
+    },
+    "/api/v1/lakehouse/{lakehouse_id}/task/{task_id}/result": {
+      "get": {
+        "description": "Endpoint for retrieving the payload of a scheduled connection request.",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The id of the connection task",
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseConnectResultResponseSchema"
+                }
+              }
+            },
+            "description": "The status of the task."
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get the payload of a completed connection task",
+        "tags": ["Lakehouse"]
+      }
+    },
+    "/api/v1/lakehouse/{lakehouse_id}/task/{task_id}/status": {
+      "get": {
+        "description": "Endpoint for checking what the status of a scheduled connection request is.",
+        "parameters": [
+          {
+            "description": "The unique id of the lakehouse",
+            "in": "path",
+            "name": "lakehouse_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The id of the connection task",
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LakehouseConnectStatusResponseSchema"
+                }
+              }
+            },
+            "description": "The status of the task."
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Check the status of a connection task",
+        "tags": ["Lakehouse"]
       }
     },
     "/api/v1/log/": {
@@ -26740,6 +28940,42 @@
         ]
       }
     },
+    "/api/v1/sqllab/": {
+      "get": {
+        "description": "Assembles SQLLab bootstrap data (active_tab, databases, queries, tab_state_ids) in a single endpoint. The data can be assembled from the current user's id.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SQLLabBootstrapSchema"
+                }
+              }
+            },
+            "description": "Returns the initial bootstrap data for SqlLab"
+          },
+          "400": {
+            "$ref": "#/components/responses/400"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "403": {
+            "$ref": "#/components/responses/403"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        },
+        "security": [
+          {
+            "jwt": []
+          }
+        ],
+        "summary": "Get the bootstrap data for SqlLab page",
+        "tags": ["SQL Lab"]
+      }
+    },
     "/api/v1/sqllab/estimate/": {
       "post": {
         "requestBody": {
@@ -28148,6 +30384,35 @@
         "tags": [
           "User"
         ]
+      }
+    },
+    "/api/v1/user/{user_id}/avatar.png": {
+      "get": {
+        "description": "Gets the avatar URL for the user with the given ID, or returns a 401 error if the user is unauthenticated.",
+        "parameters": [
+          {
+            "description": "The ID of the user",
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "301": {
+            "description": "A redirect to the user's avatar URL"
+          },
+          "401": {
+            "$ref": "#/components/responses/401"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        },
+        "summary": "Get the user avatar",
+        "tags": ["User"]
       }
     },
     "/api/{version}/_openapi": {

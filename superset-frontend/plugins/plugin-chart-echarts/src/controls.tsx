@@ -97,12 +97,38 @@ const legendOrientationControl: ControlSetItem = {
   },
 };
 
+export const labelColorControl: ControlSetItem = {
+  name: 'labelColor',
+  config: {
+    type: 'ColorPickerControl',
+    label: t('Label Color'),
+    default: '',
+    renderTrigger: true,
+    description: t('Select color for the series/data labels'),
+  },
+};
+
+export const legendTextColorControl: ControlSetItem = {
+  name: 'legendTextColor',
+  config: {
+    type: 'ColorPickerControl',
+    label: t('Legend Text Color'),
+    default: '',
+    renderTrigger: true,
+    description: t('Customize the color of legend labels'),
+    visibility: ({ controls }: ControlPanelsContainerProps) =>
+      Boolean(controls?.show_legend?.value),
+  },
+};
+
 export const legendSection: ControlSetRow[] = [
   [<ControlSubSectionHeader>{t('Legend')}</ControlSubSectionHeader>],
   [showLegendControl],
   [legendTypeControl],
   [legendOrientationControl],
   [legendMarginControl],
+  [labelColorControl],
+  [legendTextColorControl],
 ];
 
 export const showValueControl: ControlSetItem = {

@@ -152,6 +152,10 @@ export function interceptExploreUpdate() {
   cy.intercept('PUT', `**/api/v1/chart/*`).as('chartUpdate');
 }
 
+export function interceptExploreUpdate() {
+  cy.intercept('PUT', `/api/v1/chart/*`).as('chartUpdate');
+}
+
 export function interceptPost() {
   cy.intercept('POST', `**/api/v1/dashboard/`).as('post');
 }

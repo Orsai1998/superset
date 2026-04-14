@@ -8086,10 +8086,6 @@ msgstr ""
 "Os proprietários são uma lista de usuários que podem alterar o painel. "
 "Pesquisável por nome ou nome de usuário."
 
-#, fuzzy
-msgid "PDF download failed, please refresh and try again."
-msgstr "Falha no download da imagem, por favor atualizar e tentar novamente."
-
 msgid "Page length"
 msgstr "Comprimento da página"
 
@@ -12300,6 +12296,11 @@ msgid ""
 msgstr ""
 "Esta página foi projetada para ser incorporada em um iframe, mas é assim "
 "não é o caso."
+
+msgid ""
+"This page is intended to be embedded in an iframe, but it looks like that"
+" is not the case."
+msgstr ""
 
 msgid ""
 "This section allows you to configure how to use the slice\n"

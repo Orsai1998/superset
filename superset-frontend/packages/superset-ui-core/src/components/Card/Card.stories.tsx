@@ -48,3 +48,11 @@ InteractiveCard.argTypes = {
     },
   },
 };
+
+InteractiveRangeSlider.args = {
+  ...InteractiveSlider.args,
+  defaultValue: [50, 70],
+  draggableTrack: false,
+};
+
+InteractiveRangeSlider.argTypes = InteractiveSlider.argTypes;

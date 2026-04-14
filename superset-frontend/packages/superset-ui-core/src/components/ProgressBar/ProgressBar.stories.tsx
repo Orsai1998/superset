@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { AntdThemeProvider } from 'src/components/AntdThemeProvider';
 import ProgressBar, { ProgressBarProps } from '.';
 
 export default {

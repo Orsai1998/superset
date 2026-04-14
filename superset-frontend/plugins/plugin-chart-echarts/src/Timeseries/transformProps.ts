@@ -110,6 +110,9 @@ import {
   getYAxisFormatter,
 } from '../utils/formatters';
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: EchartsTimeseriesChartProps,
 ): TimeseriesChartTransformedProps {
@@ -559,6 +562,7 @@ export default function transformProps(
         defaultFormatter,
         yAxisFormat,
       ),
+      color: labelColor,
     },
     scale: truncateYAxis,
     name: yAxisTitle,
@@ -692,6 +696,9 @@ export default function transformProps(
       ),
       scrollDataIndex: legendIndex || 0,
       data: legendData as string[],
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     series: dedupSeries(reorderForecastSeries(series) as SeriesOption[]),
     toolbox: {

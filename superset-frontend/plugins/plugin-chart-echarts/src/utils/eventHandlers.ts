@@ -26,6 +26,7 @@ import {
   getNumberFormatter,
   getTimeFormatter,
 } from '@superset-ui/core';
+import { noop } from 'lodash';
 
 import {
   BaseTransformedProps,

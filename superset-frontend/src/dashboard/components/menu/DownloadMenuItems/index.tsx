@@ -29,6 +29,8 @@ import {
 } from 'src/logger/LogUtils';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { DownloadScreenshotFormat } from './types';
+import DownloadAsPdf from './DownloadAsPdf';
+import DownloadAsImage from './DownloadAsImage';
 
 export interface UseDownloadMenuItemsProps {
   pdfMenuItemTitle: string;
@@ -52,6 +54,9 @@ export const useDownloadMenuItems = (
     disabled,
     title,
   } = props;
+  const isWebDriverScreenshotEnabled =
+    isFeatureEnabled(FeatureFlag.EnableDashboardScreenshotEndpoints) &&
+    isFeatureEnabled(FeatureFlag.EnableDashboardDownloadWebDriverScreenshot);
 
   const { addDangerToast } = useToasts();
   const SCREENSHOT_NODE_SELECTOR = '.dashboard';

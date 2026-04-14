@@ -358,6 +358,16 @@ msgstr ""
 "    Erreur : %(text)s\n"
 "    "
 
+#, fuzzy, python-format
+msgid ""
+"*%(name)s*\n"
+"\n"
+"    %(description)s\n"
+"\n"
+"    Error: %(text)s\n"
+"    "
+msgstr "*%(name)s*%(description)sErreur : %(text)s"
+
 #, python-format
 msgid ""
 "*%(name)s*\n"
@@ -11140,6 +11150,11 @@ msgstr "Solide"
 msgid "Some roles do not exist"
 msgstr "Des profils n'existent pas"
 
+msgid ""
+"Something went wrong with embedded authentication. Check the dev console "
+"for details."
+msgstr ""
+
 #, fuzzy
 msgid "Something went wrong while saving the user info"
 msgstr "Une erreur s'est produite. Réessayez plus tard."
@@ -13267,6 +13282,11 @@ msgid ""
 " is not the case."
 msgstr ""
 
+msgid ""
+"This page is intended to be embedded in an iframe, but it looks like that"
+" is not the case."
+msgstr ""
+
 #, fuzzy
 msgid ""
 "This section allows you to configure how to use the slice\n"
@@ -13887,6 +13907,10 @@ msgstr "Hôte MySQL \"%(hostname)s\" inconnu."
 #, python-format
 msgid "Unknown MySQL server host \"%(hostname)s\"."
 msgstr "Hôte inconnu du serveur MySQL \"%(hostname)s\"."
+
+#, fuzzy, python-format
+msgid "Unknown OceanBase server host \"%(hostname)s\"."
+msgstr "Hôte MySQL \"%(hostname)s\" inconnu."
 
 #, fuzzy, python-format
 msgid "Unknown OceanBase server host \"%(hostname)s\"."

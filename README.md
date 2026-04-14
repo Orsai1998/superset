@@ -149,6 +149,61 @@ Want to add support for your datastore or data engine? Read more [here](https://
 
 Try out Superset's [quickstart](https://superset.apache.org/docs/quickstart/) guide or learn about [the options for production deployments](https://superset.apache.org/docs/installation/architecture/).
 
+## Custom Commenting Layer (MVP)
+
+This repository includes an in-app commenting layer for dashboards and charts
+(`slice_id` scoped), with threading, `@mentions`, soft delete, and RBAC-backed
+permissions.
+
+### Enable
+
+Set the feature flag in `superset_config.py`:
+
+```python
+FEATURE_FLAGS = {
+    "COMMENTING_ENABLED": True,
+}
+```
+
+### Apply migrations
+
+After enabling code changes, run:
+
+```bash
+superset db upgrade
+superset init
+```
+
+This creates:
+
+- `comments`
+- `comment_mentions`
+
+### Docker notes
+
+When using Docker Compose, you can enable the feature with environment flags:
+
+```bash
+SUPERSET_FEATURE_COMMENTING_ENABLED=true
+```
+
+Then rebuild/restart Superset services so backend and frontend changes are loaded:
+
+```bash
+docker compose build
+docker compose up -d
+docker compose exec superset superset init
+```
+
+### API surface
+
+Comments API endpoints are available under:
+
+- `/api/v1/comments/` (list/create)
+- `/api/v1/comments/<id>/reply`
+- `/api/v1/comments/<id>` (patch/delete)
+- `/api/v1/comments/mentions/`
+
 ## Get Involved
 
 - Ask and answer questions on [StackOverflow](https://stackoverflow.com/questions/tagged/apache-superset) using the **apache-superset** tag

@@ -279,6 +279,11 @@ def test_rename_with_catalog(
     assert chart.catalog_perm == f"[{database_with_catalog.name}].[catalog2]"
     assert chart.schema_perm == f"[{database_with_catalog.name}].[catalog2].[schema4]"
 
+    assert dataset.catalog_perm == "[my_other_db].[catalog2]"
+    assert dataset.schema_perm == "[my_other_db].[catalog2].[schema4]"
+    assert chart.catalog_perm == "[my_other_db].[catalog2]"
+    assert chart.schema_perm == "[my_other_db].[catalog2].[schema4]"
+
 
 def test_rename_without_catalog(
     mocker: MockerFixture,

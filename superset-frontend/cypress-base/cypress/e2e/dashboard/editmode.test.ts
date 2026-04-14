@@ -60,6 +60,27 @@ function assertMetadata(text: string) {
     });
 }
 
+function openExploreProperties() {
+  cy.getBySel('actions-trigger').click({ force: true });
+  cy.get('.ant-dropdown-menu')
+    .contains('Edit chart properties')
+    .click({ force: true });
+  cy.get('.ant-modal-body').should('be.visible');
+}
+
+function assertMetadata(text: string) {
+  const regex = new RegExp(text);
+  cy.get('#json_metadata')
+    .should('be.visible')
+    .then(() => {
+      const metadata = cy.$$('#json_metadata')[0];
+
+      // cypress can read this locally, but not in ci
+      // so we have to use the ace module directly to fetch the value
+      expect(ace.edit(metadata).getValue()).to.match(regex);
+    });
+}
+
 function openAdvancedProperties() {
   cy.get('.ant-modal-body')
     .contains('Advanced')
@@ -1082,7 +1103,7 @@ describe('Dashboard edit', () => {
       applyChanges();
     });
 
-    it.skip('should not accept an invalid color scheme', () => {
+    it('should not accept an invalid color scheme', () => {
       openAdvancedProperties();
       clearMetadata();
       // allow console error

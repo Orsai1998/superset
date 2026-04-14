@@ -8963,6 +8963,10 @@ msgstr "カタログまたはタイプを選択してカタログを検索して
 msgid "Select channels"
 msgstr "チャンネルを選択"
 
+#, fuzzy
+msgid "Select channels"
+msgstr "チャートを選択"
+
 msgid "Select chart"
 msgstr "チャートを選択"
 

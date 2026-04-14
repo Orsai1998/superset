@@ -16,22 +16,31 @@
       ],
       "@superset-ui/plugin-chart-*": ["./plugins/plugin-chart-*/src"],
       "@superset-ui/preset-chart-*": ["./plugins/preset-chart-*/src"],
-      "@superset-ui/switchboard": ["./packages/superset-ui-switchboard/src"]
+      "@superset-ui/switchboard": ["./packages/superset-ui-switchboard/src"],
+      "superset-plugin-chart-product-counter": ["./plugins/superset-plugin-chart-product-counter"]
+
     },
     "typeRoots": ["src/types", "node_modules/@types"]
 
   },
   "exclude": [
-    "./packages/generator-superset/test/**/*"
+    "./packages/generator-superset/test/**/*",
+    "lib",
+    "esm",
+    "**/*.test.ts",
+    "**/*.spec.ts"
   ],
   "include": [
     "./src/**/*",
     "./spec/**/*",
+      "src/**/*",
+    "plugins/**/*",
     "./packages/*/src/**/*",
     "./packages/*/types/**/*",
     "./plugins/*/src/**/*",
     "./plugins/*/types/**/*",
     "./packages/*/test/**/*",
     "./plugins/*/test/**/*"
-  ]
+  ],
+
 }

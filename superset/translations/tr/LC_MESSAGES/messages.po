@@ -7427,9 +7427,6 @@ msgid ""
 " or username."
 msgstr ""
 
-msgid "PDF download failed, please refresh and try again."
-msgstr ""
-
 msgid "Page length"
 msgstr ""
 

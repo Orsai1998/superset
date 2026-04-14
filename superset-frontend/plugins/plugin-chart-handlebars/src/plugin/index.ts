@@ -23,6 +23,9 @@ import example2 from '../images/example2.jpg';
 import buildQuery from './buildQuery';
 import controlPanel from './controlPanel';
 import transformProps from './transformProps';
+import { registerCustomHelpers } from './handleBarsHelpers';
+
+registerCustomHelpers();
 
 export default class HandlebarsChartPlugin extends ChartPlugin {
   /**
@@ -47,6 +50,7 @@ export default class HandlebarsChartPlugin extends ChartPlugin {
       buildQuery,
       controlPanel,
       loadChart: () => import('../Handlebars'),
+      // loadChart: () =>Promise.resolve(HandlebarsChart),
       metadata,
       transformProps,
     });

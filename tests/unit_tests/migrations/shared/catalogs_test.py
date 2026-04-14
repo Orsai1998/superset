@@ -22,6 +22,7 @@ from flask import current_app
 from pytest_mock import MockerFixture
 from sqlalchemy.orm.session import Session
 
+from superset import app
 from superset.migrations.shared.catalogs import (
     downgrade_catalog_perms,
     upgrade_catalog_perms,

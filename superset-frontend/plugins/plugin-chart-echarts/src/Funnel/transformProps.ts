@@ -52,6 +52,8 @@ import { getDefaultTooltip } from '../utils/tooltip';
 import { Refs } from '../types';
 
 const percentFormatter = getNumberFormatter(NumberFormats.PERCENT_2_POINT);
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
 export function parseParams({
   params,
@@ -133,6 +135,11 @@ export default function transformProps(
   const keys = data.map(datum =>
     extractGroupbyLabel({ datum, groupby: groupbyLabels, coltypeMapping: {} }),
   );
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+
   const labelMap = data.reduce((acc: Record<string, string[]>, datum) => {
     const label = extractGroupbyLabel({
       datum,
@@ -291,6 +298,9 @@ export default function transformProps(
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
       data: keys,
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     series,
   };

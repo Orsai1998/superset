@@ -99,6 +99,8 @@ import {
 } from '../utils/formatters';
 import { getMetricDisplayName } from '../utils/metricDisplayName';
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const getFormatter = (
   customFormatters: Record<string, ValueFormatter>,
   defaultFormatter: ValueFormatter,
@@ -133,7 +135,10 @@ export default function transformProps(
   } = chartProps;
 
   let focusedSeries: string | null = null;
-
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const {
     verboseMap = {},
     currencyFormats = {},
@@ -616,6 +621,7 @@ export default function transformProps(
             formatter,
             yAxisFormat,
           ),
+          color: labelColor,
         },
         scale: truncateYAxis,
         name: yAxisTitle,
@@ -639,6 +645,7 @@ export default function transformProps(
             formatterSecondary,
             yAxisFormatSecondary,
           ),
+          color: labelColor,
         },
         scale: truncateYAxis,
         name: yAxisTitleSecondary,
@@ -722,6 +729,9 @@ export default function transformProps(
         legendState,
         chartPadding,
       ),
+      textStyle: {
+        color: legendTextColor,
+      },
       // @ts-ignore
       data: series
         .filter(

@@ -99,6 +99,12 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     chartProps;
 
   const { data = [] } = queriesData[0];
+  const getCSSVariable = (name: string): string =>
+    getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const {
     x,
     y,
@@ -231,6 +237,9 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
       data: Array.from(legends),
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     tooltip: {
       show: !inContextMenu,

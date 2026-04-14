@@ -79,6 +79,7 @@ import {
 } from 'src/filters/components';
 import { PivotTableChartPlugin as PivotTableChartPluginV2 } from '@superset-ui/plugin-chart-pivot-table';
 import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
+
 import { FilterPlugins } from 'src/constants';
 import AgGridTableChartPlugin from '@superset-ui/plugin-chart-ag-grid-table';
 import HandlebarBTSChartPlugin from '../../../plugins/plugin-chart-handlebar_BTS/src/plugin';
@@ -87,6 +88,11 @@ import SupersetPluginChartTop5Bars from '../../../plugins/superset-plugin-chart-
 import SupersetPluginDieselConsumption from '../../../plugins/superset-plugin-diesel-consumption/src/plugin';
 import SupersetPluginTop40Consumption from '../../../plugins/superset-plugin-top40-consumption/src/plugin';
 import TimeTableChartPlugin from '../TimeTable';
+import Top5BarsPlugin from '../../../plugins/superset-plugin-chart-top5bars/src/plugin';
+import SupersetPluginChartErgPlanFact from '../../../plugins/superset-plugin-chart-erg-bars/src/plugin/index';
+import SupersetPluginTop40Consumption from '../../../plugins/superset-plugin-top40-consumption/src/plugin/index';
+import SupersetPluginDieselConsumption from '../../../plugins/superset-plugin-diesel-consumption/src/plugin/index';
+import SupersetPluginMetallCut from '../../../plugins/superset-plugin-metall-cut/src/plugin/index';
 
 export default class MainPreset extends Preset {
   constructor() {

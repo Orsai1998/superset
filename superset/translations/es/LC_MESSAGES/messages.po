@@ -317,7 +317,7 @@ msgstr "*%(name)s*\n\n    %(description)s\n\n    Error: %(text)s\n    "
 msgid ""
 "*%(name)s*\n"
 "\n"
-"%(description)s\n"
+"    %(description)s\n"
 "\n"
 "<%(url)s|Explore in Superset>\n"
 "\n"
@@ -745,6 +745,14 @@ msgstr "Añadir destinatarios CCO"
 
 msgid "Add CC Recipients"
 msgstr "Añadir destinatarios CC"
+
+#, fuzzy
+msgid "Add BCC Recipients"
+msgstr "Recientes"
+
+#, fuzzy
+msgid "Add CC Recipients"
+msgstr "Recientes"
 
 msgid "Add CSS template"
 msgstr "Añadir plantilla CSS"
@@ -1723,6 +1731,10 @@ msgstr "Eje descendente"
 
 msgid "BCC recipients"
 msgstr "Destinatarios CCO"
+
+#, fuzzy
+msgid "BCC recipients"
+msgstr "Recientes"
 
 msgid "BOOLEAN"
 msgstr "BOOLEANO"
@@ -7750,6 +7762,9 @@ msgstr "Formato del eje Y primario"
 msgid "Private Channels (Bot in channel)"
 msgstr "Canales privados (bot en el canal)"
 
+msgid "Private Channels (Bot in channel)"
+msgstr ""
+
 msgid "Private Key"
 msgstr "Clave privada"
 
@@ -9110,6 +9125,10 @@ msgstr "Mayús. + clic para ordenar por varias columnas"
 msgid "Shift start date"
 msgstr "Fecha de inicio del turno"
 
+#, fuzzy
+msgid "Shift start date"
+msgstr "El Gráfico ha cambiado"
+
 msgid "Short description must be unique for this layer"
 msgstr "La descripción corta debe ser única para esta capa"
 
@@ -9389,6 +9408,11 @@ msgid ""
 "Something went wrong with embedded authentication. Check the dev console "
 "for details."
 msgstr "Se ha producido un error con la autenticación incrustada. Consulta la consola de desarrollo para obtener más detalles."
+
+msgid ""
+"Something went wrong with embedded authentication. Check the dev console "
+"for details."
+msgstr ""
 
 msgid "Something went wrong."
 msgstr "Se ha producido un error."
@@ -10528,6 +10552,15 @@ msgstr "Se está generando la captura de pantalla. No abandones la página."
 msgid "The service url of the layer"
 msgstr "La URL de servicio de la capa"
 
+msgid "The screenshot could not be downloaded. Please, try again later."
+msgstr ""
+
+msgid "The screenshot is being generated. Please, do not leave the page."
+msgstr ""
+
+msgid "The screenshot is now being downloaded."
+msgstr ""
+
 msgid "The size of each cell in meters"
 msgstr "El tamaño de cada celda en metros"
 
@@ -11005,6 +11038,11 @@ msgid ""
 "This page is intended to be embedded in an iframe, but it looks like that"
 " is not the case."
 msgstr "Esta página está pensada para incrustarse en un iframe, pero parece que no es el caso."
+
+msgid ""
+"This page is intended to be embedded in an iframe, but it looks like that"
+" is not the case."
+msgstr ""
 
 msgid ""
 "This section allows you to configure how to use the slice\n"
@@ -11528,6 +11566,10 @@ msgstr "«Host» «%(hostname)s» del servidor MySQL desconocido."
 #, python-format
 msgid "Unknown OceanBase server host \"%(hostname)s\"."
 msgstr "«Host» «%(hostname)s» del servidor OceanBase desconocido."
+
+#, fuzzy, python-format
+msgid "Unknown OceanBase server host \"%(hostname)s\"."
+msgstr "Host desconocido de MySQL: \"%(hostname)s\""
 
 msgid "Unknown Presto Error"
 msgstr "Error de Presto desconocido"

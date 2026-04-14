@@ -153,6 +153,9 @@ function getCategoryName(columnName: string, name?: DataRecordValue) {
   return String(name);
 }
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: EchartsGraphChartProps,
 ): GraphChartTransformedProps {
@@ -195,6 +198,10 @@ export default function transformProps(
     sliceId,
   }: EchartsGraphFormData = { ...DEFAULT_GRAPH_FORM_DATA, ...formData };
 
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const refs: Refs = {};
   const metricLabel = getMetricLabel(metric);
   const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);
@@ -354,6 +361,9 @@ export default function transformProps(
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
       data: categoryList,
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     series,
   };

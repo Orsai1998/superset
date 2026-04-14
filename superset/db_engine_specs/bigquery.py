@@ -141,6 +141,10 @@ class BigQueryEngineSpec(BaseEngineSpec):  # pylint: disable=too-many-public-met
     # pylint: disable=invalid-name
     encrypted_extra_sensitive_fields = {"$.credentials_info.private_key"}
 
+    # when editing the database, mask this field in `encrypted_extra`
+    # pylint: disable=invalid-name
+    encrypted_extra_sensitive_fields = {"$.credentials_info.private_key"}
+
     """
     https://www.python.org/dev/peps/pep-0249/#arraysize
     raw_connections bypass the sqlalchemy-bigquery query execution context and deal with

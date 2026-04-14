@@ -120,6 +120,9 @@ function getTotalValuePadding({
   return padding;
 }
 
+const getCSSVariable = (name: string): string =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 export default function transformProps(
   chartProps: EchartsPieChartProps,
 ): PieChartTransformedProps {
@@ -168,6 +171,10 @@ export default function transformProps(
     ...DEFAULT_PIE_FORM_DATA,
     ...formData,
   };
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
   const refs: Refs = {};
   const metricLabel = getMetricLabel(metric);
   const contributionLabel = getContributionLabel(metricLabel);
