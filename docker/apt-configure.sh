@@ -17,37 +17,35 @@
 #
 set -euo pipefail
 
-# Ensure this script is run as root
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root" >&2
   exit 1
 fi
 
-# Check for required arguments
-if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 <package1> [<package2> ...]" >&2
-  exit 1
+rewrite_sources() {
+  local target=$1
+
+  sed -ri \
+    -e 's|http://deb\.debian\.org/|https://deb.debian.org/|g' \
+    -e 's|http://security\.debian\.org/|https://security.debian.org/|g' \
+    "$target"
+}
+
+if [[ -f /etc/apt/sources.list ]]; then
+  rewrite_sources /etc/apt/sources.list
 fi
 
-# Colors for better logging (optional)
-GREEN='\033[0;32m'
-RED='\033[0;31m'
-RESET='\033[0m'
+if [[ -d /etc/apt/sources.list.d ]]; then
+  while IFS= read -r -d '' source_file; do
+    rewrite_sources "$source_file"
+  done < <(
+    find /etc/apt/sources.list.d -type f \
+      \( -name '*.list' -o -name '*.sources' \) -print0
+  )
+fi
 
-bash /app/docker/apt-configure.sh
-
-# Install packages with clean-up
-echo -e "${GREEN}Updating package lists...${RESET}"
-apt-get update -qq
-
-echo -e "${GREEN}Installing packages: $@${RESET}"
-apt-get install -yqq --no-install-recommends "$@"
-
-echo -e "${GREEN}Autoremoving unnecessary packages...${RESET}"
-apt-get autoremove -y
-
-echo -e "${GREEN}Cleaning up package cache and metadata...${RESET}"
-apt-get clean
-rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* /tmp/* /var/tmp/*
-
-echo -e "${GREEN}Installation and cleanup complete.${RESET}"
+cat > /etc/apt/apt.conf.d/99network-resilience <<'EOF'
+Acquire::Retries "5";
+Acquire::http::Timeout "30";
+Acquire::https::Timeout "30";
+EOF

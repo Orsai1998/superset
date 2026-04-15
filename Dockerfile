@@ -18,6 +18,10 @@ ENV BUILD_TRANSLATIONS=${BUILD_TRANSLATIONS}
 ARG DEV_MODE="false"           # Skip frontend build in dev mode
 ENV DEV_MODE=${DEV_MODE}
 
+# Use the proxy for outbound package installs in this stage.
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
 COPY docker/ /app/docker/
 # Arguments for build configuration
 ARG NPM_BUILD_CMD="build"
@@ -87,6 +91,8 @@ FROM python:${PY_VER} AS python-base
 
 ARG SUPERSET_HOME="/app/superset_home"
 ENV SUPERSET_HOME=${SUPERSET_HOME}
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
 
 RUN mkdir -p $SUPERSET_HOME
 RUN useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
@@ -95,6 +101,8 @@ RUN useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash 
 
 # Some bash scripts needed throughout the layers
 COPY --chmod=755 docker/*.sh /app/docker/
+
+RUN bash /app/docker/apt-configure.sh
 
 RUN pip install --no-cache-dir --upgrade uv
 
@@ -203,6 +211,9 @@ ENV https_proxy=""
 ######################################################################
 FROM python-common AS lean
 
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
+
 # Install Python dependencies using docker/pip-install.sh
 COPY requirements/base.txt requirements/
 RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
@@ -212,12 +223,18 @@ RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
     uv pip install -e .
 RUN python -m compileall /app/superset
 
+ENV http_proxy=""
+ENV https_proxy=""
+
 USER superset
 
 ######################################################################
 # Stage 4: Dev
 ######################################################################
 FROM python-common AS dev
+
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
 
 # Debian libs needed for dev
 RUN /app/docker/apt-install.sh \
@@ -237,6 +254,9 @@ RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
 RUN uv pip install .[postgres]
 RUN python -m compileall /app/superset
 
+ENV http_proxy=""
+ENV https_proxy=""
+
 USER superset
 
 ######################################################################
@@ -244,6 +264,10 @@ USER superset
 ######################################################################
 FROM lean AS ci
 USER root
+ENV http_proxy=http://10.5.8.5:8080
+ENV https_proxy=http://10.5.8.5:8080
 RUN uv pip install .[postgres]
+ENV http_proxy=""
+ENV https_proxy=""
 USER superset
 CMD ["/app/docker/entrypoints/docker-ci.sh"]

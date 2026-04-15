@@ -40,6 +40,7 @@ done
 # Install build-essential if required
 if $REQUIRES_BUILD_ESSENTIAL; then
   echo "Installing build-essential for package builds..."
+  bash /app/docker/apt-configure.sh
   apt-get update -qq \
     && apt-get install -yqq --no-install-recommends build-essential
 fi
