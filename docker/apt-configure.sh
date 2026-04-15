@@ -24,20 +24,30 @@ fi
 
 rewrite_sources() {
   local target=$1
+  local scheme=$2
 
   sed -ri \
-    -e 's|http://deb\.debian\.org/|https://deb.debian.org/|g' \
-    -e 's|http://security\.debian\.org/|https://security.debian.org/|g' \
+    -e "s|https?://deb\\.debian\\.org/|${scheme}://deb.debian.org/|g" \
+    -e "s|https?://security\\.debian\\.org/|${scheme}://security.debian.org/|g" \
     "$target"
 }
 
+APT_MIRROR_SCHEME="https"
+
+# Corporate proxies may terminate TLS with an internal CA that is not yet
+# trusted inside the base image. In that case, keep Debian mirrors on HTTP so
+# apt can still use the proxy without certificate bootstrap issues.
+if [[ -n "${http_proxy:-}" || -n "${HTTP_PROXY:-}" || -n "${https_proxy:-}" || -n "${HTTPS_PROXY:-}" ]]; then
+  APT_MIRROR_SCHEME="http"
+fi
+
 if [[ -f /etc/apt/sources.list ]]; then
-  rewrite_sources /etc/apt/sources.list
+  rewrite_sources /etc/apt/sources.list "$APT_MIRROR_SCHEME"
 fi
 
 if [[ -d /etc/apt/sources.list.d ]]; then
   while IFS= read -r -d '' source_file; do
-    rewrite_sources "$source_file"
+    rewrite_sources "$source_file" "$APT_MIRROR_SCHEME"
   done < <(
     find /etc/apt/sources.list.d -type f \
       \( -name '*.list' -o -name '*.sources' \) -print0
