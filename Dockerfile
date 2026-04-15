@@ -6,6 +6,10 @@ ARG PY_VER=3.11.13-slim-bookworm
 # If BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
 
+# Keep the ERG proxy as the default while permitting local overrides via build args.
+ARG HTTP_PROXY=http://10.5.8.5:8080
+ARG HTTPS_PROXY=http://10.5.8.5:8080
+
 # Include translations in the final build
 ARG BUILD_TRANSLATIONS="false"
 
@@ -17,10 +21,12 @@ ARG BUILD_TRANSLATIONS
 ENV BUILD_TRANSLATIONS=${BUILD_TRANSLATIONS}
 ARG DEV_MODE="false"           # Skip frontend build in dev mode
 ENV DEV_MODE=${DEV_MODE}
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
 
 # Use the proxy for outbound package installs in this stage.
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
 
 COPY docker/ /app/docker/
 # Arguments for build configuration
@@ -90,9 +96,11 @@ RUN if [ "$BUILD_TRANSLATIONS" = "true" ]; then \
 FROM python:${PY_VER} AS python-base
 
 ARG SUPERSET_HOME="/app/superset_home"
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
 ENV SUPERSET_HOME=${SUPERSET_HOME}
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
 
 RUN mkdir -p $SUPERSET_HOME
 RUN useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
@@ -210,9 +218,10 @@ ENV https_proxy=""
 # Stage 2: Lean Python Superset base
 ######################################################################
 FROM python-common AS lean
-
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
 
 # Install Python dependencies using docker/pip-install.sh
 COPY requirements/base.txt requirements/
@@ -232,9 +241,10 @@ USER superset
 # Stage 4: Dev
 ######################################################################
 FROM python-common AS dev
-
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
 
 # Debian libs needed for dev
 RUN /app/docker/apt-install.sh \
@@ -264,8 +274,10 @@ USER superset
 ######################################################################
 FROM lean AS ci
 USER root
-ENV http_proxy=http://10.5.8.5:8080
-ENV https_proxy=http://10.5.8.5:8080
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ENV http_proxy=${HTTP_PROXY}
+ENV https_proxy=${HTTPS_PROXY}
 RUN uv pip install .[postgres]
 ENV http_proxy=""
 ENV https_proxy=""

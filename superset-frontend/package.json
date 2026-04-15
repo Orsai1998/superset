@@ -88,6 +88,7 @@
     "@emotion/cache": "^11.4.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@fontsource/russo-one": "^5.2.7",
     "@rc-component/context": "^1.4.0",
     "@react-spring/web": "^9.4.5",
     "@reduxjs/toolkit": "^1.9.3",

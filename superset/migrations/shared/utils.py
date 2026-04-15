@@ -340,6 +340,10 @@ def add_columns(table_name: str, *columns: Column) -> None:
             batch_op.add_column(col)
 
 
+def add_column_if_not_exists(table_name: str, column: Column) -> None:
+    add_columns(table_name, column)
+
+
 def drop_columns(table_name: str, *columns: str) -> None:
     """
     Drops specified columns from an existing database table.

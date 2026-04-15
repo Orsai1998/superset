@@ -41,6 +41,13 @@ if [[ -n "${http_proxy:-}" || -n "${HTTP_PROXY:-}" || -n "${https_proxy:-}" || -
   APT_MIRROR_SCHEME="http"
 fi
 
+# Some slim base images, notably node:*-bookworm-slim, do not include a CA
+# bundle before the first apt install. Keep Debian mirrors on HTTP until
+# ca-certificates has been bootstrapped.
+if [[ ! -f /etc/ssl/certs/ca-certificates.crt ]]; then
+  APT_MIRROR_SCHEME="http"
+fi
+
 if [[ -f /etc/apt/sources.list ]]; then
   rewrite_sources /etc/apt/sources.list "$APT_MIRROR_SCHEME"
 fi
