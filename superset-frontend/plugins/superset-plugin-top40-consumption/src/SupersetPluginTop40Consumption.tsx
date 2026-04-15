@@ -2,8 +2,6 @@
  * Top-40 Diesel Consumption Plugin — Final balanced layout
  */
 import { styled } from '@superset-ui/core';
-// eslint-disable-next-line no-restricted-syntax
-import React from 'react';
 import type { SupersetPluginTop40ConsumptionProps } from './types';
 
 // @ts-ignore

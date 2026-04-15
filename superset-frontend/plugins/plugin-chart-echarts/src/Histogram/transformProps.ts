@@ -68,9 +68,9 @@ export default function transformProps(
     yAxisFormat,
   } = formData;
   const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--label-color') || theme.colorTextSecondary;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const { data } = queriesData[0];
   const colorFn = CategoricalColorNamespace.getScale(colorScheme);
 
@@ -186,6 +186,7 @@ export default function transformProps(
       nameLocation: 'middle',
       axisLabel: {
         formatter: (value: number) => yAxisFormatter.format(value),
+        color: labelColor,
       },
     },
     series: barSeries,

@@ -2,9 +2,9 @@ import Handlebars from 'handlebars';
 
 export function registerCustomHelpers() {
   Handlebars.registerHelper('groupBy', function (items, fieldName, options) {
-    const grouped = {};
+    const grouped: Record<string, { [x: string]: any }[]> = {};
     items.forEach((item: { [x: string]: any }) => {
-      const key = item[fieldName];
+      const key = String(item[fieldName] ?? '');
       if (!grouped[key]) grouped[key] = [];
       grouped[key].push(item);
     });
@@ -41,7 +41,7 @@ export function registerCustomHelpers() {
       .trim()
       .toLowerCase()
       .replace(/^["']+|["']+$/g, '');
-    const map = {
+    const map: Record<string, string> = {
       алюминий: 'Al',
       железо: 'Fe',
       хром: 'Cr',
@@ -132,7 +132,7 @@ export function registerCustomHelpers() {
   Handlebars.registerHelper('parseDay', function (day, divisionClass) {
     if (!day) return [];
     // Map cyrillic to latin for class
-    const typeMap = {
+    const typeMap: Record<string, string> = {
       БП: 'bp',
       ОП: 'op',
       ПС: 'ps',

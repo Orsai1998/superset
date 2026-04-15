@@ -1,13 +1,14 @@
 import {
   QueryFormData,
-  supersetTheme,
   TimeseriesDataRecord,
 } from '@superset-ui/core';
+
+type HeaderFontSize = number | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
 export interface SupersetPluginDieselConsumptionStylesProps {
   height: number;
   width: number;
-  headerFontSize: keyof typeof supersetTheme.typography.sizes;
+  headerFontSize: HeaderFontSize;
   boldText: boolean;
   theme: 'light' | 'dark';
   title_font_size: number;

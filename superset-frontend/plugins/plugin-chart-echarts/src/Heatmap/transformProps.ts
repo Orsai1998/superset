@@ -104,13 +104,12 @@ export default function transformProps(
     xAxisTimeFormat,
     xAxisLabelRotation,
     currencyFormat,
-    theme,
   } = formData;
   const metricLabel = getMetricLabel(metric);
   const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--label-color') || theme.colorTextSecondary;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const xAxisLabel = getColumnLabel(xAxis);
   // groupby is overridden to be a single value
   const yAxisLabel = getColumnLabel(groupby as unknown as QueryFormColumn);
@@ -264,6 +263,7 @@ export default function transformProps(
         formatter: xAxisFormatter,
         interval: xscaleInterval === -1 ? 'auto' : xscaleInterval - 1,
         rotate: xAxisLabelRotation,
+        color: labelColor,
       },
     },
     yAxis: {

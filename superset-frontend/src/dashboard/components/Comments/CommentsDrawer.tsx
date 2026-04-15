@@ -21,8 +21,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Badge, Drawer, Mentions, Popconfirm } from 'antd';
 import { Check, RotateCcw } from 'lucide-react';
 import { getClientErrorObject, styled, t } from '@superset-ui/core';
-import { Avatar, Empty, Space } from 'src/components';
-import Button from 'src/components/Button';
+import { Avatar, Button, Empty, Space } from '@superset-ui/core/components';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
 import {
   Comment,
@@ -52,14 +51,14 @@ const DrawerTitle = styled.div`
 `;
 
 const ScopeLabel = styled.span`
-  color: ${({ theme }) => theme.colors.text.label};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
 `;
 
 const ThreadList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.gridUnit * 3}px;
+  gap: ${({ theme }) => theme.sizeUnit * 3}px;
 `;
 
 const ThreadToolbar = styled.div`
@@ -70,32 +69,28 @@ const ThreadToolbar = styled.div`
 const ThreadPreviewCard = styled.button<{ active: boolean }>`
   ${({ theme, active }) => `
     width: 100%;
-    border: 1px solid ${
-      active ? theme.colors.primary.base : theme.colors.grayscale.light2
-    };
+    border: 1px solid ${active ? theme.colorPrimary : theme.colorBorderSecondary};
     border-radius: ${theme.borderRadius}px;
-    background: ${
-      active ? theme.colors.primary.light4 : theme.colors.grayscale.light5
-    };
-    padding: ${theme.gridUnit * 3}px;
+    background: ${active ? theme.colorPrimaryBg : theme.colorFillAlter};
+    padding: ${theme.sizeUnit * 3}px;
     text-align: left;
     cursor: pointer;
 
     &:hover {
-      border-color: ${theme.colors.primary.base};
+      border-color: ${theme.colorPrimary};
     }
   `}
 `;
 
 const ThreadPreviewMeta = styled.div`
-  color: ${({ theme }) => theme.colors.text.label};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
-  margin-bottom: ${({ theme }) => theme.gridUnit}px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
+  margin-bottom: ${({ theme }) => theme.sizeUnit}px;
 `;
 
 const ThreadPreviewBody = styled.div`
-  color: ${({ theme }) => theme.colors.text.label};
-  margin-top: ${({ theme }) => theme.gridUnit}px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  margin-top: ${({ theme }) => theme.sizeUnit}px;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -104,73 +99,73 @@ const ThreadPreviewBody = styled.div`
 `;
 
 const ThreadPreviewReplies = styled.div`
-  color: ${({ theme }) => theme.colors.primary.base};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
-  margin-top: ${({ theme }) => theme.gridUnit}px;
+  color: ${({ theme }) => theme.colorPrimary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
+  margin-top: ${({ theme }) => theme.sizeUnit}px;
 `;
 
 const CommentCard = styled.div<{ depth: number }>`
-  border: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
+  border: 1px solid ${({ theme }) => theme.colorBorderSecondary};
   border-radius: ${({ theme }) => theme.borderRadius}px;
-  padding: ${({ theme }) => theme.gridUnit * 3}px;
-  margin-left: ${({ theme, depth }) => depth * theme.gridUnit * 4}px;
+  padding: ${({ theme }) => theme.sizeUnit * 3}px;
+  margin-left: ${({ theme, depth }) => depth * theme.sizeUnit * 4}px;
 `;
 
 const CommentHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+  margin-bottom: ${({ theme }) => theme.sizeUnit * 2}px;
 `;
 
 const AuthorGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit * 2}px;
+  gap: ${({ theme }) => theme.sizeUnit * 2}px;
 `;
 
 const AuthorName = styled.div`
-  font-weight: ${({ theme }) => theme.typography.weights.medium};
+  font-weight: ${({ theme }) => theme.fontWeightStrong};
 `;
 
 const Timestamp = styled.div`
-  color: ${({ theme }) => theme.colors.text.label};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
 `;
 
 const CommentBody = styled.div`
-  margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+  margin-bottom: ${({ theme }) => theme.sizeUnit * 2}px;
   white-space: normal;
 
   .comment-mention {
-    background-color: ${({ theme }) => theme.colors.primary.light4};
-    color: ${({ theme }) => theme.colors.primary.dark1};
+    background-color: ${({ theme }) => theme.colorPrimaryBg};
+    color: ${({ theme }) => theme.colorPrimaryHover};
     border-radius: ${({ theme }) => theme.borderRadius}px;
-    padding: 0 ${({ theme }) => theme.gridUnit / 2}px;
-    font-weight: ${({ theme }) => theme.typography.weights.medium};
+    padding: 0 ${({ theme }) => theme.sizeUnit / 2}px;
+    font-weight: ${({ theme }) => theme.fontWeightStrong};
   }
 `;
 
 const ActionsRow = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit * 2}px;
+  gap: ${({ theme }) => theme.sizeUnit * 2}px;
 `;
 
 const Composer = styled.div`
-  border-top: 1px solid ${({ theme }) => theme.colors.grayscale.light2};
-  padding-top: ${({ theme }) => theme.gridUnit * 3}px;
-  margin-top: ${({ theme }) => theme.gridUnit * 4}px;
+  border-top: 1px solid ${({ theme }) => theme.colorBorderSecondary};
+  padding-top: ${({ theme }) => theme.sizeUnit * 3}px;
+  margin-top: ${({ theme }) => theme.sizeUnit * 4}px;
 `;
 
 const ComposerHint = styled.div`
-  color: ${({ theme }) => theme.colors.text.label};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
-  margin-top: ${({ theme }) => theme.gridUnit}px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
+  margin-top: ${({ theme }) => theme.sizeUnit}px;
 `;
 
 const ReplyComposer = styled.div`
-  margin-top: ${({ theme }) => theme.gridUnit * 2}px;
+  margin-top: ${({ theme }) => theme.sizeUnit * 2}px;
 `;
 
 const MentionInput = styled(Mentions)`
@@ -180,23 +175,23 @@ const MentionInput = styled(Mentions)`
 const InlineTextButton = styled.button`
   background: transparent;
   border: none;
-  color: ${({ theme }) => theme.colors.primary.base};
+  color: ${({ theme }) => theme.colorPrimary};
   padding: 0;
   cursor: pointer;
 `;
 
 const DeletedText = styled.span`
-  color: ${({ theme }) => theme.colors.grayscale.base};
+  color: ${({ theme }) => theme.colorTextSecondary};
   font-style: italic;
 `;
 
 const ResolvedBanner = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit}px;
-  color: ${({ theme }) => theme.colors.success.base};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
-  margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+  gap: ${({ theme }) => theme.sizeUnit}px;
+  color: ${({ theme }) => theme.colorSuccess};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
+  margin-bottom: ${({ theme }) => theme.sizeUnit * 2}px;
 `;
 
 const ResolveButton = styled.button<{ resolved: boolean }>`
@@ -206,14 +201,14 @@ const ResolveButton = styled.button<{ resolved: boolean }>`
   padding: 0;
   display: inline-flex;
   align-items: center;
-  gap: ${({ theme }) => theme.gridUnit}px;
+  gap: ${({ theme }) => theme.sizeUnit}px;
   color: ${({ theme, resolved }) =>
-    resolved ? theme.colors.success.base : theme.colors.grayscale.base};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+    resolved ? theme.colorSuccess : theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
 
   &:hover {
     color: ${({ theme, resolved }) =>
-      resolved ? theme.colors.warning.base : theme.colors.success.base};
+      resolved ? theme.colorWarning : theme.colorSuccess};
   }
 `;
 
@@ -811,7 +806,7 @@ const CommentsDrawer = ({ dashboardId }: CommentsDrawerProps) => {
                 </Button>
                 <Button
                   buttonSize="small"
-                  buttonStyle="default"
+                  buttonStyle="secondary"
                   onClick={() => {
                     setEditingCommentId(null);
                     setEditingValue('');
@@ -932,7 +927,7 @@ const CommentsDrawer = ({ dashboardId }: CommentsDrawerProps) => {
                 </Button>
                 <Button
                   buttonSize="small"
-                  buttonStyle="default"
+                  buttonStyle="secondary"
                   onClick={() => {
                     setReplyingTo(null);
                     setReplyDrafts(prev => ({ ...prev, [comment.id]: '' }));
@@ -1061,7 +1056,7 @@ const CommentsDrawer = ({ dashboardId }: CommentsDrawerProps) => {
               {t('Submit')}
             </Button>
             <Button
-              buttonStyle="default"
+              buttonStyle="secondary"
               buttonSize="small"
               onClick={cancelComposer}
             >

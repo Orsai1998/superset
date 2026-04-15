@@ -32,7 +32,6 @@ import {
   getColumnTypeTooltipNode,
 } from './labelUtils';
 import { SQLPopover } from './SQLPopover';
-import InfoTooltipWithTrigger from './InfoTooltipWithTrigger';
 
 export type ColumnOptionProps = {
   column: ColumnMeta;

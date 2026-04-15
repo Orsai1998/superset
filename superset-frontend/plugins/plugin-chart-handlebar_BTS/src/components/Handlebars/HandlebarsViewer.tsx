@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SafeMarkdown, styled, t } from '@superset-ui/core';
+import { styled, t } from '@superset-ui/core';
+import { SafeMarkdown } from '@superset-ui/core/components';
 import Handlebars from 'handlebars';
-import moment from 'moment';
+import dayjs from 'dayjs';
 import { useMemo, useState } from 'react';
 import { isPlainObject } from 'lodash';
 // eslint-disable-next-line import/no-unresolved
@@ -78,7 +79,7 @@ export const HandlebarsViewer = ({
 //  usage: {{dateFormat my_date format="MMMM YYYY"}}
 Handlebars.registerHelper('dateFormat', function (context, block) {
   const f = block.hash.format || 'YYYY-MM-DD';
-  return moment(context).format(f);
+  return dayjs(context).format(f);
 });
 
 // usage: {{  }}

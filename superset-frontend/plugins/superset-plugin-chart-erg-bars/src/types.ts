@@ -20,14 +20,15 @@ import {
   DataRecord,
   NumberFormats,
   QueryFormData,
-  supersetTheme,
   TimeseriesDataRecord,
 } from '@superset-ui/core';
+
+type HeaderFontSize = number | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
 export interface SupersetPluginChartTop5BarsStylesProps {
   height: number;
   width: number;
-  headerFontSize: keyof typeof supersetTheme.typography.sizes;
+  headerFontSize: HeaderFontSize;
   boldText: boolean;
 }
 

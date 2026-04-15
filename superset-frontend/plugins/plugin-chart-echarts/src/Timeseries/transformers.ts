@@ -317,10 +317,6 @@ export function transformSeries(
     }
   }
 
-  const labelColor =
-    getComputedStyle(document.documentElement)
-      .getPropertyValue('--label-color')
-      .trim() || '#333';
   const lineStyle =
     isConfidenceBand || (stack === StackControlsValue.Stream && area)
       ? { ...opts.lineStyle, opacity: OpacityEnum.Transparent }
@@ -548,11 +544,6 @@ export function transformEventAnnotation(
         opacity: 1,
       },
     };
-    const labelColor =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue('--label-color')
-        .trim() || '#333';
-
     const eventLabel: SeriesLineLabelOption = showLabel
       ? {
           show: true,

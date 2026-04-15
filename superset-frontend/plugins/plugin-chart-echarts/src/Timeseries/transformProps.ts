@@ -132,6 +132,10 @@ export default function transformProps(
   } = chartProps;
 
   let focusedSeries: string | null = null;
+  const labelColor =
+    getCSSVariable('--label-color') || theme.colorTextSecondary;
+  const legendTextColor =
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
 
   const {
     verboseMap = {},

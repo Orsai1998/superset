@@ -18,8 +18,8 @@
  */
 
 import { css, styled, t } from '@superset-ui/core';
+import { Tooltip } from '@superset-ui/core/components';
 import { MessageCircle } from 'lucide-react';
-import { Tooltip } from 'src/components/Tooltip';
 import { dispatchOpenComments } from './events';
 import { usePinCount } from './CommentsPinCountContext';
 
@@ -37,13 +37,13 @@ const IconButton = styled.button`
     cursor: pointer;
     line-height: 1;
     padding: 0;
-    color: ${theme.colors.grayscale.dark1};
+    color: ${theme.colorTextSecondary};
     display: flex;
     align-items: center;
     justify-content: center;
 
     &:hover {
-      color: ${theme.colors.primary.base};
+      color: ${theme.colorPrimary};
     }
   `}
 `;
@@ -52,8 +52,8 @@ const Badge = styled.span<{ visible: boolean }>`
   position: absolute;
   top: -4px;
   right: -4px;
-  background: ${({ theme }) => theme.colors.error.base};
-  color: ${({ theme }) => theme.colors.grayscale.light5};
+  background: ${({ theme }) => theme.colorError};
+  color: ${({ theme }) => theme.colorBgContainer};
   font-size: 10px;
   font-weight: 600;
   border-radius: 999px;

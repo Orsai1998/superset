@@ -19,7 +19,7 @@
 
 import { CSSProperties } from 'react';
 import { css, styled } from '@superset-ui/core';
-import { rgba } from 'emotion-rgba';
+import { rgba } from 'polished';
 
 const PinButton = styled.button<{ resolved: boolean }>`
   ${({ theme, resolved }) => css`
@@ -28,20 +28,18 @@ const PinButton = styled.button<{ resolved: boolean }>`
     height: 24px;
     border-radius: 50%;
     border: 2px solid
-      ${resolved ? theme.colors.grayscale.light1 : theme.colors.primary.base};
-    background: ${resolved
-      ? theme.colors.grayscale.light2
-      : theme.colors.primary.base};
-    color: ${theme.colors.grayscale.light5};
+      ${resolved ? theme.colorBorderSecondary : theme.colorPrimary};
+    background: ${resolved ? theme.colorFillAlter : theme.colorPrimary};
+    color: ${theme.colorBgContainer};
     font-size: 10px;
-    font-weight: ${theme.typography.weights.bold};
+    font-weight: ${theme.fontWeightStrong};
     line-height: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     pointer-events: auto;
-    box-shadow: 0 2px 8px ${rgba(theme.colors.grayscale.dark2, 0.25)};
+    box-shadow: 0 2px 8px ${rgba(theme.colorText, 0.25)};
     transform: translate(-50%, -50%);
     transition:
       transform 0.15s ease,
@@ -52,7 +50,7 @@ const PinButton = styled.button<{ resolved: boolean }>`
 
     &:hover {
       transform: translate(-50%, -50%) scale(1.2);
-      box-shadow: 0 4px 12px ${rgba(theme.colors.grayscale.dark2, 0.3)};
+      box-shadow: 0 4px 12px ${rgba(theme.colorText, 0.3)};
     }
   `}
 `;

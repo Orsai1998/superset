@@ -198,10 +198,8 @@ export default function transformProps(
     sliceId,
   }: EchartsGraphFormData = { ...DEFAULT_GRAPH_FORM_DATA, ...formData };
 
-  const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const refs: Refs = {};
   const metricLabel = getMetricLabel(metric);
   const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);

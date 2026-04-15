@@ -17,7 +17,7 @@
  * under the License.
  */
 import { render, screen } from 'spec/helpers/testing-library';
-import Slider from '.';
+import Slider from '@superset-ui/core/components/Slider';
 
 const mockedProps = {
   defaultValue: 90,

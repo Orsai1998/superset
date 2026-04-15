@@ -4,13 +4,17 @@ import type {
   QueryFormColumn,
   DataRecord,
 } from '@superset-ui/core';
-import { supersetTheme } from '@superset-ui/core';
 
 /**
  * Размер заголовка: можно брать ключи темы ('xxs'…'xxl') или число в px
  */
 export type HeaderFontSize =
-  | keyof typeof supersetTheme.typography.sizes
+  | 'xs'
+  | 's'
+  | 'm'
+  | 'l'
+  | 'xl'
+  | 'xxl'
   | number;
 
 /**

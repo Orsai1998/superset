@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-restricted-syntax
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { styled } from '@superset-ui/core';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import * as echarts from 'echarts/core';

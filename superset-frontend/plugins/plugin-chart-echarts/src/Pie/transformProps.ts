@@ -171,10 +171,8 @@ export default function transformProps(
     ...DEFAULT_PIE_FORM_DATA,
     ...formData,
   };
-  const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const refs: Refs = {};
   const metricLabel = getMetricLabel(metric);
   const contributionLabel = getContributionLabel(metricLabel);
@@ -443,6 +441,9 @@ export default function transformProps(
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend, theme),
       data: transformedData.map(datum => datum.name),
+      textStyle: {
+        color: legendTextColor,
+      },
     },
     graphic: showTotal
       ? {

@@ -136,9 +136,9 @@ export default function transformProps(
 
   let focusedSeries: string | null = null;
   const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--label-color') || theme.colorTextSecondary;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const {
     verboseMap = {},
     currencyFormats = {},

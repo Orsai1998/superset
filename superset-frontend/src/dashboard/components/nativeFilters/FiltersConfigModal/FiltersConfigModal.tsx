@@ -20,12 +20,9 @@ import {
   Divider,
   Filter,
   NativeFilterType,
-  Divider,
   styled,
   t,
   css,
-  styled,
-  t,
   useTheme,
 } from '@superset-ui/core';
 import { debounce, isEmpty, isEqual, sortBy, uniq } from 'lodash';
@@ -41,7 +38,6 @@ import { ErrorBoundary } from 'src/components';
 import { testWithId } from 'src/utils/testUtils';
 import { updateCascadeParentIds } from 'src/dashboard/actions/nativeFilters';
 import useEffectEvent from 'src/hooks/useEffectEvent';
-import { testWithId } from 'src/utils/testUtils';
 import { useFilterConfigMap, useFilterConfiguration } from '../state';
 import DividerConfigForm from './DividerConfigForm';
 import FilterConfigurePane from './FilterConfigurePane';

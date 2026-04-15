@@ -135,10 +135,8 @@ export default function transformProps(
   const keys = data.map(datum =>
     extractGroupbyLabel({ datum, groupby: groupbyLabels, coltypeMapping: {} }),
   );
-  const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
 
   const labelMap = data.reduce((acc: Record<string, string[]>, datum) => {
     const label = extractGroupbyLabel({

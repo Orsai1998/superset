@@ -35,9 +35,8 @@ import {
   styled,
   t,
 } from '@superset-ui/core';
-import { rgba } from 'emotion-rgba';
-import { Space } from 'src/components';
-import Button from 'src/components/Button';
+import { Button, Space } from '@superset-ui/core/components';
+import { rgba } from 'polished';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
 import { updateDataMask } from 'src/dataMask/actions';
 import {
@@ -79,10 +78,10 @@ const HintBar = styled.div`
     top: 0;
     left: 0;
     right: 0;
-    padding: ${theme.gridUnit}px ${theme.gridUnit * 2}px;
-    background: ${theme.colors.primary.base};
-    color: ${theme.colors.grayscale.light5};
-    font-size: ${theme.typography.sizes.xs}px;
+    padding: ${theme.sizeUnit}px ${theme.sizeUnit * 2}px;
+    background: ${theme.colorPrimary};
+    color: ${theme.colorBgContainer};
+    font-size: ${theme.fontSizeXS}px;
     text-align: center;
     pointer-events: none;
     z-index: 12;
@@ -94,17 +93,17 @@ const DraftCard = styled.div`
     width: 280px;
     display: flex;
     flex-direction: column;
-    gap: ${theme.gridUnit * 2}px;
-    padding: ${theme.gridUnit * 2}px;
-    background: ${theme.colors.grayscale.light5};
+    gap: ${theme.sizeUnit * 2}px;
+    padding: ${theme.sizeUnit * 2}px;
+    background: ${theme.colorBgContainer};
     border-radius: ${theme.borderRadius}px;
-    box-shadow: 0 4px 16px ${rgba(theme.colors.grayscale.dark2, 0.2)};
+    box-shadow: 0 4px 16px ${rgba(theme.colorText, 0.2)};
   `}
 `;
 
 const MentionInput = styled(Mentions)`
   width: 100%;
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
 `;
 
 type DraftPin = {
@@ -312,7 +311,7 @@ const PinOverlay: FC<PinOverlayProps> = ({
         </Button>
         <Button
           buttonSize="small"
-          buttonStyle="default"
+          buttonStyle="secondary"
           onClick={handleDraftCancel}
         >
           {t('Cancel')}

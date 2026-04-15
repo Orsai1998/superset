@@ -280,10 +280,10 @@ test('When changing database the schema and table list must be updated', async (
   const updatedTableSelector = await screen.findAllByText(/new_table/i);
   expect(updatedTableSelector[0]).toBeInTheDocument();
 
-  const select = screen.getByRole('combobox', {
+  const tableSelect = screen.getByRole('combobox', {
     name: 'Select schema or type to search schemas',
   });
-  userEvent.click(select);
+  userEvent.click(tableSelect);
   expect(
     await screen.findByRole('option', { name: 'main' }),
   ).toBeInTheDocument();

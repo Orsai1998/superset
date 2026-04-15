@@ -102,9 +102,9 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
   const getCSSVariable = (name: string): string =>
     getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--label-color') || theme.colorTextSecondary;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const {
     x,
     y,
@@ -197,7 +197,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
   const echartOptions: EChartsCoreOption = {
     series,
     xAxis: {
-      axisLabel: { formatter: xAxisFormatter },
+      axisLabel: { formatter: xAxisFormatter, color: labelColor },
       splitLine: {
         lineStyle: {
           type: 'dashed',
@@ -216,7 +216,7 @@ export default function transformProps(chartProps: EchartsBubbleChartProps) {
       ...getMinAndMaxFromBounds(xAxisType, truncateXAxis, xAxisMin, xAxisMax),
     },
     yAxis: {
-      axisLabel: { formatter: yAxisFormatter },
+      axisLabel: { formatter: yAxisFormatter, color: labelColor },
       splitLine: {
         lineStyle: {
           type: 'dashed',

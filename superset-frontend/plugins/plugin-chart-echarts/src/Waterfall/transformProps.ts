@@ -184,9 +184,9 @@ export default function transformProps(
     showValue,
   } = formData;
   const labelColor =
-    getCSSVariable('--label-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--label-color') || theme.colorTextSecondary;
   const legendTextColor =
-    getCSSVariable('--legend-text-color') || theme.colors.grayscale.dark2;
+    getCSSVariable('--legend-text-color') || theme.colorTextSecondary;
   const defaultFormatter = currencyFormat?.symbol
     ? new CurrencyFormatter({ d3Format: yAxisFormat, currency: currencyFormat })
     : getNumberFormatter(yAxisFormat);

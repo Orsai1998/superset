@@ -21,8 +21,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Mentions, Popover } from 'antd';
 import { Check, RotateCcw, X } from 'lucide-react';
 import { css, getClientErrorObject, styled, t } from '@superset-ui/core';
-import { Avatar, Space } from 'src/components';
-import Button from 'src/components/Button';
+import { Avatar, Button, Space } from '@superset-ui/core/components';
 import { useToasts } from 'src/components/MessageToasts/withToasts';
 import {
   Comment,
@@ -43,7 +42,7 @@ const Card = styled.div`
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: ${theme.gridUnit * 2}px;
+    gap: ${theme.sizeUnit * 2}px;
   `}
 `;
 
@@ -52,8 +51,8 @@ const ThreadHeader = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: ${theme.gridUnit * 2}px;
-    border-bottom: 1px solid ${theme.colors.grayscale.light2};
+    padding-bottom: ${theme.sizeUnit * 2}px;
+    border-bottom: 1px solid ${theme.colorBorderSecondary};
   `}
 `;
 
@@ -61,12 +60,12 @@ const CommentItem = styled.div<{ isReply: boolean }>`
   ${({ theme, isReply }) => css`
     display: flex;
     flex-direction: column;
-    gap: ${theme.gridUnit}px;
+    gap: ${theme.sizeUnit}px;
     ${isReply &&
     `
-      margin-left: ${theme.gridUnit * 4}px;
-      padding-left: ${theme.gridUnit * 2}px;
-      border-left: 2px solid ${theme.colors.grayscale.light2};
+      margin-left: ${theme.sizeUnit * 4}px;
+      padding-left: ${theme.sizeUnit * 2}px;
+      border-left: 2px solid ${theme.colorBorderSecondary};
     `}
   `}
 `;
@@ -75,22 +74,22 @@ const AuthorRow = styled.div`
   ${({ theme }) => css`
     display: flex;
     align-items: center;
-    gap: ${theme.gridUnit * 2}px;
+    gap: ${theme.sizeUnit * 2}px;
   `}
 `;
 
 const AuthorName = styled.span`
-  font-weight: ${({ theme }) => theme.typography.weights.medium};
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  font-weight: ${({ theme }) => theme.fontWeightStrong};
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
 `;
 
 const Timestamp = styled.span`
-  color: ${({ theme }) => theme.colors.text.label};
-  font-size: ${({ theme }) => theme.typography.sizes.xs}px;
+  color: ${({ theme }) => theme.colorTextSecondary};
+  font-size: ${({ theme }) => theme.fontSizeXS}px;
 `;
 
 const Body = styled.div`
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
   word-break: break-word;
 `;
 
@@ -98,7 +97,7 @@ const ActionsRow = styled.div`
   ${({ theme }) => css`
     display: flex;
     align-items: center;
-    gap: ${theme.gridUnit * 2}px;
+    gap: ${theme.sizeUnit * 2}px;
     flex-wrap: wrap;
   `}
 `;
@@ -106,8 +105,8 @@ const ActionsRow = styled.div`
 const InlineBtn = styled.button`
   background: transparent;
   border: none;
-  color: ${({ theme }) => theme.colors.primary.base};
-  font-size: ${({ theme }) => theme.typography.sizes.xs}px;
+  color: ${({ theme }) => theme.colorPrimary};
+  font-size: ${({ theme }) => theme.fontSizeXS}px;
   padding: 0;
   cursor: pointer;
 `;
@@ -116,9 +115,9 @@ const ResolvedBanner = styled.div`
   ${({ theme }) => css`
     display: flex;
     align-items: center;
-    gap: ${theme.gridUnit}px;
-    color: ${theme.colors.success.base};
-    font-size: ${theme.typography.sizes.xs}px;
+    gap: ${theme.sizeUnit}px;
+    color: ${theme.colorSuccess};
+    font-size: ${theme.fontSizeXS}px;
   `}
 `;
 
@@ -130,30 +129,26 @@ const ResolveBtn = styled.button<{ resolved: boolean }>`
     padding: 0;
     display: inline-flex;
     align-items: center;
-    gap: ${theme.gridUnit}px;
-    font-size: ${theme.typography.sizes.xs}px;
-    color: ${resolved
-      ? theme.colors.success.base
-      : theme.colors.grayscale.base};
+    gap: ${theme.sizeUnit}px;
+    font-size: ${theme.fontSizeXS}px;
+    color: ${resolved ? theme.colorSuccess : theme.colorTextSecondary};
     &:hover {
-      color: ${resolved
-        ? theme.colors.warning.base
-        : theme.colors.success.base};
+      color: ${resolved ? theme.colorWarning : theme.colorSuccess};
     }
   `}
 `;
 
 const ReplyArea = styled.div`
   ${({ theme }) => css`
-    border-top: 1px solid ${theme.colors.grayscale.light2};
-    padding-top: ${theme.gridUnit * 2}px;
-    margin-top: ${theme.gridUnit}px;
+    border-top: 1px solid ${theme.colorBorderSecondary};
+    padding-top: ${theme.sizeUnit * 2}px;
+    margin-top: ${theme.sizeUnit}px;
   `}
 `;
 
 const MentionInput = styled(Mentions)`
   width: 100%;
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
 `;
 
 function getInitials(name: string): string {

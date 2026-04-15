@@ -19,9 +19,10 @@
 
 import {
   QueryFormData,
-  supersetTheme,
   TimeseriesDataRecord,
 } from '@superset-ui/core';
+
+type HeaderFontSize = number | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
 /**
  * Layout & visual configuration
@@ -30,7 +31,7 @@ export interface SupersetPluginTop40ConsumptionStylesProps {
   height: number;
   width: number;
   headerText?: string;
-  headerFontSize: keyof typeof supersetTheme.typography.sizes;
+  headerFontSize: HeaderFontSize;
   boldText: boolean;
   theme: 'light' | 'dark';
 }
