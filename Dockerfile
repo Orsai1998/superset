@@ -250,7 +250,8 @@ ENV https_proxy=${HTTPS_PROXY}
 RUN /app/docker/apt-install.sh \
     git \
     pkg-config \
-    default-libmysqlclient-dev
+    default-libmysqlclient-dev \
+    unixodbc-dev
 
 # Copy development requirements and install them
 COPY requirements/*.txt requirements/
@@ -262,6 +263,17 @@ RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
     uv pip install -e .
 
 RUN uv pip install .[postgres]
+
+# Extra database drivers and packages needed by custom superset_config
+RUN --mount=type=cache,target=${SUPERSET_HOME}/.cache/uv \
+    uv pip install \
+    oracledb \
+    python-ldap \
+    pyodbc \
+    mysqlclient \
+    flask_cors \
+    prophet
+
 RUN python -m compileall /app/superset
 
 ENV http_proxy=""
